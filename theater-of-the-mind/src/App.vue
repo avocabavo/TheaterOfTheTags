@@ -50,7 +50,6 @@ function addTag() {
         v-for="tagId in tagIds"
         :key="tagId"
         :ymap="powerTags"
-        :id="tagId"
         :field="tagId"
       />
     </div>

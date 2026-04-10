@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const props = defineProps<{
-  id: string
   ymap: Y.Map<any>
   field: string
 }>()
@@ -10,7 +9,7 @@ const props = defineProps<{
 const localValue = ref(0)
 
 const syncFromYjs = () => {
-  localValue.value = props.ymap.get(props.id) ?? 0
+  localValue.value = props.ymap.get(props.field) ?? 0
 }
 
 const observer = () => {
@@ -18,8 +17,8 @@ const observer = () => {
 }
 
 onMounted(() => {
-  if (!props.ymap.has(props.id)) {
-    props.ymap.set(props.id, 0)
+  if (!props.ymap.has(props.field)) {
+    props.ymap.set(props.field, 0)
   }
 
   syncFromYjs()
@@ -33,17 +32,17 @@ onUnmounted(() => {
 const value = computed(() => localValue.value)
 
 function increment() {
-  props.ymap.set(props.id, value.value + 1)
+  props.ymap.set(props.field, value.value + 1)
 }
 
 function decrement() {
-  props.ymap.set(props.id, value.value - 1)
+  props.ymap.set(props.field, value.value - 1)
 }
 </script>
 
 <template>
   <div class="power-tag">
-    <p class="tag-name">{{ id }}</p>
+    <p class="tag-name">{{ field }}</p>
     <hr style="width: 100%;">
     <div class="int-adjuster">
       <button @click="decrement">−</button>

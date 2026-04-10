@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { powerTags } from '../lib/yjs'
 
 const props = defineProps<{
   id: string
+  ymap: Y.Map<any>
+  field: string
 }>()
 
 const localValue = ref(0)
 
 const syncFromYjs = () => {
-  localValue.value = powerTags.get(props.id) ?? 0
+  localValue.value = props.ymap.get(props.id) ?? 0
 }
 
 const observer = () => {
@@ -17,26 +18,26 @@ const observer = () => {
 }
 
 onMounted(() => {
-  if (!powerTags.has(props.id)) {
-    powerTags.set(props.id, 0)
+  if (!props.ymap.has(props.id)) {
+    props.ymap.set(props.id, 0)
   }
 
   syncFromYjs()
-  powerTags.observe(observer)
+  props.ymap.observe(observer)
 })
 
 onUnmounted(() => {
-  powerTags.unobserve(observer)
+  props.ymap.unobserve(observer)
 })
 
 const value = computed(() => localValue.value)
 
 function increment() {
-  powerTags.set(props.id, value.value + 1)
+  props.ymap.set(props.id, value.value + 1)
 }
 
 function decrement() {
-  powerTags.set(props.id, value.value - 1)
+  props.ymap.set(props.id, value.value - 1)
 }
 </script>
 

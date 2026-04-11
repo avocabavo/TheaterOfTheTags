@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as Y from 'yjs'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const props = defineProps<{

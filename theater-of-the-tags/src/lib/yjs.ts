@@ -13,3 +13,4 @@ export const provider = new WebsocketProvider(
 
 export const powerTags = doc.getMap<number>('powerTags')
 export const statusTags = doc.getMap<Y.Map<any>>('statusTags')
+export const tags = doc.getMap<Y.Map<any>>('tags')

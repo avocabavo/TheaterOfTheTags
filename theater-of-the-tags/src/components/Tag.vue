@@ -31,6 +31,10 @@ onUnmounted(()=> {
 function toggleScratched() {
   props.shard.set('scratched', !scratched.value)
 }
+
+const emit = defineEmits<{
+  (e: 'delete'): void
+}>()
 </script>
 
 <template>
@@ -47,6 +51,10 @@ function toggleScratched() {
       class="scratch-button"
       @click="toggleScratched"
     >///</button>
+
+    <button type="button" @click="emit('delete')">
+      delete
+    </button>
   </div>
 </template>
 

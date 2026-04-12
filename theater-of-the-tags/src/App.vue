@@ -6,8 +6,10 @@ import NavigationBar from './components/NavigationBar.vue'
 import StatusTag from './components/StatusTag.vue'
 import Tag from './components/Tag.vue'
 import { createStatusTagShard } from './lib/StatusTag'
-import { statusTags, tags } from './lib/yjs'
+import { statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
+import { createThemeShard } from './lib/Theme'
+import Theme from './components/Theme.vue'
 
 const newStatusName = ref('')
 const statusNames = ref<string[]>([])
@@ -15,29 +17,40 @@ const statusNames = ref<string[]>([])
 const newTagName = ref('')
 const tagNames = ref<string[]>([])
 
+const newThemePrimaryTagName = ref('')
+const themeNames = ref<string[]>([])
+
 function syncStatusNames() {
   statusNames.value = Array.from(statusTags.keys())
 }
 
-function syncTags() {
+function syncTagNames() {
   tagNames.value = Array.from(tags.keys())
+}
+
+function syncThemeNames() {
+  themeNames.value = Array.from(themes.keys())
 }
 
 const observer = ()=> {
   syncStatusNames()
-  syncTags()
+  syncTagNames()
+  syncThemeNames()
 }
 
 onMounted(()=> {
   syncStatusNames()
-  syncTags()
+  syncTagNames()
+  syncThemeNames()
   statusTags.observe(observer)
   tags.observe(observer)
+  themes.observe(observer)
 })
 
 onUnmounted(()=> {
   statusTags.unobserve(observer)
   tags.unobserve(observer)
+  themes.unobserve(observer)
 })
 
 const statusEntries = computed(()=>
@@ -58,6 +71,15 @@ const tagEntries = computed(()=>
     .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
 )
 
+const themeEntries = computed(()=>
+  themeNames.value
+    .map(name=> ({
+      name,
+      shard: themes.get(name)
+    }))
+    .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
+)
+
 function addStatus() {
   const name = newStatusName.value.trim()
   if (!name || statusTags.has(name)) return
@@ -72,6 +94,30 @@ function addTag() {
 
   tags.set(name, createTagShard({name}))
   newTagName.value = ''
+}
+
+function addTheme() {
+  const name = newThemePrimaryTagName.value.trim()
+  if (!name || themes.has(name)) return
+
+  themes.set(name, createThemeShard({
+    might: 'origin',
+    themeType: 'circumstance',
+    themeTagName: name
+  }))
+  newThemePrimaryTagName.value = ''
+}
+
+function deleteStatus(name: string) {
+  statusTags.delete(name)
+}
+
+function deleteTag(name: string) {
+  tags.delete(name)
+}
+
+function deleteTheme(name: string) {
+  themes.delete(name)
 }
 </script>
 
@@ -92,6 +138,7 @@ function addTag() {
         v-for="entry in statusEntries"
         :key="entry.name"
         :shard="entry.shard"
+        @delete="deleteStatus(entry.name)"
       />
     </div>
 
@@ -108,6 +155,24 @@ function addTag() {
         v-for="entry in tagEntries"
         :key="entry.name"
         :shard="entry.shard"
+        @delete="deleteTag(entry.name)"
+      />
+    </div>
+
+    <div class="toolbar">
+      <input
+        v-model="newThemePrimaryTagName"
+        placeHolder="Enter theme name"
+        @keyup.enter="addTheme"
+      />
+      <button @click="addTheme">Add Theme</button>
+    </div>
+    <div class="tag-holder">
+      <Theme
+        v-for="entry in themeEntries"
+        :key="entry.name"
+        :shard="entry.shard"
+        @delete="deleteTheme(entry.name)"
       />
     </div>
   </main>

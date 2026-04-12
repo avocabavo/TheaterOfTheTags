@@ -61,6 +61,10 @@ function reduce(n: number = 1) {
 
   props.shard.set('tiers', newTiers)
 }
+
+const emit = defineEmits<{
+  (e: 'delete'): void
+}>()
 </script>
 
 <template>
@@ -86,6 +90,10 @@ function reduce(n: number = 1) {
         <span class="tier-marked">{{ tier ? '✖' : '' }}</span>
       </button>
     </div>
+
+    <button type="button" @click="emit('delete')">
+      delete
+    </button>
   </div>
 </template>
 

@@ -35,23 +35,27 @@ function toggleScratched() {
 
 <template>
   <div :class="['tag', nature]">
-    <h3 :class="{ scratched }">
+    <p :class="{'tag-name': true, scratched}">
       {{ name }}
-    </h3>
+    </p>
 
     <button
       type="button"
-      class="scratch-button"
+      :class="{'scratch-button': true, scratched: !scratched}"
       @click="toggleScratched"
-    >=//=</button>
+    >///</button>
   </div>
 </template>
 
 <style scoped>
 .tag {
-  padding: 1rem;
+  padding: 0.5rem;
+  margin: 1rem;
   border: none;
   border-radius: 100rem;
+
+  display: flex;
+  align-items: center;
 }
 
 .tag.theme {
@@ -59,7 +63,7 @@ function toggleScratched() {
 }
 
 .tag.theme,
-.tag.theme {
+.tag.power {
   background-color: gold;
   color: black;
 }
@@ -69,17 +73,24 @@ function toggleScratched() {
   color: white;
 }
 
+.tag-name {
+  margin: 0.5rem;
+}
+
 .scratched {
   text-decoration: line-through;
 }
 
 .scratch-button {
-  margin-top: 0.5rem;
+  aspect-ratio: 1;
+  margin-top: 0;
   padding: 0.35rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 999rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
+
+  font-size: xx-large;
 }
 </style>

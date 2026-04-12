@@ -2,6 +2,7 @@
 import * as Y from 'yjs'
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { StatusNature } from '../lib/StatusTag'
+import { LIMIT } from '../lib/StatusTag'
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -9,16 +10,12 @@ const props = defineProps<{
 
 const name = ref('')
 const nature = ref<StatusNature>('helpful')
-const limit = ref(5)
-const tiers = ref<boolean[]>(Array(limit.value).fill(false))
-const exceeded = ref(false)
+const tiers = ref<boolean[]>(Array(LIMIT).fill(false))
 
 function syncFromYjs() {
   name.value = props.shard.get('name') ?? ''
-  limit.value = props.shard.get('limit') ?? 5
   nature.value = props.shard.get('nature') ?? 'helpful'
-  tiers.value = [...(props.shard.get('tiers') ?? Array(limit.value).fill(false))]
-  exceeded.value = props.shard.get('exceeded') ?? false
+  tiers.value = [...(props.shard.get('tiers') ?? Array(LIMIT).fill(false))]
 }
 
 const observer = ()=> {
@@ -49,14 +46,14 @@ function advanceTier(startIndex: number) {
 function reduce(n: number = 1) {
   if (n <= 0) return
 
-  if (n >= limit.value) {
-    props.shard.set('tiers', Array(limit.value).fill(false))
+  if (n >= LIMIT) {
+    props.shard.set('tiers', Array(LIMIT).fill(false))
     return
   }
 
-  const newTiers = Array(limit.value).fill(false)
+  const newTiers = Array(LIMIT).fill(false)
 
-  for (let i = n; i < limit.value; i++) {
+  for (let i = n; i < LIMIT; i++) {
     if (tiers.value[i]) {
       newTiers[i - n] = true
     }
@@ -68,11 +65,16 @@ function reduce(n: number = 1) {
 
 <template>
   <div :class="['status-tag', nature]">
-    <h3>{{ name }}</h3>
+    <p class="upper-half">
+      <span class="the-word-tag">TAG</span>
+      <span class="status-tag-name">{{ name }}</span>
+    </p>
     <div class="status-row">
       <button
+        type="button"
+        class="reduce-button"
         @click="reduce()"
-      >&lt;&lt;</button>
+      >≪</button>
       <button
         v-for="(tier, index) in tiers"
         :key="index"
@@ -80,21 +82,26 @@ function reduce(n: number = 1) {
         class="tier-button"
         @click="advanceTier(index)"
       >
-        {{ index + 1 }}{{ tier ? '✖ ' : '' }}
+        <span class="tier-label">{{ index + 1 }}</span>
+        <span class="tier-marked">{{ tier ? '✖' : '' }}</span>
       </button>
     </div>
-    <div>{{ exceeded ? "⭐" : "_" }}</div>
   </div>
 </template>
 
 <style scoped>
 .status-tag {
-  padding: 1rem;
-  border-radius: 1rem;
+  margin: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .status-tag.helpful {
-  background-color: lime;
+  background-color: #7d8;
   color: black;
 }
 
@@ -103,13 +110,67 @@ function reduce(n: number = 1) {
   color: white;
 }
 
+.upper-half {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+}
+
+.the-word-tag {
+  font-size: smaller;
+  color: gray;
+  margin-right: 0.25rem;
+}
+
+.status-tag-name {
+  font-size: larger;
+}
+
+.status-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.reduce-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  font-size: x-large;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+}
+
 .tier-button {
-  margin-right: 0.5rem;
   padding: 0.4rem 0.6rem;
   border: 1px solid currentColor;
   border-radius: 0.4rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
+
+  width: 2rem;
+  height: 3.5rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.tier-label {
+  font-size: large;
+  font-weight: bold;
+  color: darkgray;
+}
+
+.tier-marked {
+  font-size: xx-large;
+  margin-top: -0.25rem;
 }
 </style>

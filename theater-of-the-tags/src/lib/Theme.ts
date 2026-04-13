@@ -1,5 +1,6 @@
 import * as Y from 'yjs'
 import { createTagShard } from './Tag'
+import type { ThemeShard } from './schema'
 
 export type Might = 'origin' | 'adventure' | 'greatness'
 export type OriginThemeType =
@@ -34,26 +35,26 @@ export type ThemeCreationProps = {
 }
 export function createThemeShard({
   might, themeType, themeTagName
-}: ThemeCreationProps): Y.Map<any> {
-  const shard = new Y.Map()
+}: ThemeCreationProps): ThemeShard {
+  const themeShard = new Y.Map() as ThemeShard
 
-  shard.set('might', might)
-  shard.set('themeType', themeType)
+  themeShard.set('might', might)
+  themeShard.set('themeType', themeType)
 
   const themeTag = createTagShard({
     name: themeTagName,
     nature: 'theme'
   })
-  shard.set('themeTag', themeTag)
+  themeShard.set('themeTag', themeTag)
 
-  shard.set('powerTags', new Y.Array())
-  shard.set('weaknessTags', new Y.Array())
+  themeShard.set('powerTags', new Y.Array())
+  themeShard.set('weaknessTags', new Y.Array())
 
-  shard.set('quest', '')
+  themeShard.set('quest', '')
 
-  shard.set('abandon', 0)
-  shard.set('improve', 0)
-  shard.set('milestone', 0)
+  themeShard.set('abandon', 0)
+  themeShard.set('improve', 0)
+  themeShard.set('milestone', 0)
 
-  return shard
+  return themeShard
 }

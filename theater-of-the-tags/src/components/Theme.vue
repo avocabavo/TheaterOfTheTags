@@ -9,12 +9,12 @@ const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const might = useYMapField<Might>(props.shard, 'might', 'origin')
-const themeType = useYMapField<ThemeType>(props.shard, 'themeType', 'circumstance')
-const quest = useYMapField<string>(props.shard, 'quest', '')
-const abandon = useYMapField<number>(props.shard, 'abandon', 0)
-const improve = useYMapField<number>(props.shard, 'improve', 0)
-const milestone = useYMapField<number>(props.shard, 'milestone', 0)
+const might = useYMapField(props.shard, 'might', 'origin')
+const themeType = useYMapField(props.shard, 'themeType', 'circumstance')
+const quest = useYMapField(props.shard, 'quest', '')
+const abandon = useYMapField(props.shard, 'abandon', 0)
+const improve = useYMapField(props.shard, 'improve', 0)
+const milestone = useYMapField(props.shard, 'milestone', 0)
 
 const { items: powerTags, push: addPowerTag } =
   useYArray<Y.Map<any>>(props.shard, 'powerTags')

@@ -1,26 +1,27 @@
 import * as Y from 'yjs'
 import { ref, onMounted, onUnmounted, type Ref } from 'vue'
+import { getYArray } from './yHelpers'
 
-export function useYMapField<T>(
-  ymap: Y.Map<any>,
-  key: string,
-  defaultValue: T
-): Ref<T> {
-  const state = ref<T>(defaultValue) as Ref<T>
+export function useYMapField<T, K extends keyof T>(
+  ymap: Y.Map<T>,
+  key: K,
+  defaultValue: T[K]
+): Ref<T[K]> {
+  const state = ref<T[K]>(defaultValue) as Ref<T[K]>
 
-  function syncFromYjs() {
-    if (!ymap.has(key)) {
-      ymap.set(key, defaultValue)
+  function sync() {
+    if (!ymap.has(key as string)) {
+      ymap.set(key as string, defaultValue)
     }
-    state.value = ymap.get(key)
+    state.value = ymap.get(key as string) as T[K]
   }
 
   function observer() {
-    syncFromYjs()
+    sync()
   }
 
   onMounted(() => {
-    syncFromYjs()
+    sync()
     ymap.observe(observer)
   })
 
@@ -28,21 +29,18 @@ export function useYMapField<T>(
     ymap.unobserve(observer)
   })
 
-  // write-through setter
-  const proxy = new Proxy(state, {
+  return new Proxy(state, {
     set(target, prop, value) {
       if (prop === 'value') {
-        ymap.set(key, value)
+        ymap.set(key as string, value)
         return true
       }
       return Reflect.set(target, prop, value)
     }
   })
-
-  return proxy
 }
 
-export function useYArray<T = any>(
+export function useYArray<T>(
   ymap: Y.Map<any>,
   key: string
 ): {
@@ -54,25 +52,8 @@ export function useYArray<T = any>(
   const items = ref<T[]>([]) as Ref<T[]>
   let yarray: Y.Array<any> | null = null
 
-  function ensureYArray(): Y.Array<T> {
-    let value = ymap.get(key)
-
-    if (!(value instanceof Y.Array)) {
-      const newArr = new Y.Array<T>()
-
-      if (Array.isArray(value)) {
-        newArr.push(value as T[])
-      }
-
-      ymap.set(key, newArr)
-      value = newArr
-    }
-
-    return value
-  }
-
-  function syncFromYjs() {
-    const arr = ensureYArray()
+  function sync() {
+    const arr = getYArray<T>(ymap, key)
 
     if (yarray !== arr) {
       yarray?.unobserve(observer)
@@ -84,11 +65,11 @@ export function useYArray<T = any>(
   }
 
   function observer() {
-    syncFromYjs()
+    sync()
   }
 
   onMounted(() => {
-    syncFromYjs()
+    sync()
     ymap.observe(observer)
   })
 

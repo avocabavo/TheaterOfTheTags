@@ -1,4 +1,5 @@
 import * as Y from 'yjs'
+import { type TagShard } from './schema'
 
 export type TagNature = 'theme' | 'power' | 'weakness'
 export type TagCreationProps = {
@@ -10,13 +11,13 @@ export function createTagShard({
   name,
   nature = 'power',
   scratched = false,
-}: TagCreationProps): Y.Map<any> {
-  const shard = new Y.Map()
+}: TagCreationProps): TagShard {
+  const tagShard = new Y.Map() as TagShard
 
-  shard.set('uuid', crypto.randomUUID())
-  shard.set('name', name)
-  shard.set('nature', nature)
-  shard.set('scratched', scratched)
+  tagShard.set('uuid', crypto.randomUUID())
+  tagShard.set('name', name)
+  tagShard.set('nature', nature)
+  tagShard.set('scratched', scratched)
 
-  return shard
+  return tagShard
 }

@@ -1,4 +1,5 @@
 import * as Y from 'yjs'
+import type { StatusTagShard } from './schema'
 
 export const LIMIT = 6
 
@@ -12,12 +13,12 @@ export function createStatusTagShard({
   name,
   nature = 'helpful',
   tiers = Array(LIMIT).fill(false),
-}: StatusCreationProps): Y.Map<any> {
-  const shard = new Y.Map()
+}: StatusCreationProps): StatusTagShard {
+  const statusTagShard = new Y.Map() as StatusTagShard
 
-  shard.set('name', name)
-  shard.set('nature', nature)
-  shard.set('tiers', tiers)
+  statusTagShard.set('name', name)
+  statusTagShard.set('nature', nature)
+  statusTagShard.set('tiers', tiers)
 
-  return shard
+  return statusTagShard
 }

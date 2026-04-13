@@ -3,34 +3,18 @@ import * as Y from 'yjs'
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { StatusNature } from '../lib/StatusTag'
 import { LIMIT } from '../lib/StatusTag'
+import { useYArray, useYMapField } from '../lib/yjsComposables';
 
 const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const name = ref('')
-const nature = ref<StatusNature>('helpful')
-const tiers = ref<boolean[]>(Array(LIMIT).fill(false))
-
-function syncFromYjs() {
-  name.value = props.shard.get('name') ?? ''
-  nature.value = props.shard.get('nature') ?? 'helpful'
-  tiers.value = [...(props.shard.get('tiers') ?? Array(LIMIT).fill(false))]
-}
-
-const observer = ()=> {
-  syncFromYjs()
-}
-onMounted(()=> {
-  syncFromYjs()
-  props.shard.observe(observer)
-})
-onUnmounted(()=> {
-  props.shard.unobserve(observer)
-})
+const name = useYMapField(props.shard, 'name', '')
+const nature = useYMapField(props.shard, 'nature', 'helpful')
+const tiers = useYArray<boolean>(props.shard, 'tiers')
 
 function advanceTier(startIndex: number) {
-  const updated = [...tiers.value]
+  const updated = [...tiers.yarray()]
 
   for (let i = startIndex; i < updated.length; i++) {
     if (!updated[i]) {

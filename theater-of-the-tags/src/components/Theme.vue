@@ -1,34 +1,32 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import Tag from './Tag.vue'
-import { type ThemeType, type Might } from '../lib/Theme';
+import { createTagShard } from '../lib/Tag';
+import { type ThemeType, type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
-import { computed } from 'vue';
+import type { TagShard, ThemeData } from '../lib/schema';
 
 const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const might = useYMapField(props.shard, 'might', 'origin')
-const themeType = useYMapField(props.shard, 'themeType', 'circumstance')
-const quest = useYMapField(props.shard, 'quest', '')
-const abandon = useYMapField(props.shard, 'abandon', 0)
-const improve = useYMapField(props.shard, 'improve', 0)
-const milestone = useYMapField(props.shard, 'milestone', 0)
+const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
+const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
+const quest = useYMapField<ThemeData, 'quest'>(props.shard, 'quest', '')
+const abandon = useYMapField<ThemeData, 'abandon'>(props.shard, 'abandon', 0)
+const improve = useYMapField<ThemeData, 'improve'>(props.shard, 'improve', 0)
+const milestone = useYMapField<ThemeData, 'milestone'>(props.shard, 'milestone', 0)
 
 const { items: powerTags, push: addPowerTag } =
-  useYArray<Y.Map<any>>(props.shard, 'powerTags')
+  useYArray<TagShard>(props.shard, 'powerTags')
 
 const { items: weaknessTags, push: addWeaknessTag } =
-  useYArray<Y.Map<any>>(props.shard, 'weaknessTags')
+  useYArray<TagShard>(props.shard, 'weaknessTags')
 
-const themeTag = useYChildMap(props.shard, 'themeTag', () => {
-  const tag = new Y.Map()
-  tag.set('name', 'Theme')
-  tag.set('nature', 'power')
-  tag.set('scratched', false)
-  return tag
-})
+const themeTag = useYChildMap(
+  props.shard,
+  'themeTag',
+)
 
 const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
 
@@ -69,20 +67,20 @@ const emit = defineEmits<{
 
     <div class="tag-section">
       <Tag
-        v-for="tag in powerTags"
+        v-for="tag in powerTags.value"
         :key="tag.get('uuid')"
         :shard="tag"
       />
-      <button @click="addPowerTag(new Y.Map())">+ Add</button>
+      <button @click="addPowerTag(createTagShard({ name: '', nature: 'power'}))">+ Add</button>
     </div>
 
     <div class="tag-section">
       <Tag
-        v-for="tag in weaknessTags"
+        v-for="tag in weaknessTags.value"
         :key="tag.get('uuid')"
         :shard="tag"
       />
-      <button @click="addWeaknessTag(new Y.Map())">+ Add</button>
+      <button @click="addWeaknessTag(createTagShard({ name: '', nature: 'weakness'}))">+ Add</button>
     </div>
   </div>
 </template>

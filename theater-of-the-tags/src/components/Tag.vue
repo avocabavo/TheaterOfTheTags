@@ -1,35 +1,17 @@
 <script setup lang="ts">
-import * as Y from 'yjs'
-import { ref, onMounted, onUnmounted } from 'vue'
-import type { TagNature } from '../lib/Tag'
+import type { TagData, TagNature, TagShard } from '../lib/schema'
+import { useYMapField } from '../lib/yjsComposables';
 
 const props = defineProps<{
-  shard: Y.Map<any>
+  shard: TagShard
 }>()
 
-const name = ref('')
-const nature = ref<TagNature>('power')
-const scratched = ref(false)
-
-function syncFromYjs() {
-  name.value = props.shard.get('name') ?? ''
-  nature.value = props.shard.get('nature') ?? 'power'
-  scratched.value = props.shard.get('scratched') ?? false
-}
-
-const observer = ()=> {
-  syncFromYjs()
-}
-onMounted(()=> {
-  syncFromYjs()
-  props.shard.observe(observer)
-})
-onUnmounted(()=> {
-  props.shard.unobserve(observer)
-})
+const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
+const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as TagNature)
+const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
 
 function toggleScratched() {
-  props.shard.set('scratched', !scratched.value)
+  scratched.value = !scratched.value
 }
 
 const emit = defineEmits<{
@@ -87,11 +69,6 @@ const emit = defineEmits<{
 .tag-name {
   margin: 0.5rem;
 }
-
-/* .scratched {
-  text-decoration: line-through;
-  text-decoration-thickness: 0.175rem;
-} */
 
 .tag-name.scratched {
   position: relative;

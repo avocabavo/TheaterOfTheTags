@@ -1,33 +1,7 @@
 import * as Y from 'yjs'
 import { createTagShard } from './Tag'
-import type { ThemeShard } from './schema'
+import type { Might, ThemeShard, ThemeType } from './schema'
 
-export type Might = 'origin' | 'adventure' | 'greatness'
-export type OriginThemeType =
-  'circumstance' |
-  'devotion' |
-  'past' |
-  'people' |
-  'personality' |
-  'skill or trade' |
-  'trait'
-export type AdventureThemeType =
-  'duty' |
-  'influence' |
-  'knowledge' |
-  'prodigious ability' |
-  'relic' |
-  'uncanny being'
-export type GreatnessThemeType =
-  'destiny' |
-  'dominion' |
-  'mastery' |
-  'monstrosity'
-export type VaryingMightThemeType =
-  'companion' |
-  'magic' |
-  'possessions'
-export type ThemeType = OriginThemeType | AdventureThemeType | GreatnessThemeType | VaryingMightThemeType
 export type ThemeCreationProps = {
   might: Might
   themeType: ThemeType
@@ -36,8 +10,9 @@ export type ThemeCreationProps = {
 export function createThemeShard({
   might, themeType, themeTagName
 }: ThemeCreationProps): ThemeShard {
-  const themeShard = new Y.Map() as ThemeShard
+  const themeShard: ThemeShard = new Y.Map()
 
+  themeShard.set('uuid', crypto.randomUUID())
   themeShard.set('might', might)
   themeShard.set('themeType', themeType)
 
@@ -47,8 +22,10 @@ export function createThemeShard({
   })
   themeShard.set('themeTag', themeTag)
 
-  themeShard.set('powerTags', new Y.Array())
-  themeShard.set('weaknessTags', new Y.Array())
+  const powerTags = new Y.Array<ReturnType<typeof createTagShard>>()
+  themeShard.set('powerTags', powerTags)
+  const weaknessTags = new Y.Array<ReturnType<typeof createTagShard>>()
+  themeShard.set('weaknessTags', weaknessTags)
 
   themeShard.set('quest', '')
 

@@ -1,49 +1,43 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import { ref, onMounted, onUnmounted } from 'vue'
-import type { StatusNature } from '../lib/StatusTag'
-import { LIMIT } from '../lib/StatusTag'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
+import type { StatusTagData } from '../lib/schema';
 
 const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const name = useYMapField(props.shard, 'name', '')
-const nature = useYMapField(props.shard, 'nature', 'helpful')
+const name = useYMapField<StatusTagData, 'name'>(props.shard, 'name', '')
+const nature = useYMapField<StatusTagData, 'nature'>(props.shard, 'nature', 'helpful')
 const tiers = useYArray<boolean>(props.shard, 'tiers')
 
 function advanceTier(startIndex: number) {
-  const updated = [...tiers.yarray()]
+  const arr = tiers.yarray()
+  if (!arr) return
+  const current = arr.toArray()
 
-  for (let i = startIndex; i < updated.length; i++) {
-    if (!updated[i]) {
-      updated[i] = true
-      props.shard.set('tiers', updated)
+  for (let i = startIndex; i < current.length; i++) {
+    if (!current[i]) {
+      arr.delete(i, 1)
+      arr.insert(i, [true])
       return
     }
   }
-
-  props.shard.set('exceeded', true)
 }
 
 function reduce(n: number = 1) {
-  if (n <= 0) return
+  const arr = tiers.yarray()
+  if (!arr || n <= 0) return
+  const current = arr.toArray()
 
-  if (n >= LIMIT) {
-    props.shard.set('tiers', Array(LIMIT).fill(false))
+  if (n >= current.length) {
+    arr.delete(0, arr.length)
+    arr.insert(0, Array(current.length).fill(false))
     return
   }
 
-  const newTiers = Array(LIMIT).fill(false)
-
-  for (let i = n; i < LIMIT; i++) {
-    if (tiers.value[i]) {
-      newTiers[i - n] = true
-    }
-  }
-
-  props.shard.set('tiers', newTiers)
+  arr.delete(0, n)
+  arr.insert(current.length - n, Array(n).fill(false))
 }
 
 const emit = defineEmits<{
@@ -64,11 +58,11 @@ const emit = defineEmits<{
         @click="reduce()"
       >≪</button>
       <button
-        v-for="(tier, index) in tiers"
+        v-for="(tier, index) in tiers.items.value"
         :key="index"
         type="button"
         class="tier-button"
-        @click="advanceTier(index)"
+        @click="advanceTier(Number(index))"
       >
         <span class="tier-label">{{ index + 1 }}</span>
         <span class="tier-marked">{{ tier ? '✖' : '' }}</span>

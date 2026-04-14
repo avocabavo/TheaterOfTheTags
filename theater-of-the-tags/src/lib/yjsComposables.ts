@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, type Ref } from 'vue'
 import { getYArray } from './yHelpers'
 
 export function useYMapField<T, K extends keyof T>(
-  ymap: Y.Map<T>,
+  ymap: Y.Map<any>,
   key: K,
   defaultValue: T[K]
 ): Ref<T[K]> {
@@ -16,8 +16,10 @@ export function useYMapField<T, K extends keyof T>(
     state.value = ymap.get(key as string) as T[K]
   }
 
-  function observer() {
-    sync()
+  function observer(event: Y.YMapEvent<T>) {
+    if (event.keysChanged.has(key as string)) {
+      sync()
+    }
   }
 
   onMounted(() => {
@@ -79,7 +81,8 @@ export function useYArray<T>(
   })
 
   function push(item: T) {
-    yarray?.push([item])
+    if (!yarray) throw new Error("Y.Array not initialized yet")
+    yarray.push([item])
   }
 
   function remove(index: number) {
@@ -97,27 +100,34 @@ export function useYArray<T>(
 export function useYChildMap(
   ymap: Y.Map<any>,
   key: string,
-  factory: () => Y.Map<any>
+  factory?: () => Y.Map<any>
 ) {
-  const child = ref<Y.Map<any>>()
+  const child = ref<Y.Map<any> | null>(null)
 
-  function syncFromYjs() {
+  function sync() {
     let value = ymap.get(key)
 
-    if (!value) {
-      value = factory()
-      ymap.set(key, value)
+    if (!(value instanceof Y.Map)) {
+      if (factory) {
+        value = factory()
+        ymap.set(key, value)
+      } else {
+        throw new Error(`Missing or invalid Y.Map at key ${key}, `)
+      }
     }
 
     child.value = value
   }
 
-  function observer() {
-    syncFromYjs()
+  function observer(event: Y.YMapEvent<any>) {
+    if (event.keysChanged.has(key)) {
+      sync()
+    }
   }
 
+  sync()
+
   onMounted(() => {
-    syncFromYjs()
     ymap.observe(observer)
   })
 
@@ -125,5 +135,5 @@ export function useYChildMap(
     ymap.unobserve(observer)
   })
 
-  return child as { value: Y.Map<any> }
+  return child
 }

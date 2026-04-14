@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { TagData, TagNature, TagShard } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
+import { useMode } from '../lib/modeStore';
+import DeleteButton from './DeleteButton.vue';
+
+const { mode } = useMode()
 
 const props = defineProps<{
   shard: TagShard
@@ -21,6 +25,7 @@ const emit = defineEmits<{
 
 <template>
   <div :class="['tag', nature]">
+    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <p
       class="tag-name"
       :class="{ scratched }"
@@ -33,21 +38,19 @@ const emit = defineEmits<{
       class="scratch-button"
       @click="toggleScratched"
     >///</button>
-
-    <button type="button" @click="emit('delete')">
-      delete
-    </button>
   </div>
 </template>
 
 <style scoped>
 .tag {
+  position: relative;
   padding: 0.5rem;
   margin: 1rem;
   border: none;
   border-radius: 100rem;
 
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 

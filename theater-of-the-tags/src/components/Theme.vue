@@ -6,6 +6,9 @@ import { type ThemeType, type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
 import type { TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './DeleteButton.vue';
+import { useMode } from '../lib/modeStore';
+
+const { mode } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -38,7 +41,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="theme">
-    <DeleteButton @delete="emit('delete')" />
+    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
     <p class="the-words-theme-card">THEME CARD</p>
     <div class="might">

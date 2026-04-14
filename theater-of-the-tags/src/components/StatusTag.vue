@@ -2,6 +2,10 @@
 import * as Y from 'yjs'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData } from '../lib/schema';
+import DeleteButton from './DeleteButton.vue';
+import { useMode } from '../lib/modeStore';
+
+const { mode } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -47,6 +51,8 @@ const emit = defineEmits<{
 
 <template>
   <div :class="['status-tag', nature]">
+    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+
     <p class="upper-half">
       <span class="the-word-tag">TAG</span>
       <span class="status-tag-name">{{ name }}</span>
@@ -68,15 +74,12 @@ const emit = defineEmits<{
         <span class="tier-marked">{{ tier ? '✖' : '' }}</span>
       </button>
     </div>
-
-    <button type="button" @click="emit('delete')">
-      delete
-    </button>
   </div>
 </template>
 
 <style scoped>
 .status-tag {
+  position: relative;
   margin: 0.5rem;
   padding: 0.5rem 1.5rem;
   border-radius: 9999rem;

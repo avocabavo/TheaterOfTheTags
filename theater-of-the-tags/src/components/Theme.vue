@@ -87,6 +87,9 @@ const emit = defineEmits<{
 
 <style scoped>
 .theme {
+  border: 0.25rem solid #764;
+  background-color: #dc9;
+
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

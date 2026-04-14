@@ -5,6 +5,7 @@ import { createTagShard } from '../lib/Tag';
 import { type ThemeType, type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
 import type { TagShard, ThemeData } from '../lib/schema';
+import DeleteButton from './DeleteButton.vue';
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -37,9 +38,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="theme">
-    <button type="button" @click="emit('delete')">
-      delete
-    </button>
+    <DeleteButton @delete="emit('delete')" />
 
     <p class="the-words-theme-card">THEME CARD</p>
     <div class="might">
@@ -87,8 +86,9 @@ const emit = defineEmits<{
 
 <style scoped>
 .theme {
+  position: relative;
   border: 0.25rem solid #764;
-  background-color: #dc9;
+  background-color: #dca;
 
   display: flex;
   flex-direction: column;

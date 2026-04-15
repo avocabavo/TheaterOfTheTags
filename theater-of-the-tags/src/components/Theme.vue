@@ -94,17 +94,22 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
         @delete="removePowerTag(index)"
       />
       <NewTag
+        v-if="mode !== 'scene'"
         nature="power" @create="handleCreateTag"
       />
     </div>
 
     <div class="tag-section">
       <Tag
-        v-for="tag in weaknessTags"
+        v-for="(tag, index) in weaknessTags"
         :key="tag.get('uuid')"
         :shard="tag"
+        @delete="removeWeaknessTag(index)"
       />
-      <button @click="addWeaknessTag(createTagShard({ name: '', nature: 'weakness'}))">+ Add</button>
+      <NewTag
+        v-if="mode !== 'scene'"
+        nature="weakness" @create="handleCreateTag"
+      />
     </div>
   </div>
 </template>

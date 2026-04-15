@@ -1,43 +1,48 @@
 <script setup lang="ts">
-import type { TagData, TagNature, TagShard } from '../lib/schema'
-import { useYMapField } from '../lib/yjsComposables';
-import { useMode } from '../lib/modeStore';
-import DeleteButton from './DeleteButton.vue';
-
-const { mode } = useMode()
+import { computed, ref } from 'vue'
+import type { TagData, TagNature } from '../lib/schema'
 
 const props = defineProps<{
-  shard: TagShard
+  nature: TagNature
 }>()
-
-const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
-const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as TagNature)
-const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
-
-function toggleScratched() {
-  scratched.value = !scratched.value
-}
 
 const emit = defineEmits<{
-  (e: 'delete'): void
+  (e: 'create', payload: { name: string; nature: TagNature; scratched: boolean}): void
 }>()
+
+const name = ref('')
+
+function createTag() {
+  const trimmed = name.value.trim()
+  if (!trimmed) return
+
+  emit('create', {
+    name: trimmed,
+    nature: props.nature,
+    scratched: false,
+  })
+
+  name.value = ''
+}
+
+const readyToCreate = computed(()=> name.value.trim())
 </script>
 
 <template>
-  <div :class="['tag', nature]">
-    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
-    <p
-      class="tag-name"
-      :class="{ scratched }"
-    >
-      {{ name }}
-    </p>
+  <div :class="['tag', nature, 'new-tag']">
+    <input
+      v-model="name"
+      class="tag-name-input"
+      placeholder="add tag..."
+      @keydown.enter="createTag"
+    />
 
     <button
       type="button"
-      class="scratch-button"
-      @click="toggleScratched"
-    >///</button>
+      class="add-button"
+      @click="createTag"
+      :disabled="!readyToCreate"
+    >+</button>
   </div>
 </template>
 
@@ -112,7 +117,7 @@ const emit = defineEmits<{
   opacity: 0.75;
 }
 
-.scratch-button {
+.scratch-button, .add-button {
   aspect-ratio: 1;
   margin-top: 0;
   padding: 0.35rem 0.75rem;
@@ -123,5 +128,16 @@ const emit = defineEmits<{
   cursor: pointer;
 
   font-size: xx-large;
+}
+
+.tag-name-input {
+  font-size: larger;
+  background: rgba(255, 255, 255, 0.75);
+  color: black;
+}
+
+.new-tag {
+  opacity: 0.8;
+  border-style: dashed;
 }
 </style>

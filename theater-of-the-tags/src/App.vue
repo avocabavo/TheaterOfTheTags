@@ -103,7 +103,7 @@ function addTheme() {
   themes.set(name, createThemeShard({
     might: 'origin',
     themeType: 'circumstance',
-    themeTagName: name
+    primaryTagName: name
   }))
   newThemePrimaryTagName.value = ''
 }

@@ -5,10 +5,10 @@ import type { Might, ThemeShard, ThemeType } from './schema'
 export type ThemeCreationProps = {
   might: Might
   themeType: ThemeType
-  themeTagName: string
+  primaryTagName: string
 }
 export function createThemeShard({
-  might, themeType, themeTagName
+  might, themeType, primaryTagName
 }: ThemeCreationProps): ThemeShard {
   const themeShard: ThemeShard = new Y.Map()
 
@@ -16,11 +16,11 @@ export function createThemeShard({
   themeShard.set('might', might)
   themeShard.set('themeType', themeType)
 
-  const themeTag = createTagShard({
-    name: themeTagName,
-    nature: 'theme'
+  const primaryTag = createTagShard({
+    name: primaryTagName,
+    nature: 'primary'
   })
-  themeShard.set('themeTag', themeTag)
+  themeShard.set('primaryTag', primaryTag)
 
   const powerTags = new Y.Array<ReturnType<typeof createTagShard>>()
   themeShard.set('powerTags', powerTags)

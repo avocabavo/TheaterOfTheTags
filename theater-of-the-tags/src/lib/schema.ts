@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
 
-export type TagNature = 'theme' | 'power' | 'weakness'
+export type TagNature = 'primary' | 'power' | 'weakness'
 export type StatusNature = 'helpful' | 'hindering'
 export type Might = 'origin' | 'adventure' | 'greatness'
 export type OriginThemeType =
@@ -61,7 +61,7 @@ export type ThemeData = {
   uuid: string
   might: Might
   themeType: ThemeType
-  themeTag: TagShard
+  primaryTag: TagShard
   powerTags: Y.Array<TagShard>
   weaknessTags: Y.Array<TagShard>
   quest: string
@@ -74,7 +74,7 @@ export const THEME_KEYS = {
   uuid: 'uuid',
   might: 'might',
   themeType: 'themeType',
-  themeTag: 'themeTag',
+  primaryTag: 'primaryTag',
   powerTags: 'powerTags',
   weaknessTags: 'weaknessTags',
   quest: 'quest',

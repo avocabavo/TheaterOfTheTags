@@ -4,9 +4,10 @@ import Tag from './Tag.vue'
 import { createTagShard } from '../lib/Tag';
 import { type ThemeType, type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
-import type { TagShard, ThemeData } from '../lib/schema';
+import type { TagData, TagNature, TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
+import NewTag from './NewTag.vue';
 
 const { mode } = useMode()
 
@@ -21,15 +22,15 @@ const abandon = useYMapField<ThemeData, 'abandon'>(props.shard, 'abandon', 0)
 const improve = useYMapField<ThemeData, 'improve'>(props.shard, 'improve', 0)
 const milestone = useYMapField<ThemeData, 'milestone'>(props.shard, 'milestone', 0)
 
-const { items: powerTags, push: addPowerTag } =
+const { items: powerTags, push: addPowerTag, remove: removePowerTag } =
   useYArray<TagShard>(props.shard, 'powerTags')
 
-const { items: weaknessTags, push: addWeaknessTag } =
+const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag } =
   useYArray<TagShard>(props.shard, 'weaknessTags')
 
-const themeTag = useYChildMap(
+const primaryTag = useYChildMap(
   props.shard,
-  'themeTag',
+  'primaryTag',
 )
 
 const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
@@ -37,6 +38,22 @@ const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
 const emit = defineEmits<{
   (e: 'delete'): void
 }>()
+
+function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+  console.log(`handling create tag with ${data.name}, ${data.nature}, ${data.scratched}`)
+  const newShard = createTagShard(data)
+
+  switch (data.nature) {
+    case 'primary':
+      throw new Error('replacing a primary tag is not implemented yet')
+    case 'power':
+      addPowerTag(newShard)
+      break;
+    case 'weakness':
+      addWeaknessTag(newShard)
+      break;
+  }
+}
 </script>
 
 <template>
@@ -65,20 +82,25 @@ const emit = defineEmits<{
       {{ themeType }}
     </p>
 
-    <Tag v-if="themeTag" :shard="themeTag" />
-
     <div class="tag-section">
-      <Tag
-        v-for="tag in powerTags.value"
-        :key="tag.get('uuid')"
-        :shard="tag"
-      />
-      <button @click="addPowerTag(createTagShard({ name: '', nature: 'power'}))">+ Add</button>
+      <Tag v-if="primaryTag" :shard="primaryTag" />
     </div>
 
     <div class="tag-section">
       <Tag
-        v-for="tag in weaknessTags.value"
+        v-for="(tag, index) in powerTags"
+        :key="tag.get('uuid')"
+        :shard="tag"
+        @delete="removePowerTag(index)"
+      />
+      <NewTag
+        nature="power" @create="handleCreateTag"
+      />
+    </div>
+
+    <div class="tag-section">
+      <Tag
+        v-for="tag in weaknessTags"
         :key="tag.get('uuid')"
         :shard="tag"
       />
@@ -93,13 +115,18 @@ const emit = defineEmits<{
   border: 0.25rem solid #764;
   background-color: #dca;
 
+  width: 25rem;
+
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
 }
 
 .the-words-theme-card {
-  font-size: small;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  font-size: x-large;
   color: gray;
 }
 
@@ -116,6 +143,8 @@ const emit = defineEmits<{
 }
 
 .theme-type {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
   display: flex;
   align-items: baseline;
 }
@@ -127,6 +156,7 @@ const emit = defineEmits<{
 }
 
 .tag-section {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;

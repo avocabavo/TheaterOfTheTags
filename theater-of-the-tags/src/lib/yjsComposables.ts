@@ -105,29 +105,48 @@ export function useYArray<T>(
 export function useYChildMap(
   ymap: Y.Map<any>,
   key: string,
-  factory?: () => Y.Map<any>
 ) {
   const child = ref<Y.Map<any> | null>(null)
 
   function sync() {
     let value = ymap.get(key)
 
-    if (!(value instanceof Y.Map)) {
-      if (factory) {
-        value = factory()
-        ymap.set(key, value)
-      } else {
-        throw new Error(`Missing or invalid Y.Map at key ${key}, `)
-      }
+    if (value == null) {
+      child.value = null
+      return
     }
 
-    child.value = value
+    if (value instanceof Y.Map) {
+      child.value = value
+      return
+    }
+
+    throw new Error(`Invalid Y.Map at key ${key}`)
   }
 
   function observer(event: Y.YMapEvent<any>) {
     if (event.keysChanged.has(key)) {
       sync()
     }
+  }
+
+  function clear() {
+    if (ymap.has(key)) {
+      ymap.delete(key)
+    }
+  }
+
+  function set(newMap?: Y.Map<any>) {
+    if (newMap == null) {
+      return clear()
+    }
+
+    if (newMap instanceof Y.Map) {
+      ymap.set(key, newMap)
+      return
+    }
+
+    throw new Error(`Invalid Y.Map attempted to be set to key ${key}`)
   }
 
   sync()
@@ -140,5 +159,9 @@ export function useYChildMap(
     ymap.unobserve(observer)
   })
 
-  return child
+  return {
+    child,
+    clear,
+    set,
+  }
 }

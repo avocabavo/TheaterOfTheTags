@@ -28,7 +28,7 @@ const { items: powerTags, push: addPowerTag, remove: removePowerTag } =
 const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag } =
   useYArray<TagShard>(props.shard, 'weaknessTags')
 
-const primaryTag = useYChildMap(
+const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
   props.shard,
   'primaryTag',
 )
@@ -45,7 +45,8 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
 
   switch (data.nature) {
     case 'primary':
-      throw new Error('replacing a primary tag is not implemented yet')
+      setPrimaryTag(newShard)
+      break;
     case 'power':
       addPowerTag(newShard)
       break;
@@ -83,7 +84,16 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
     </p>
 
     <div class="tag-section">
-      <Tag v-if="primaryTag" :shard="primaryTag" />
+      <Tag
+        v-if="primaryTag"
+        :shard="primaryTag"
+        @delete="clearPrimaryTag"
+      />
+      <NewTag
+        v-else-if="mode !== 'scene'"
+        nature="primary"
+        @create="handleCreateTag"
+      />
     </div>
 
     <div class="tag-section">
@@ -95,7 +105,8 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       />
       <NewTag
         v-if="mode !== 'scene'"
-        nature="power" @create="handleCreateTag"
+        nature="power"
+        @create="handleCreateTag"
       />
     </div>
 
@@ -108,7 +119,8 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       />
       <NewTag
         v-if="mode !== 'scene'"
-        nature="weakness" @create="handleCreateTag"
+        nature="weakness"
+        @create="handleCreateTag"
       />
     </div>
   </div>

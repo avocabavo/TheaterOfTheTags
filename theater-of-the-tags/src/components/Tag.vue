@@ -26,6 +26,8 @@ const emit = defineEmits<{
 <template>
   <div :class="['tag', nature]">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+    <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
+
     <p
       class="tag-name"
       :class="{ scratched }"
@@ -34,6 +36,7 @@ const emit = defineEmits<{
     </p>
 
     <button
+      v-if="nature !== 'weakness'"
       type="button"
       class="scratch-button"
       @click="toggleScratched"
@@ -115,6 +118,7 @@ const emit = defineEmits<{
 .scratch-button {
   aspect-ratio: 1;
   margin-top: 0;
+  margin-left: 0.5rem;
   padding: 0.35rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 999rem;
@@ -123,5 +127,10 @@ const emit = defineEmits<{
   cursor: pointer;
 
   font-size: xx-large;
+}
+
+.weakness-indicator {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 </style>

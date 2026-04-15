@@ -30,6 +30,8 @@ const readyToCreate = computed(()=> name.value.trim())
 
 <template>
   <div :class="['tag', nature, 'new-tag']">
+    <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
+
     <input
       v-model="name"
       class="tag-name-input"
@@ -120,6 +122,7 @@ const readyToCreate = computed(()=> name.value.trim())
 .scratch-button, .add-button {
   aspect-ratio: 1;
   margin-top: 0;
+  margin-left: 0.5rem;
   padding: 0.35rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 999rem;
@@ -131,6 +134,8 @@ const readyToCreate = computed(()=> name.value.trim())
 }
 
 .tag-name-input {
+  width: 100%;
+  box-sizing: border-box;
   font-size: larger;
   background: rgba(255, 255, 255, 0.75);
   color: black;
@@ -139,5 +144,10 @@ const readyToCreate = computed(()=> name.value.trim())
 .new-tag {
   opacity: 0.8;
   border-style: dashed;
+}
+
+.weakness-indicator {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 </style>

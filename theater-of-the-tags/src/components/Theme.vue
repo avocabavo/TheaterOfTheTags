@@ -2,13 +2,14 @@
 import * as Y from 'yjs'
 import Tag from './Tag.vue'
 import { createTagShard } from '../lib/Tag';
-import { type ThemeType, type Might } from '../lib/schema';
+import { type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
-import type { TagData, TagNature, TagShard, ThemeData } from '../lib/schema';
+import type { TagNature, TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
+import Bubbles from './Bubbles.vue';
 
 const { mode } = useMode()
 
@@ -18,9 +19,6 @@ const props = defineProps<{
 
 const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
-const abandon = useYMapField<ThemeData, 'abandon'>(props.shard, 'abandon', 0)
-const improve = useYMapField<ThemeData, 'improve'>(props.shard, 'improve', 0)
-const milestone = useYMapField<ThemeData, 'milestone'>(props.shard, 'milestone', 0)
 
 const { items: powerTags, push: addPowerTag, remove: removePowerTag } =
   useYArray<TagShard>(props.shard, 'powerTags')
@@ -126,6 +124,29 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
     <div class="tag-section">
       <Quest :shard="shard" />
     </div>
+
+    <div class="tag-section">
+      <div class="quest-aim">
+        <Bubbles
+          :shard="shard"
+          field="abandon"
+          :max="3"
+          name="ABANDON"
+        />
+        <Bubbles
+          :shard="shard"
+          field="improve"
+          :max="3"
+          name="IMPROVE"
+        />
+        <Bubbles
+          :shard="shard"
+          field="milestone"
+          :max="3"
+          name="MILESTONE"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -181,5 +202,13 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
+}
+
+.quest-aim {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-around;
 }
 </style>

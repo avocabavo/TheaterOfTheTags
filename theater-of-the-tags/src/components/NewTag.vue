@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { TagData, TagNature } from '../lib/schema'
+import type { TagNature } from '../lib/schema'
 
 const props = defineProps<{
   nature: TagNature

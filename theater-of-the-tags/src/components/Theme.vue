@@ -40,7 +40,6 @@ const emit = defineEmits<{
 }>()
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
-  console.log(`handling create tag with ${data.name}, ${data.nature}, ${data.scratched}`)
   const newShard = createTagShard(data)
 
   switch (data.nature) {

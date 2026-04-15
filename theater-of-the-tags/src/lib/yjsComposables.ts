@@ -83,11 +83,8 @@ export function useYArray<T>(
   })
 
   function push(item: T) {
-    console.log('in the useYArray push function')
     if (!yarray) throw new Error("Y.Array not initialized yet")
-    console.log(`yarray before push length: ${yarray.length}`)
     yarray.push([item])
-    console.log(`yarray after push length: ${yarray.length}`)
   }
 
   function remove(index: number) {

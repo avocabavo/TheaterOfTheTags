@@ -8,6 +8,7 @@ import type { TagData, TagNature, TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
+import Quest from './Quest.vue';
 
 const { mode } = useMode()
 
@@ -17,7 +18,6 @@ const props = defineProps<{
 
 const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
-const quest = useYMapField<ThemeData, 'quest'>(props.shard, 'quest', '')
 const abandon = useYMapField<ThemeData, 'abandon'>(props.shard, 'abandon', 0)
 const improve = useYMapField<ThemeData, 'improve'>(props.shard, 'improve', 0)
 const milestone = useYMapField<ThemeData, 'milestone'>(props.shard, 'milestone', 0)
@@ -121,6 +121,10 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
         nature="weakness"
         @create="handleCreateTag"
       />
+    </div>
+
+    <div class="tag-section">
+      <Quest :shard="shard" />
     </div>
   </div>
 </template>

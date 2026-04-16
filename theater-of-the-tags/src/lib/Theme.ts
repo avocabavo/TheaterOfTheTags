@@ -10,6 +10,7 @@ export type ThemeCreationProps = {
 export function createThemeShard({
   might, themeType, primaryTagName
 }: ThemeCreationProps): ThemeShard {
+  console.log(`Creating shard for ${might} - ${themeType} theme called ${primaryTagName}`)
   const themeShard: ThemeShard = new Y.Map()
 
   themeShard.set('uuid', crypto.randomUUID())

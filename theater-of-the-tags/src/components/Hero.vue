@@ -3,9 +3,15 @@ import * as Y from 'yjs'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import type { HeroData } from '../lib/schema';
+import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { ref } from 'vue';
+import { createTagShard } from '../lib/Tag';
+import Tag from './Tag.vue';
+import NewTag from './NewTag.vue';
+import Theme from './Theme.vue';
+import { createThemeShard } from '../lib/Theme';
+import NewTheme from './NewTheme.vue';
 
 const { mode } = useMode()
 
@@ -17,11 +23,24 @@ const newQuintessence = ref('')
 
 const characterName = useYMapField<HeroData, 'characterName'>(props.shard, 'characterName', '')
 const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
+
 const {
   items: quintessences,
   push: pushQuintessence,
   remove: removeQuintessence,
 } = useYArray<string>(props.shard, 'quintessences')
+
+const {
+  items: backpackTags,
+  push: addBackpackTag,
+  remove: removeBackpackTag,
+} = useYArray<TagShard>(props.shard, 'backpack')
+
+const {
+  items: themes,
+  push: addTheme,
+  remove: removeTheme,
+} = useYArray<ThemeShard>(props.shard, 'themes')
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -33,6 +52,17 @@ function createQuintessence() {
 
   pushQuintessence(trimmed)
   newQuintessence.value = ''
+}
+
+function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+  const newShard = createTagShard(data)
+  addBackpackTag(newShard)
+}
+
+function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTagName: string}) {
+  console.log(`Handling theme creation for a ${data.might} - ${data.themeType} theme called ${data.primaryTagName}`)
+  const newShard = createThemeShard(data)
+  addTheme(newShard)
 }
 
 </script>
@@ -76,7 +106,38 @@ function createQuintessence() {
           <button @click="createQuintessence">+</button>
         </div>
       </div>
+
+      <div class="tag-section">
+        <Tag
+          v-for="(tag, index) in backpackTags"
+          :key="tag.get('uuid')"
+          :shard="tag"
+          @delete="removeBackpackTag(index)"
+        />
+        <NewTag
+          v-if="mode !== 'scene'"
+          nature="power"
+          @create="handleCreateTag"
+        />
+        <NewTag
+          v-if="mode !== 'scene'"
+          nature="weakness"
+          @create="handleCreateTag"
+        />
+      </div>
     </div>
+
+    <Theme
+      v-for="(theme, index) in themes"
+      :key="theme.get('uuid')"
+      :shard="theme"
+      @delete="removeTheme(index)"
+    />
+
+    <NewTheme
+      v-if="mode !== 'scene'"
+      @create="handleCreateTheme"
+    />
   </div>
 </template>
 
@@ -98,7 +159,17 @@ function createQuintessence() {
   align-items: center;
   gap: 0.5rem;
 
+  width: 25rem;
+
   background: #500;
+}
+
+.tag-section {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
 }
 
 .the-words-hero-card {

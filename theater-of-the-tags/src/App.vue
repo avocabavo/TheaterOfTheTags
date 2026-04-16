@@ -6,10 +6,12 @@ import NavigationBar from './components/NavigationBar.vue'
 import StatusTag from './components/StatusTag.vue'
 import Tag from './components/Tag.vue'
 import { createStatusTagShard } from './lib/StatusTag'
-import { statusTags, tags, themes } from './lib/yjs'
+import { heroes, statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
 import { createThemeShard } from './lib/Theme'
 import Theme from './components/Theme.vue'
+import { createHeroShard } from './lib/Hero'
+import Hero from './components/Hero.vue'
 
 const newStatusName = ref('')
 const statusNames = ref<string[]>([])
@@ -19,6 +21,10 @@ const tagNames = ref<string[]>([])
 
 const newThemePrimaryTagName = ref('')
 const themeNames = ref<string[]>([])
+
+const newHeroCharacterName = ref('')
+const newHeroPlayerName = ref('')
+const heroNames = ref<string[]>([])
 
 function syncStatusNames() {
   statusNames.value = Array.from(statusTags.keys())
@@ -32,25 +38,33 @@ function syncThemeNames() {
   themeNames.value = Array.from(themes.keys())
 }
 
+function syncHeroNames() {
+  heroNames.value = Array.from(heroes.keys())
+}
+
 const observer = ()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncHeroNames()
 }
 
 onMounted(()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncHeroNames()
   statusTags.observe(observer)
   tags.observe(observer)
   themes.observe(observer)
+  heroes.observe(observer)
 })
 
 onUnmounted(()=> {
   statusTags.unobserve(observer)
   tags.unobserve(observer)
   themes.unobserve(observer)
+  heroes.unobserve(observer)
 })
 
 const statusEntries = computed(()=>
@@ -78,6 +92,15 @@ const themeEntries = computed(()=>
       shard: themes.get(name)
     }))
     .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
+)
+
+const heroEntries = computed(()=>
+  heroNames.value
+    .map(characterName=> ({
+      characterName,
+      shard: heroes.get(characterName)
+    }))
+    .filter((entry): entry is { characterName: string; shard: Y.Map<any> }=> !!entry.shard)
 )
 
 function addStatus() {
@@ -108,6 +131,19 @@ function addTheme() {
   newThemePrimaryTagName.value = ''
 }
 
+function addHero() {
+  const characterName = newHeroCharacterName.value.trim()
+  if (!characterName || heroes.has(characterName)) return
+  const playerName = newHeroPlayerName.value.trim()
+  if (!playerName) return
+
+  heroes.set(characterName, createHeroShard({
+    characterName, playerName
+  }))
+  newHeroCharacterName.value = ''
+  newHeroPlayerName.value = ''
+}
+
 function deleteStatus(name: string) {
   statusTags.delete(name)
 }
@@ -118,6 +154,10 @@ function deleteTag(name: string) {
 
 function deleteTheme(name: string) {
   themes.delete(name)
+}
+
+function deleteHero(characterName: string) {
+  heroes.delete(characterName)
 }
 </script>
 
@@ -173,6 +213,28 @@ function deleteTheme(name: string) {
         :key="entry.name"
         :shard="entry.shard"
         @delete="deleteTheme(entry.name)"
+      />
+    </div>
+
+    <div class="toolbar">
+      <input
+        v-model="newHeroCharacterName"
+        placeHodlter="Enter character name"
+        @keyup.enter="addHero"
+      />
+      <input
+        v-model="newHeroPlayerName"
+        placeHolder="Enter player name"
+        @keyup.enter="addHero"
+      />
+      <button @click="addHero">Add Hero</button>
+    </div>
+    <div class="tag-holder">
+      <Hero
+        v-for="entry in heroEntries"
+        :key="entry.characterName"
+        :shard="entry.shard"
+        @delete="deleteHero(entry.characterName)"
       />
     </div>
   </main>

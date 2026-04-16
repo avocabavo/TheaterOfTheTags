@@ -82,3 +82,15 @@ export const THEME_KEYS = {
   improve: 'improve',
   milestone: 'milestone',
 } as const
+
+export type HeroData = {
+  uuid: string
+  characterName: string
+  playerName: string
+  promise: number
+  quintessences: Y.Array<string>
+  backpack: Y.Array<string>
+  notes: string
+  themes: Y.Array<ThemeShard>
+}
+export type HeroShard = Y.Map<any>

@@ -10,6 +10,7 @@ import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
+import { onBeforeUpdate, ref } from 'vue';
 
 const { mode } = useMode()
 
@@ -52,13 +53,60 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       break;
   }
 }
+
+const fieldRefs = ref<any[]>([])
+
+function setFieldRef(el: any) {
+  if (el) fieldRefs.value.push(el)
+}
+
+const primaryTagRef = ref<any | null>(null)
+const powerTagRefs = ref<any[]>([])
+const weaknessTagRefs = ref<any[]>([])
+
+function setPrimaryTagRef(el: any) {
+  primaryTagRef.value = el
+}
+function setPowerTagRef(el: any) {
+  if (el) powerTagRefs.value.push(el)
+}
+function setWeaknessTagRef(el: any) {
+  if (el) weaknessTagRefs.value.push(el)
+}
+
+onBeforeUpdate(()=> {
+  powerTagRefs.value = []
+  weaknessTagRefs.value = []
+})
+
+function toJson() {
+  return {
+    ...Object.assign(
+      {},
+      ...fieldRefs.value.map(b=> b.toJson())
+    ),
+    might: might.value,
+    themeType: themeType.value,
+    primaryTag: primaryTagRef.value?.toJson() ?? null,
+    powerTags: powerTagRefs.value.map(t=> t.toJson()),
+    weaknessTags: weaknessTagRefs.value.map(t=> t.toJson()),
+  }
+}
+
+function print() {
+  console.log(toJson())
+}
+
+defineExpose({
+  toJson
+})
 </script>
 
 <template>
   <div class="theme">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-    <p class="static-words">THEME CARD</p>
+    <p class="static-words" @click="print">THEME CARD</p>
     <div class="might">
       <label
         v-for="option in mightOptions"
@@ -83,6 +131,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
     <div class="tag-section">
       <Tag
         v-if="primaryTag"
+        :ref="setPrimaryTagRef"
         :shard="primaryTag"
         @delete="clearPrimaryTag"
       />
@@ -97,6 +146,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       <Tag
         v-for="(tag, index) in powerTags"
         :key="tag.get('uuid')"
+        :ref="setPowerTagRef"
         :shard="tag"
         @delete="removePowerTag(index)"
       />
@@ -111,6 +161,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       <Tag
         v-for="(tag, index) in weaknessTags"
         :key="tag.get('uuid')"
+        :ref="setWeaknessTagRef"
         :shard="tag"
         @delete="removeWeaknessTag(index)"
       />
@@ -122,28 +173,19 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
     </div>
 
     <div class="tag-section">
-      <Quest :shard="shard" />
+      <Quest :shard="shard" :ref="setFieldRef"/>
     </div>
 
     <div class="tag-section">
       <div class="quest-aim">
         <Bubbles
+          v-for="field in ['abandon', 'improve', 'milestone']"
+          :key="field"
+          :ref="setFieldRef"
           :shard="shard"
-          field="abandon"
+          :field="field"
           :max="3"
-          name="ABANDON"
-        />
-        <Bubbles
-          :shard="shard"
-          field="improve"
-          :max="3"
-          name="IMPROVE"
-        />
-        <Bubbles
-          :shard="shard"
-          field="milestone"
-          :max="3"
-          name="MILESTONE"
+          :name="field.toUpperCase()"
         />
       </div>
     </div>

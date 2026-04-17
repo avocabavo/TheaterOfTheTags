@@ -49,11 +49,23 @@ function autoResize() {
 onMounted(()=> {
   nextTick(autoResize)
 })
+
+function toJson() {
+  return {quest: localValue.value}
+}
+
+function print() {
+  console.log(toJson())
+}
+
+defineExpose({
+  toJson
+})
 </script>
 
 <template>
   <div class="quest-container">
-    <p class="static-words">QUEST</p>
+    <p class="static-words" @click="print">QUEST</p>
     <textarea
       ref="textareaRef"
       v-model="localValue"

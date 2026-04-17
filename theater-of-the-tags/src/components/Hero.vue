@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
+import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
-import { ref } from 'vue';
+import { onBeforeUpdate, ref } from 'vue';
 import { createTagShard } from '../lib/Tag';
 import Tag from './Tag.vue';
 import NewTag from './NewTag.vue';
@@ -65,6 +66,46 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   addTheme(newShard)
 }
 
+const fieldRefs = ref<any[]>([])
+
+function setFieldRef(el: any) {
+  if (el) fieldRefs.value.push(el)
+}
+
+const backpackTagRefs = ref<any[]>([])
+
+function setBackpackTagRef(el: any) {
+  if (el) backpackTagRefs.value.push(el)
+}
+
+const themeRefs = ref<any[]>([])
+
+function setThemeRef(el: any) {
+  if (el) themeRefs.value.push(el)
+}
+
+onBeforeUpdate(()=> {
+  backpackTagRefs.value = []
+  themeRefs.value = []
+})
+
+function toJson() {
+  return {
+    ...Object.assign(
+      {},
+      ...fieldRefs.value.map(b=> b.toJson())
+    ),
+    characterName: characterName.value,
+    playerName: playerName.value,
+    quintessences: quintessences.value,
+    backpackTags: backpackTagRefs.value.map(t=> t.toJson()),
+    themes: themeRefs.value.map(t=> t.toJson())
+  }
+}
+
+function print() {
+  console.log(YAML.stringify(toJson(), null, 2))
+}
 </script>
 
 <template>
@@ -72,7 +113,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
     <div class="hero-card">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-      <p class="static-words">HERO CARD</p>
+      <p class="static-words" @click="print">HERO CARD</p>
       <div class="character-name">
         <h1>{{ characterName }}</h1>
       </div>
@@ -85,6 +126,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
         <div class="promise-holder">
           <Bubbles
             :shard="shard"
+            :ref="setFieldRef"
             field="promise"
             :max="5"
             name="PROMISE"
@@ -118,6 +160,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
         <Tag
           v-for="(tag, index) in backpackTags"
           :key="tag.get('uuid')"
+          :ref="setBackpackTagRef"
           :shard="tag"
           @delete="removeBackpackTag(index)"
         />
@@ -137,6 +180,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
     <Theme
       v-for="(theme, index) in themes"
       :key="theme.get('uuid')"
+      :ref="setThemeRef"
       :shard="theme"
       @delete="removeTheme(index)"
     />

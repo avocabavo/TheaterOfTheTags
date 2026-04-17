@@ -21,10 +21,26 @@ function toggleScratched() {
 const emit = defineEmits<{
   (e: 'delete'): void
 }>()
+
+function toJson() {
+  return {
+    name: name.value,
+    nature: nature.value,
+    scratched: scratched.value,
+  }
+}
+
+function print() {
+  console.log(toJson())
+}
+
+defineExpose({
+  toJson
+})
 </script>
 
 <template>
-  <div :class="['tag', nature]">
+  <div :class="['tag', nature]" @click="print">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
 

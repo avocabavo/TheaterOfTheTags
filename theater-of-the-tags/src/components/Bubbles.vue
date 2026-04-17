@@ -24,6 +24,18 @@ function clear() {
   if (mode.value !== 'narrator') return
   value.value = 0
 }
+
+function toJson() {
+  return {[props.field]: value.value}
+}
+
+function print() {
+  console.log(toJson())
+}
+
+defineExpose({
+  toJson
+})
 </script>
 
 <template>
@@ -49,7 +61,7 @@ function clear() {
       />
     </div>
 
-    <div class="label">
+    <div class="label" @click="print">
       {{ name }}
     </div>
   </div>

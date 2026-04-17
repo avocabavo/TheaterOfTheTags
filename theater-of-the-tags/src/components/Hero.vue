@@ -77,19 +77,23 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
         <h1>{{ characterName }}</h1>
       </div>
       <div class="player-name">
+        <p class="static-words">PLAYER NAME</p>
         <h3>{{ playerName }}</h3>
       </div>
 
       <div class="tag-section">
-        <Bubbles
-          :shard="shard"
-          field="promise"
-          :max="5"
-          name="PROMISE"
-        />
+        <div class="promise-holder">
+          <Bubbles
+            :shard="shard"
+            field="promise"
+            :max="5"
+            name="PROMISE"
+          />
+        </div>
       </div>
 
-      <div class="tag-section">
+      <div class="quintessences">
+        <p class="static-words">QUINTESSENCES</p>
         <div
           v-for="(quintessence, index) in quintessences"
           class="quintessence-box"
@@ -97,7 +101,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
           <DeleteButton v-if="mode === 'narrator'" @delete="removeQuintessence(index)" />
           <p>{{ quintessence }}</p>
         </div>
-        <div>
+        <div class="quintessence-box">
           <input
             v-model="newQuintessence"
             @keydown.enter="createQuintessence"
@@ -167,12 +171,33 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   background: #500;
 }
 
+.character-name {
+  color: white;
+}
+
+.player-name {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  color: white;
+}
+
 .tag-section {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
+}
+
+.promise-holder {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-around;
 }
 
 .static-words {
@@ -182,8 +207,31 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   color: gray;
 }
 
+.quintessences {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
 .quintessence-box {
   position: relative;
+  padding: 0.25rem 1rem;
+  margin: 0.25rem;
+  border: 0.2rem solid rgba(0, 0, 0, 0.5);
+  border-radius: 999rem;
+  box-sizing: border-box;
+
+  max-width: 25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+.quintessence-box p {
+  margin: 0.25rem;
 }
 
 .backpack {

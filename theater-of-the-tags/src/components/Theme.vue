@@ -58,7 +58,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   <div class="theme">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-    <p class="the-words-theme-card">THEME CARD</p>
+    <p class="static-words">THEME CARD</p>
     <div class="might">
       <label
         v-for="option in mightOptions"
@@ -76,7 +76,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
       </label>
     </div>
     <p class="theme-type">
-      <span class="the-word-type">type</span>
+      <span class="tiny-static-words">type</span>
       {{ themeType }}
     </p>
 
@@ -164,7 +164,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   gap: 0.5rem;
 }
 
-.the-words-theme-card {
+.static-words {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
   font-size: x-large;
@@ -190,7 +190,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   align-items: baseline;
 }
 
-.the-word-type {
+.tiny-static-words {
   font-size: smaller;
   color: gray;
   margin-right: 0.25rem;

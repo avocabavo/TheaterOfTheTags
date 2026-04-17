@@ -45,7 +45,7 @@ const readyToCreate = computed(()=> {
 
 <template>
   <div class="theme new-theme">
-    <p class="the-words-new-theme-card">NEW THEME CARD</p>
+    <p class="static-words">NEW THEME CARD</p>
     <div class="might">
       <label
         v-for="option in mightOptions"

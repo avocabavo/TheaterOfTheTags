@@ -54,7 +54,7 @@ const emit = defineEmits<{
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
     <p class="upper-half">
-      <span class="the-word-tag">TAG</span>
+      <span class="tiny-static-words">TAG</span>
       <span class="status-tag-name">{{ name }}</span>
     </p>
     <div class="status-row">
@@ -107,7 +107,7 @@ const emit = defineEmits<{
   margin-bottom: 0.25rem;
 }
 
-.the-word-tag {
+.tiny-static-words {
   font-size: smaller;
   color: gray;
   margin-right: 0.25rem;

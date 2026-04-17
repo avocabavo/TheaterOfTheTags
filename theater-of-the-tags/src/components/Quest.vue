@@ -53,7 +53,7 @@ onMounted(()=> {
 
 <template>
   <div class="quest-container">
-    <p class="the-word-quest">QUEST</p>
+    <p class="static-words">QUEST</p>
     <textarea
       ref="textareaRef"
       v-model="localValue"
@@ -72,12 +72,12 @@ onMounted(()=> {
   padding: 0.75rem;
 }
 
-.the-word-quest {
+.static-words {
   width: 100%;
   text-align: center;
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
-  font-size: large;
+  font-size: x-large;
   color: gray;
 }
 

@@ -72,7 +72,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
     <div class="hero-card">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-      <p class="the-words-hero-card">HERO CARD</p>
+      <p class="static-words">HERO CARD</p>
       <div class="character-name">
         <h1>{{ characterName }}</h1>
       </div>
@@ -106,7 +106,10 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
           <button @click="createQuintessence">+</button>
         </div>
       </div>
+    </div>
 
+    <div class="backpack">
+      <p class="static-words">BACKPACK</p>
       <div class="tag-section">
         <Tag
           v-for="(tag, index) in backpackTags"
@@ -172,7 +175,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   align-items: center;
 }
 
-.the-words-hero-card {
+.static-words {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
   font-size: x-large;
@@ -181,5 +184,15 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
 
 .quintessence-box {
   position: relative;
+}
+
+.backpack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: #444;
+
+  width: 25rem;
 }
 </style>

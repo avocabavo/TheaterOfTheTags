@@ -115,7 +115,7 @@ defineExpose({
       >
         <input
           type="radio"
-          name="might"
+          :name="`might-${shard.get('uuid')}`"
           :value="option"
           :checked="might === option"
           @change="might = option"

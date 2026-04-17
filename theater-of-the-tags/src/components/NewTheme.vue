@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { Might, ThemeType } from '../lib/schema';
-
-const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
-
-const themeTypeOptions: ThemeType[] = [
-  'circumstance',
-  'devotion',
-  'past',
-  'people',
-  'personality',
-  'skill or trade',
-  'trait',
-]
+import {
+  mightOptions,
+  originThemeTypeOptions,
+  adventureThemeTypeOptions,
+  greatnessThemeTypeOptions,
+  themeTypeOptions
+} from '../lib/schema'
 
 const emit = defineEmits<{
   (e: 'create', payload: { might: Might, themeType: ThemeType, primaryTagName: string}): void

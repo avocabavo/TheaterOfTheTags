@@ -72,21 +72,20 @@ function onKeydown(e: KeyboardEvent) {
 
 <template>
   <div class="editable-text">
-    <input
-      v-if="isEditing"
-      ref="inputRef"
-      v-model="localValue"
-      class="input"
-      :placeholder="placeholder"
-      @keydown="onKeydown"
-      @blur="stopEditing(true)"
-    />
     <component
       :is="tag"
-      v-else
       class="editable-component"
     >
-      {{ modelValue  }}
+      <input
+        v-if="isEditing"
+        ref="inputRef"
+        v-model="localValue"
+        class="input"
+        :placeholder="placeholder"
+        @keydown="onKeydown"
+        @blur="stopEditing(true)"
+      />
+      {{ modelValue }}
       <EditButton
         v-if="!disabled && showEditButton"
         v-on:edit="startEditing"
@@ -104,14 +103,18 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .input {
-  width: 80%;
+  position: absolute;
+  width: 100%;
+  min-width: 5rem;
+  height: 100%;
+  min-height: 2rem;
   box-sizing: border-box;
-  font-size: 2rem;
+  font-size: inherit;
   font-weight: bold;
   text-align: center;
   outline: none;
   color: black;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 1);
 }
 
 .editable-component {

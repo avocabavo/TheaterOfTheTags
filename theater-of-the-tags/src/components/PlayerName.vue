@@ -43,7 +43,7 @@ defineExpose({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0;
 
   box-sizing: border-box;
 

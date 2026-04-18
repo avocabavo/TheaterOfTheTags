@@ -3,6 +3,7 @@ import type { TagData, TagNature, TagShard } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
+import EditableText from './EditableText.vue';
 
 const { mode } = useMode()
 
@@ -44,12 +45,14 @@ defineExpose({
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
 
-    <p
+    <EditableText
+      v-model="name"
+      tag="p"
       class="tag-name"
       :class="{ scratched }"
-    >
-      {{ name }}
-    </p>
+      placeholder="Enter Tag Name ..."
+      :disabled="mode !== 'creation'"
+    />
 
     <button
       v-if="nature !== 'weakness'"
@@ -97,8 +100,8 @@ defineExpose({
   color: white;
 }
 
-.tag-name {
-  margin: 0.5rem;
+.tag :deep(p) {
+  margin: 0.5rem 0.5rem 0.5rem 1rem;
 }
 
 .tag-name.scratched {

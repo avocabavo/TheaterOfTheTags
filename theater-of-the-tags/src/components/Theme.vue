@@ -2,7 +2,7 @@
 import * as Y from 'yjs'
 import Tag from './Tag.vue'
 import { createTagShard } from '../lib/Tag';
-import { type Might } from '../lib/schema';
+import { mightOptions } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
 import type { TagNature, TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './/buttons/DeleteButton.vue';
@@ -23,21 +23,21 @@ const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
 
 const { items: powerTags, push: addPowerTag, remove: removePowerTag } =
-  useYArray<TagShard>(props.shard, 'powerTags')
+  useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'), ()=> emit('resized'))
 
 const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag } =
-  useYArray<TagShard>(props.shard, 'weaknessTags')
+  useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'), ()=> emit('resized'))
 
 const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
   props.shard,
   'primaryTag',
+  ()=> emit('resized'),
+  ()=> emit('resized'),
 )
-
-const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
 
 const emit = defineEmits<{
   (e: 'delete'): void,
-  (e: 'resize'): void,
+  (e: 'resized'): void,
 }>()
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
@@ -132,6 +132,7 @@ defineExpose({
         :ref="setPrimaryTagRef"
         :shard="primaryTag"
         @delete="clearPrimaryTag"
+        @resized="emit('resized')"
       />
       <NewTag
         v-else-if="mode !== 'scene'"
@@ -147,6 +148,7 @@ defineExpose({
         :ref="setPowerTagRef"
         :shard="tag"
         @delete="removePowerTag(index)"
+        @resized="emit('resized')"
       />
       <NewTag
         v-if="mode !== 'scene'"
@@ -162,6 +164,7 @@ defineExpose({
         :ref="setWeaknessTagRef"
         :shard="tag"
         @delete="removeWeaknessTag(index)"
+        @resized="emit('resized')"
       />
       <NewTag
         v-if="mode !== 'scene'"
@@ -171,7 +174,11 @@ defineExpose({
     </div>
 
     <div class="tag-section">
-      <Quest :shard="shard" :ref="setFieldRef"/>
+      <Quest
+        :shard="shard"
+        :ref="setFieldRef"
+        @resized="emit('resized')"
+      />
     </div>
 
     <div class="tag-section">

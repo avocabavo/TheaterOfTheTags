@@ -44,7 +44,9 @@ export function useYMapField<T, K extends keyof T>(
 
 export function useYArray<T>(
   ymap: Y.Map<any>,
-  key: string
+  key: string,
+  pushCallback?: (()=> any) | null,
+  removeCallback?: (()=> any) | null,
 ): {
   items: Ref<T[]>
   push: (item: T) => void
@@ -85,10 +87,12 @@ export function useYArray<T>(
   function push(item: T) {
     if (!yarray) throw new Error("Y.Array not initialized yet")
     yarray.push([item])
+    if (pushCallback) pushCallback()
   }
 
   function remove(index: number) {
     yarray?.delete(index, 1)
+    if (removeCallback) removeCallback()
   }
 
   return {
@@ -102,6 +106,8 @@ export function useYArray<T>(
 export function useYChildMap(
   ymap: Y.Map<any>,
   key: string,
+  clearCallback?: (()=> any) | null,
+  setCallback?: (()=> any) | null,
 ) {
   const child = ref<Y.Map<any> | null>(null)
 
@@ -131,15 +137,21 @@ export function useYChildMap(
     if (ymap.has(key)) {
       ymap.delete(key)
     }
+    if (clearCallback) clearCallback()
   }
 
   function set(newMap?: Y.Map<any>) {
     if (newMap == null) {
-      return clear()
+      if (ymap.has(key)) {
+        ymap.delete(key)
+      }
+      if (setCallback) setCallback()
+      return
     }
 
     if (newMap instanceof Y.Map) {
       ymap.set(key, newMap)
+      if (setCallback) setCallback()
       return
     }
 

@@ -22,12 +22,20 @@ useWatchWithDebounce(quest, localValue, null, autoResize)
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
+const emit = defineEmits<{
+  (e: 'resized'): void
+}>()
+
 function autoResize() {
   const el = textareaRef.value
   if (!el) return
 
+  const oldHeight = el.style.height
+
   el.style.height = 'auto'
   el.style.height = el.scrollHeight + 'px'
+
+  if (el.style.height != oldHeight) emit('resized')
 }
 
 onMounted(()=> {

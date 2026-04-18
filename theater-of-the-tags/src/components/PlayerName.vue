@@ -20,6 +20,10 @@ function toJson() {
 defineExpose({
   toJson
 })
+
+const emit = defineEmits<{
+  (e: 'resized'): void,
+}>()
 </script>
 
 <template>
@@ -32,6 +36,7 @@ defineExpose({
       tag="h3"
       placeholder="Enter Player Name ..."
       :disabled="mode !== 'creation'"
+      @resized="emit('resized')"
     />
   </div>
 </template>

@@ -21,6 +21,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'start-edit'): void
   (e: 'end-edit'): void
+  (e: 'resized'): void
 }>()
 
 const isEditing = ref(false)
@@ -32,6 +33,7 @@ watch(() => props.modelValue, (val) => {
   if (!isEditing.value) {
     localValue.value = val
   }
+  emit('resized') // TODO - can this be smarter about whether the dimensions of this element actually changed?
 })
 
 function startEditing() {

@@ -34,13 +34,13 @@ const {
   items: quintessences,
   push: pushQuintessence,
   remove: removeQuintessence,
-} = useYArray<string>(props.shard, 'quintessences')
+} = useYArray<string>(props.shard, 'quintessences', reflowMasonry, reflowMasonry)
 
 const {
   items: backpackTags,
   push: addBackpackTag,
   remove: removeBackpackTag,
-} = useYArray<TagShard>(props.shard, 'backpack')
+} = useYArray<TagShard>(props.shard, 'backpack', reflowMasonry, reflowMasonry)
 
 const {
   items: themes,
@@ -64,7 +64,6 @@ function createQuintessence() {
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
   const newShard = createTagShard(data)
   addBackpackTag(newShard)
-  reflowMasonry()
 }
 
 function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTagName: string}) {
@@ -137,8 +136,8 @@ function print() {
       <div class="static-words">
         <p @click="print">HERO CARD</p>
       </div>
-      <CharacterName :shard="shard" :ref="setFieldRef" />
-      <PlayerName :shard="shard" :ref="setFieldRef" />
+      <CharacterName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
+      <PlayerName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
 
       <div class="tag-section">
         <div class="promise-holder">
@@ -181,6 +180,7 @@ function print() {
           :ref="setBackpackTagRef"
           :shard="tag"
           @delete="removeBackpackTag(index)"
+          @resized="reflowMasonry"
         />
         <NewTag
           v-if="mode !== 'scene'"
@@ -202,6 +202,7 @@ function print() {
       :ref="setThemeRef"
       :shard="theme"
       @delete="removeTheme(index)"
+      @resized="reflowMasonry"
     />
 
     <NewTheme

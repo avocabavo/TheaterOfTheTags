@@ -20,7 +20,8 @@ function toggleScratched() {
 }
 
 const emit = defineEmits<{
-  (e: 'delete'): void
+  (e: 'delete'): void,
+  (e: 'resized'): void,
 }>()
 
 function toJson() {
@@ -52,6 +53,7 @@ defineExpose({
       :class="{ scratched }"
       placeholder="Enter Tag Name ..."
       :disabled="mode !== 'creation'"
+      @resized="emit('resized')"
     />
 
     <button

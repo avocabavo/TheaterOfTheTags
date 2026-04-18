@@ -13,6 +13,7 @@ import NewTag from './NewTag.vue';
 import Theme from './Theme.vue';
 import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
+import CharacterName from './CharacterName.vue';
 
 const { mode } = useMode()
 
@@ -22,7 +23,6 @@ const props = defineProps<{
 
 const newQuintessence = ref('')
 
-const characterName = useYMapField<HeroData, 'characterName'>(props.shard, 'characterName', '')
 const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
 
 const {
@@ -95,7 +95,6 @@ function toJson() {
       {},
       ...fieldRefs.value.map(b=> b.toJson())
     ),
-    characterName: characterName.value,
     playerName: playerName.value,
     quintessences: quintessences.value,
     backpackTags: backpackTagRefs.value.map(t=> t.toJson()),
@@ -113,12 +112,14 @@ function print() {
     <div class="hero-card">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-      <p class="static-words" @click="print">HERO CARD</p>
-      <div class="character-name">
-        <h1>{{ characterName }}</h1>
+      <div class="static-words">
+        <p @click="print">HERO CARD</p>
       </div>
+      <CharacterName :shard="shard" :ref="setFieldRef" />
       <div class="player-name">
-        <p class="static-words">PLAYER NAME</p>
+        <div class="small static-words">
+          <p>PLAYER NAME</p>
+        </div>
         <h3>{{ playerName }}</h3>
       </div>
 
@@ -192,7 +193,7 @@ function print() {
   </div>
 </template>
 
-<style>
+<style scoped>
 .hero {
   position: relative;
   border: 3px solid violet;
@@ -212,11 +213,7 @@ function print() {
 
   width: 25rem;
 
-  background: #500;
-}
-
-.character-name {
-  color: white;
+  background: #fca;
 }
 
 .player-name {
@@ -225,7 +222,7 @@ function print() {
   flex-direction: column;
   align-items: center;
 
-  color: white;
+  color: black;
 }
 
 .tag-section {
@@ -245,10 +242,25 @@ function print() {
 }
 
 .static-words {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.hero-card .static-words {
+  background-color: #c65;
+}
+
+.static-words p {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
   font-size: x-large;
-  color: gray;
+  color: #433;
+}
+.static-words.small p {
+  font-size: large;
 }
 
 .quintessences {

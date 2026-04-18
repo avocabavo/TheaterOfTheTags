@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import * as Y from 'yjs'
 import { useYMapField } from '../lib/yjsComposables'
 import { useMode } from '../lib/modeStore'
 import type { ThemeData } from '../lib/schema'
+import { useWatchWithDebounce } from '../lib/util'
 
 const { mode } = useMode()
 
@@ -17,24 +18,7 @@ const quest = useYMapField<ThemeData, 'quest'>(props.shard, 'quest', '')
 // Local input state (for debouncing)
 const localValue = ref(quest.value)
 
-// Keep local in sync if Yjs updates externally
-watch(quest, (val) => {
-  if (val !== localValue.value) {
-    localValue.value = val
-  }
-})
-
-// Debounce write → Yjs
-let timeout: number | undefined
-watch(localValue, (val) => {
-  nextTick(autoResize)
-  window.clearTimeout(timeout)
-  timeout = window.setTimeout(() => {
-    if (val !== quest.value) {
-      quest.value = val
-    }
-  }, 200) // tweak debounce timing as needed
-})
+useWatchWithDebounce(quest, localValue, null, autoResize)
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 

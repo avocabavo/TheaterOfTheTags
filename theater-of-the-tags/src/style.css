@@ -28,6 +28,8 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+
+  --masonry-gutter: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {

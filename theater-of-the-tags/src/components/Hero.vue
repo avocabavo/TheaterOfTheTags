@@ -46,7 +46,7 @@ const {
   items: themes,
   push: addTheme,
   remove: removeTheme,
-} = useYArray<ThemeShard>(props.shard, 'themes')
+} = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry, reflowMasonry)
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -58,7 +58,6 @@ function createQuintessence() {
 
   pushQuintessence(trimmed)
   newQuintessence.value = ''
-  reflowMasonry()
 }
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
@@ -218,6 +217,9 @@ function print() {
   position: relative;
   border: 3px solid violet;
   width: 100%;
+}
+.hero>* {
+  margin-bottom: 16px;
 }
 
 .grid-sizer,

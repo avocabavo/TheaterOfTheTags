@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from 'vue'
-import EditButton from './EditButton.vue';
+import EditButton from './buttons/EditButton.vue';
 
 const props = withDefaults(defineProps<{
   modelValue: string

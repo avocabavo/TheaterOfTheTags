@@ -5,7 +5,7 @@ import { createTagShard } from '../lib/Tag';
 import { type Might } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
 import type { TagNature, TagShard, ThemeData } from '../lib/schema';
-import DeleteButton from './DeleteButton.vue';
+import DeleteButton from './/buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';

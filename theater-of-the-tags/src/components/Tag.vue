@@ -2,7 +2,7 @@
 import type { TagData, TagNature, TagShard } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
-import DeleteButton from './DeleteButton.vue';
+import DeleteButton from './buttons/DeleteButton.vue';
 
 const { mode } = useMode()
 

@@ -2,7 +2,7 @@
 import * as Y from 'yjs'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData } from '../lib/schema';
-import DeleteButton from './DeleteButton.vue';
+import DeleteButton from './buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 
 const { mode } = useMode()

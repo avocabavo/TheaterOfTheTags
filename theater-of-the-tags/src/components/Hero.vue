@@ -2,7 +2,7 @@
 import * as Y from 'yjs'
 import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
-import DeleteButton from './DeleteButton.vue';
+import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
@@ -15,6 +15,8 @@ import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
 import CharacterName from './CharacterName.vue';
 import { useFieldCollector } from '../lib/util';
+import EditableText from './EditableText.vue';
+import PlayerName from './PlayerName.vue';
 
 const { mode } = useMode()
 
@@ -113,12 +115,7 @@ function print() {
         <p @click="print">HERO CARD</p>
       </div>
       <CharacterName :shard="shard" :ref="setFieldRef" />
-      <div class="player-name">
-        <div class="small static-words">
-          <p>PLAYER NAME</p>
-        </div>
-        <h3>{{ playerName }}</h3>
-      </div>
+      <PlayerName :shard="shard" :ref="setFieldRef" />
 
       <div class="tag-section">
         <div class="promise-holder">

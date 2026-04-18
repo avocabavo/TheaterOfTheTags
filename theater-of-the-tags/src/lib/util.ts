@@ -1,4 +1,4 @@
-import { nextTick, watch, type Ref } from "vue";
+import { nextTick, ref, watch, type Ref } from "vue";
 
 export function useWatchWithDebounce(
   usedField: Ref<string, string>,
@@ -25,4 +25,12 @@ export function useWatchWithDebounce(
       }
     }, timeout_ms)
   })
+}
+
+export function useFieldCollector(): { fieldRefs: Ref<any[]>, setFieldRef: (el: any)=>void } {
+  const fieldRefs = ref<any[]>([])
+  function setFieldRef(el: any) {
+    if (el) fieldRefs.value.push(el)
+  }
+  return { fieldRefs, setFieldRef }
 }

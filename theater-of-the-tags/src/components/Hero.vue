@@ -14,6 +14,7 @@ import Theme from './Theme.vue';
 import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
 import CharacterName from './CharacterName.vue';
+import { useFieldCollector } from '../lib/util';
 
 const { mode } = useMode()
 
@@ -66,11 +67,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   addTheme(newShard)
 }
 
-const fieldRefs = ref<any[]>([])
-
-function setFieldRef(el: any) {
-  if (el) fieldRefs.value.push(el)
-}
+const { fieldRefs, setFieldRef } = useFieldCollector()
 
 const backpackTagRefs = ref<any[]>([])
 

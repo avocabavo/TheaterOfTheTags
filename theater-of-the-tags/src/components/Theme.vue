@@ -11,6 +11,7 @@ import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
 import { onBeforeUpdate, ref } from 'vue';
+import { useFieldCollector } from '../lib/util';
 
 const { mode } = useMode()
 
@@ -54,11 +55,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   }
 }
 
-const fieldRefs = ref<any[]>([])
-
-function setFieldRef(el: any) {
-  if (el) fieldRefs.value.push(el)
-}
+const { fieldRefs, setFieldRef } = useFieldCollector()
 
 const primaryTagRef = ref<any | null>(null)
 const powerTagRefs = ref<any[]>([])

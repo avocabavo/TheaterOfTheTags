@@ -104,17 +104,16 @@ function onKeydown(e: KeyboardEvent) {
 
 .input {
   position: absolute;
-  width: 100%;
-  min-width: 5rem;
-  height: 100%;
-  min-height: 2rem;
-  box-sizing: border-box;
-  font-size: inherit;
+  top: 0;
+  left: 0;
+  width: 20rem;
+  height: 2rem;
+  font-size: 2rem;
   font-weight: bold;
-  text-align: center;
-  outline: none;
+  border: 0.15rem solid black;
+  border-radius: 0.25rem;
   color: black;
-  background: rgba(255, 255, 255, 1);
+  background: white;
 }
 
 .editable-component {

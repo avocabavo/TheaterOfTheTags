@@ -97,12 +97,17 @@ const readyToCreate = computed(()=> {
 
 <style scoped>
 .new-theme {
+  box-sizing: border-box;
+  border: 0.25rem dashed white;
+  background-color: #222;
+
+  width: 25rem;
+
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  align-items: center;
+  gap: 0.5rem;
 
   padding: 0.75rem;
-  border: 0.1rem dashed #aaa;
-  border-radius: 0.5rem;
 }
 </style>

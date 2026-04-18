@@ -36,7 +36,8 @@ const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYCh
 const mightOptions: Might[] = ['origin', 'adventure', 'greatness']
 
 const emit = defineEmits<{
-  (e: 'delete'): void
+  (e: 'delete'): void,
+  (e: 'resize'): void,
 }>()
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
@@ -192,6 +193,7 @@ defineExpose({
 <style scoped>
 .theme {
   position: relative;
+  box-sizing: border-box;
   border: 0.25rem solid #764;
   background-color: #dca;
 

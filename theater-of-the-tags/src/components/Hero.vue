@@ -6,7 +6,7 @@ import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
-import { onBeforeUpdate, ref } from 'vue';
+import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import { createTagShard } from '../lib/Tag';
 import Tag from './Tag.vue';
 import NewTag from './NewTag.vue';
@@ -15,14 +15,16 @@ import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
 import CharacterName from './CharacterName.vue';
 import { useFieldCollector } from '../lib/util';
-import EditableText from './EditableText.vue';
 import PlayerName from './PlayerName.vue';
+import Masonry from 'masonry-layout'
 
 const { mode } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
 }>()
+
+const grid = ref(null)
 
 const newQuintessence = ref('')
 
@@ -56,17 +58,20 @@ function createQuintessence() {
 
   pushQuintessence(trimmed)
   newQuintessence.value = ''
+  reflowMasonry()
 }
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
   const newShard = createTagShard(data)
   addBackpackTag(newShard)
+  reflowMasonry()
 }
 
 function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTagName: string}) {
   console.log(`Handling theme creation for a ${data.might} - ${data.themeType} theme called ${data.primaryTagName}`)
   const newShard = createThemeShard(data)
   addTheme(newShard)
+  reflowMasonry()
 }
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
@@ -88,6 +93,24 @@ onBeforeUpdate(()=> {
   themeRefs.value = []
 })
 
+let masonry: Masonry | null = null
+
+onMounted(async ()=> {
+  await nextTick()
+  masonry = new Masonry(grid.value, {
+    itemSelector: '.grid-item',
+    columnWidth: '.grid-sizer',
+    gutter: 16,
+  })
+  reflowMasonry()
+})
+
+async function reflowMasonry() {
+  await nextTick()
+  masonry?.reloadItems?.()
+  masonry?.layout?.()
+}
+
 function toJson() {
   return {
     ...Object.assign(
@@ -107,8 +130,8 @@ function print() {
 </script>
 
 <template>
-  <div class="hero">
-    <div class="hero-card">
+  <div ref="grid" class="hero">
+    <div class="hero-card grid-item grid-sizer">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
       <div class="static-words">
@@ -149,7 +172,7 @@ function print() {
       </div>
     </div>
 
-    <div class="backpack">
+    <div class="backpack grid-item">
       <p class="static-words">BACKPACK</p>
       <div class="tag-section">
         <Tag
@@ -173,6 +196,7 @@ function print() {
     </div>
 
     <Theme
+      class="grid-item"
       v-for="(theme, index) in themes"
       :key="theme.get('uuid')"
       :ref="setThemeRef"
@@ -181,6 +205,7 @@ function print() {
     />
 
     <NewTheme
+      class="grid-item"
       v-if="mode !== 'scene'"
       @create="handleCreateTheme"
     />
@@ -191,12 +216,13 @@ function print() {
 .hero {
   position: relative;
   border: 3px solid violet;
+  width: 100%;
+}
 
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: start;
-  gap: 1rem;
+.grid-sizer,
+.grid-item {
+  width: 25rem;
+  max-width: 100%;
 }
 
 .hero-card {
@@ -204,6 +230,8 @@ function print() {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  box-sizing: border-box;
+  border: 0.25rem solid #853;
 
   width: 25rem;
 
@@ -291,6 +319,9 @@ function print() {
   gap: 0.5rem;
   background: #444;
 
+  border: 0.25rem solid darkgray;
+
+  box-sizing: border-box;
   width: 25rem;
 }
 </style>

@@ -222,6 +222,7 @@ function print() {
   position: relative;
   border: 3px solid violet;
   width: 100%;
+  padding: 1rem;
 }
 .hero>* {
   margin-bottom: 16px;

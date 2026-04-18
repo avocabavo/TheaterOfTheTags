@@ -17,12 +17,8 @@ const value = useYMapField<any, any>(props.shard, props.field, 0)
 
 function setValue(n: number) {
   if (mode.value !== 'narrator') return
-  value.value = n
-}
-
-function clear() {
-  if (mode.value !== 'narrator') return
-  value.value = 0
+  if (value.value < n) value.value = n
+  else value.value = n - 1
 }
 
 function toJson() {
@@ -41,22 +37,12 @@ defineExpose({
 <template>
   <div class="bubble-field">
     <div class="buttons">
-      <!-- Reset button -->
-      <button
-        class="reset"
-        :disabled="mode === 'scene'"
-        @click="clear"
-      >
-        ×
-      </button>
-
-      <!-- Circle buttons -->
       <button
         v-for="n in max"
         :key="n"
         class="circle"
         :class="{ filled: n <= value }"
-        :disabled="mode === 'scene'"
+        :disabled="mode !== 'narrator'"
         @click="setValue(n)"
       />
     </div>
@@ -80,25 +66,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 0.3rem;
-}
-
-/* Reset (X) button */
-.reset {
-  width: 1.3rem;
-  height: 1.3rem;
-  border-radius: 50%;
-
-  border: 1px solid #aaa;
-  background: #f3f3f3;
-  color: black;
-
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.reset:hover:not(:disabled) {
-  background: #e0e0e0;
 }
 
 /* Circle buttons */

@@ -109,6 +109,11 @@ async function reflowMasonry() {
   masonry?.layout?.()
 }
 
+watch(mode, async ()=> {
+  await nextTick()
+  reflowMasonry()
+})
+
 function toJson() {
   return {
     ...Object.assign(

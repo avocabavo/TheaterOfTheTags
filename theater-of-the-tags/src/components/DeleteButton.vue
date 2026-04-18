@@ -30,7 +30,7 @@ button {
   background: #555;
   color: white;
 
-  opacity: 0.75;
+  opacity: 0.6;
 
   font-size: 1rem;
   line-height: 1;
@@ -41,8 +41,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
 .delete-button:hover {

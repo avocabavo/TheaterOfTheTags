@@ -7,7 +7,9 @@
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:yjs\"",
     "dev:web": "vite",
     "dev:yjs": "PORT=1234 /usr/bin/y-websocket-server",
+    "demo": "npm run vite --mode webrtc",
     "build": "vue-tsc -b && vite build",
+    "build:webrtc": "vue-tsc -b && vite build --mode webrtc",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "@types/node": "^24.12.2",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/tsconfig": "^0.9.1",
+    "gh-pages": "^6.3.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.4",
     "vue-tsc": "^3.2.6"

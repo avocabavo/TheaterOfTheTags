@@ -100,7 +100,7 @@ function onPowerDrop(targetIndex: number) {
 function onWeaknessDrop(targetIndex: number) {
   if (mode.value !== 'creation') return
   if (weaknessDraggingIndex.value === null) return
-  movePowerTag(weaknessDraggingIndex.value, targetIndex)
+  moveWeaknessTag(weaknessDraggingIndex.value, targetIndex)
   weaknessDraggingIndex.value = null
   nextTick(()=> emit('resized'))
 }

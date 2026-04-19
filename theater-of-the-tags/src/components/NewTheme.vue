@@ -3,9 +3,9 @@ import { computed, ref } from 'vue';
 import type { Might, ThemeType } from '../lib/schema';
 import {
   mightOptions,
-  originThemeTypeOptions,
-  adventureThemeTypeOptions,
-  greatnessThemeTypeOptions,
+  // originThemeTypeOptions,
+  // adventureThemeTypeOptions,
+  // greatnessThemeTypeOptions,
   themeTypeOptions
 } from '../lib/schema'
 

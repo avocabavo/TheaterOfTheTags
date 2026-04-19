@@ -51,6 +51,7 @@ export function useYArray<T>(
   items: Ref<T[]>
   push: (item: T) => void
   remove: (index: number) => void
+  move: (from: number, to: number)=> void
   yarray: ()=> Y.Array<any> | null
 } {
   const items = ref<T[]>([]) as Ref<T[]>
@@ -95,10 +96,31 @@ export function useYArray<T>(
     if (removeCallback) removeCallback()
   }
 
+  function move(from: number, to: number) {
+    if (from === to) return
+    if (!yarray) return
+
+    console.log(`moving from ${from} to ${to} within an array of length ${yarray.length}`)
+
+    const item = yarray.get(from)
+    if (item instanceof Y.Map) {
+      const itemClone = new Y.Map()
+      item.forEach((value, key)=> {
+        itemClone.set(key, value)
+      })
+      yarray.delete(from, 1)
+      yarray.insert(to, [itemClone])
+      return
+    }
+    yarray.delete(from, 1)
+    yarray.insert(to, [item])
+  }
+
   return {
     items,
     push,
     remove,
+    move,
     yarray: () => yarray
   }
 }

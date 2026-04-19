@@ -10,7 +10,7 @@ import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
-import { onBeforeUpdate, ref } from 'vue';
+import { nextTick, onBeforeUpdate, ref } from 'vue';
 import { useFieldCollector } from '../lib/util';
 
 const { mode } = useMode()
@@ -22,10 +22,10 @@ const props = defineProps<{
 const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
 
-const { items: powerTags, push: addPowerTag, remove: removePowerTag } =
+const { items: powerTags, push: addPowerTag, remove: removePowerTag, move:movePowerTag } =
   useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'), ()=> emit('resized'))
 
-const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag } =
+const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag, move: moveWeaknessTag } =
   useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'), ()=> emit('resized'))
 
 const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
@@ -76,6 +76,33 @@ onBeforeUpdate(()=> {
   powerTagRefs.value = []
   weaknessTagRefs.value = []
 })
+
+const powerDraggingIndex = ref<number | null>(null)
+const weaknessDraggingIndex = ref<number | null>(null)
+
+function onPowerDragStart(index: number) {
+  if (mode.value !== 'creation') return
+  powerDraggingIndex.value = index
+}
+function onWeaknessDragStart(index: number) {
+  if (mode.value !== 'creation') return
+  weaknessDraggingIndex.value = index
+}
+
+function onPowerDrop(targetIndex: number) {
+  if (mode.value !== 'creation') return
+  if (powerDraggingIndex.value === null) return
+  movePowerTag(powerDraggingIndex.value, targetIndex)
+  powerDraggingIndex.value = null
+  nextTick(()=> emit('resized'))
+}
+function onWeaknessDrop(targetIndex: number) {
+  if (mode.value !== 'creation') return
+  if (weaknessDraggingIndex.value === null) return
+  movePowerTag(weaknessDraggingIndex.value, targetIndex)
+  weaknessDraggingIndex.value = null
+  nextTick(()=> emit('resized'))
+}
 
 function toJson() {
   return {
@@ -147,6 +174,10 @@ defineExpose({
         :key="tag.get('uuid')"
         :ref="setPowerTagRef"
         :shard="tag"
+        draggable="true"
+        @dragstart="onPowerDragStart(index)"
+        @dragover.prevent
+        @drop="onPowerDrop(index)"
         @delete="removePowerTag(index)"
         @resized="emit('resized')"
       />
@@ -163,6 +194,10 @@ defineExpose({
         :key="tag.get('uuid')"
         :ref="setWeaknessTagRef"
         :shard="tag"
+        draggable="true"
+        @dragstart="onWeaknessDragStart(index)"
+        @dragover.prevent
+        @drop="onWeaknessDrop(index)"
         @delete="removeWeaknessTag(index)"
         @resized="emit('resized')"
       />

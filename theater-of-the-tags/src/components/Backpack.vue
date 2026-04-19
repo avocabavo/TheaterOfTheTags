@@ -6,7 +6,7 @@ import { useMode } from '../lib/modeStore';
 import { useYArray } from '../lib/yjsComposables';
 import type { TagNature, TagShard } from '../lib/schema';
 import { createTagShard } from '../lib/Tag';
-import { onBeforeUpdate, ref } from 'vue';
+import { nextTick, onBeforeUpdate, ref } from 'vue';
 
 const { mode } = useMode()
 
@@ -18,6 +18,7 @@ const {
   items: backpackTags,
   push: addBackpackTag,
   remove: removeBackpackTag,
+  move: moveBackpackTag,
 } = useYArray<TagShard>(
   props.shard,
   'backpack',
@@ -44,6 +45,21 @@ onBeforeUpdate(()=> {
   backpackTagRefs.value = []
 })
 
+const draggingIndex = ref<number | null>(null)
+
+function onDragStart(index: number) {
+  if (mode.value !== 'creation') return
+  draggingIndex.value = index
+}
+
+function onDrop(targetIndex: number) {
+  if (mode.value !== 'creation') return
+  if (draggingIndex.value === null) return
+  moveBackpackTag(draggingIndex.value, targetIndex)
+  draggingIndex.value = null
+  nextTick(()=> emit('resized'))
+}
+
 function toJson() {
   return backpackTags.value.map(t=> t.toJSON())
 }
@@ -66,6 +82,10 @@ defineExpose({
         :key="tag.get('uuid')"
         :ref="setBackpackTagRef"
         :shard="tag"
+        draggable="true"
+        @dragstart="onDragStart(index)"
+        @dragover.prevent
+        @drop="onDrop(index)"
         @delete="removeBackpackTag(index)"
         @resized="emit('resized')"
       />

@@ -6,12 +6,15 @@ import NavigationBar from './components/NavigationBar.vue'
 import StatusTag from './components/StatusTag.vue'
 import Tag from './components/Tag.vue'
 import { createStatusTagShard } from './lib/StatusTag'
-import { heroes, statusTags, tags, themes } from './lib/yjs'
+import { getProvider, heroes, statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
 import { createThemeShard } from './lib/Theme'
 import Theme from './components/Theme.vue'
 import { createHeroShard } from './lib/Hero'
 import Hero from './components/Hero.vue'
+
+const roomName = window.location.pathname ?? '/'
+getProvider(roomName)
 
 const newStatusName = ref('')
 const statusNames = ref<string[]>([])

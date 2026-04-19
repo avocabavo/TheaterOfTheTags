@@ -1,14 +1,10 @@
 import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
+import { WebrtcProvider } from 'y-webrtc'
 
 export const doc = new Y.Doc()
 
-export function getProvider(roomName: string): WebsocketProvider {
-  const provider = new WebsocketProvider(
-    'ws://localhost:1234',
-    roomName,
-    doc,
-  )
+export function getProvider(roomName: string): WebrtcProvider {
+  const provider = new WebrtcProvider(roomName, doc)
   return provider
 }
 

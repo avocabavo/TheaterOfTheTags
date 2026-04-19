@@ -3,13 +3,10 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
-import { useYArray, useYChildMap, useYMapField } from '../lib/yjsComposables';
-import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
+import { useYArray, useYMapField } from '../lib/yjsComposables';
+import type { HeroData, Might, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
-import { createTagShard } from '../lib/Tag';
-import Tag from './Tag.vue';
-import NewTag from './NewTag.vue';
 import Theme from './Theme.vue';
 import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
@@ -189,7 +186,7 @@ function print() {
 <style scoped>
 .hero {
   position: relative;
-  border: 3px solid violet;
+  border: 3px solid black;
   width: 100%;
   padding: 1rem;
 }

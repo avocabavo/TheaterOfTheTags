@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import YAML from 'yaml'
 import type { TagData, TagNature, TagShard } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
@@ -31,9 +32,14 @@ function toJson() {
     scratched: scratched.value,
   }
 }
+function toYaml() { return YAML.stringify(toJson(), null, 2) }
 
 function print() {
-  console.log(toJson())
+  console.log(toYaml())
+}
+
+async function copyToClipboard() {
+  await navigator.clipboard.writeText(toYaml())
 }
 
 defineExpose({
@@ -42,7 +48,7 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="['tag', nature]" @click="print">
+  <div :class="['tag', nature]" @click="copyToClipboard">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
 

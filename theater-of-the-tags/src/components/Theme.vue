@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
+import YAML from 'yaml'
 import Tag from './Tag.vue'
 import { createTagShard } from '../lib/Tag';
 import { mightOptions } from '../lib/schema';
@@ -119,7 +120,7 @@ function toJson() {
 }
 
 function print() {
-  console.log(toJson())
+  console.log(YAML.stringify(toJson(), null, 2))
 }
 
 defineExpose({

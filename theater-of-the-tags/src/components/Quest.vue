@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import * as Y from 'yjs'
+import YAML from 'yaml'
 import { useYMapField } from '../lib/yjsComposables'
 import { useMode } from '../lib/modeStore'
 import type { ThemeData } from '../lib/schema'
@@ -47,7 +48,7 @@ function toJson() {
 }
 
 function print() {
-  console.log(toJson())
+  console.log(YAML.stringify(toJson(), null, 2))
 }
 
 defineExpose({

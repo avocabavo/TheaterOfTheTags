@@ -20,7 +20,7 @@ const {
   remove: removeBackpackTag,
 } = useYArray<TagShard>(
   props.shard,
-  'backpackTags',
+  'backpack',
   ()=> emit('resized'),
   ()=> emit('resized')
 )
@@ -45,9 +45,7 @@ onBeforeUpdate(()=> {
 })
 
 function toJson() {
-  return {
-    backpackTags: backpackTags.value.map(t=> t.toJSON())
-  }
+  return backpackTags.value.map(t=> t.toJSON())
 }
 
 function print() {

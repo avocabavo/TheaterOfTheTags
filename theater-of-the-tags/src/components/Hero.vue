@@ -64,11 +64,7 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
-const backpackTagsRef = ref<typeof Backpack | null>()
-
-function setBackpackTagsRef(el: any) {
-  backpackTagsRef.value = el
-}
+const backpackRef = ref<typeof Backpack | null>()
 
 const themeRefs = ref<any[]>([])
 
@@ -112,7 +108,7 @@ function toJson() {
     ),
     playerName: playerName.value,
     quintessences: quintessences.value,
-    backpackTags: backpackTagsRef.value?.toJson(),
+    backpack: backpackRef.value?.toJson(),
     themes: themeRefs.value.map(t=> t.toJson())
   }
 }
@@ -168,7 +164,7 @@ function print() {
     <Backpack
       class="grid-item"
       :shard="shard"
-      :ref="setBackpackTagsRef"
+      ref="backpackRef"
       @resized="reflowMasonry"
     />
 

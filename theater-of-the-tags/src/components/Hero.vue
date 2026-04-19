@@ -3,7 +3,7 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
-import { useYArray, useYMapField } from '../lib/yjsComposables';
+import { useYArray, useYChildMap, useYMapField } from '../lib/yjsComposables';
 import type { HeroData, Might, TagNature, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
@@ -17,6 +17,7 @@ import CharacterName from './CharacterName.vue';
 import { useFieldCollector } from '../lib/util';
 import PlayerName from './PlayerName.vue';
 import Masonry from 'masonry-layout'
+import Backpack from './Backpack.vue';
 
 const { mode } = useMode()
 
@@ -37,12 +38,6 @@ const {
 } = useYArray<string>(props.shard, 'quintessences', reflowMasonry, reflowMasonry)
 
 const {
-  items: backpackTags,
-  push: addBackpackTag,
-  remove: removeBackpackTag,
-} = useYArray<TagShard>(props.shard, 'backpack', reflowMasonry, reflowMasonry)
-
-const {
   items: themes,
   push: addTheme,
   remove: removeTheme,
@@ -60,11 +55,6 @@ function createQuintessence() {
   newQuintessence.value = ''
 }
 
-function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
-  const newShard = createTagShard(data)
-  addBackpackTag(newShard)
-}
-
 function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTagName: string}) {
   console.log(`Handling theme creation for a ${data.might} - ${data.themeType} theme called ${data.primaryTagName}`)
   const newShard = createThemeShard(data)
@@ -74,10 +64,10 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
-const backpackTagRefs = ref<any[]>([])
+const backpackTagsRef = ref<typeof Backpack | null>()
 
-function setBackpackTagRef(el: any) {
-  if (el) backpackTagRefs.value.push(el)
+function setBackpackTagsRef(el: any) {
+  backpackTagsRef.value = el
 }
 
 const themeRefs = ref<any[]>([])
@@ -87,7 +77,6 @@ function setThemeRef(el: any) {
 }
 
 onBeforeUpdate(()=> {
-  backpackTagRefs.value = []
   themeRefs.value = []
 })
 
@@ -95,6 +84,7 @@ let masonry: Masonry | null = null
 
 onMounted(async ()=> {
   await nextTick()
+  if (!grid.value) return
   masonry = new Masonry(grid.value, {
     itemSelector: '.grid-item',
     columnWidth: '.grid-sizer',
@@ -122,7 +112,7 @@ function toJson() {
     ),
     playerName: playerName.value,
     quintessences: quintessences.value,
-    backpackTags: backpackTagRefs.value.map(t=> t.toJson()),
+    backpackTags: backpackTagsRef.value?.toJson(),
     themes: themeRefs.value.map(t=> t.toJson())
   }
 }
@@ -175,29 +165,12 @@ function print() {
       </div>
     </div>
 
-    <div class="backpack grid-item">
-      <p class="static-words">BACKPACK</p>
-      <div class="tag-section">
-        <Tag
-          v-for="(tag, index) in backpackTags"
-          :key="tag.get('uuid')"
-          :ref="setBackpackTagRef"
-          :shard="tag"
-          @delete="removeBackpackTag(index)"
-          @resized="reflowMasonry"
-        />
-        <NewTag
-          v-if="mode !== 'scene'"
-          nature="power"
-          @create="handleCreateTag"
-        />
-        <NewTag
-          v-if="mode !== 'scene'"
-          nature="weakness"
-          @create="handleCreateTag"
-        />
-      </div>
-    </div>
+    <Backpack
+      class="grid-item"
+      :shard="shard"
+      :ref="setBackpackTagsRef"
+      @resized="reflowMasonry"
+    />
 
     <Theme
       class="grid-item"
@@ -319,18 +292,5 @@ function print() {
 
 .quintessence-box p {
   margin: 0.25rem;
-}
-
-.backpack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  background: #444;
-
-  border: 0.25rem solid darkgray;
-
-  box-sizing: border-box;
-  width: 25rem;
 }
 </style>

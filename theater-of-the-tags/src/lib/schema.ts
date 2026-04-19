@@ -138,3 +138,6 @@ export type HeroData = {
   themes: Y.Array<ThemeShard>
 }
 export type HeroShard = Y.Map<any>
+
+export type BackpackData = Array<TagShard>
+export type BackpackShard = Y.Array<TagShard>

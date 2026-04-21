@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import type { TagNature } from '../lib/schema';
+import type { StatusNature, TagNature } from '../lib/schema';
+import NewStatusTag from './NewStatusTag.vue';
 import NewTag from './NewTag.vue';
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
   emit('createTag', data)
 }
 
+function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: boolean[]}) {
+  emit('createStatus', data)
+}
+
 const emit = defineEmits<{
   (e: 'createTag', payload: { name: string; nature: TagNature; scratched: boolean}): void
+  (e: 'createStatus', payload: { name: string; nature: StatusNature; tiers?: boolean[] }): void
 }>()
 
 </script>
@@ -22,6 +28,14 @@ const emit = defineEmits<{
       <NewTag
         nature="weakness"
         @create="handleCreateTag"
+      />
+      <NewStatusTag
+        nature="helpful"
+        @create="handleCreateStatus"
+      />
+      <NewStatusTag
+        nature="hindering"
+        @create="handleCreateStatus"
       />
     </div>
   </div>

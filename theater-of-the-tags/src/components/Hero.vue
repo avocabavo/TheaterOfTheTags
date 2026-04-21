@@ -18,6 +18,7 @@ import Backpack from './Backpack.vue';
 import LooseTag from './LooseTag.vue';
 import NewLooseTags from './NewLooseTags.vue';
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
+import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag';
 
 const { mode } = useMode()
 
@@ -69,6 +70,11 @@ const {
 
 function handleCreateLooseTag(data: TagCreationProps) {
   const newShard = createTagShard(data)
+  addLooseTag(newShard)
+}
+
+function handleCreateLooseStatus(data: StatusCreationProps) {
+  const newShard = createStatusTagShard(data)
   addLooseTag(newShard)
 }
 
@@ -215,7 +221,8 @@ function print() {
     <NewLooseTags
       class="grid-item"
       v-if="mode !== 'scene'"
-      @createTag="handleCreateLooseTag"
+      @create-tag="handleCreateLooseTag"
+      @create-status="handleCreateLooseStatus"
     />
   </div>
 </template>

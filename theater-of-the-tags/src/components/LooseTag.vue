@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import YAML from 'yaml'
-import type { TagShard } from '../lib/schema';
+import type { StatusTagShard, TagShard } from '../lib/schema';
 import Tag from './Tag.vue';
 import { ref } from 'vue';
+import StatusTag from './StatusTag.vue';
 
 const props = defineProps<{
-  shard: TagShard
+  shard: TagShard | StatusTagShard
 }>()
 
 const tagRef = ref<any>()
+const statusRef = ref<any>()
 
 const emit = defineEmits<{
   (e: 'resized'): void,
@@ -16,7 +18,11 @@ const emit = defineEmits<{
 }>()
 
 function toJson() {
-  return tagRef.value.toJson()
+  if (props.shard.has('tiers')) {
+    return statusRef.value.toJson()
+  } else {
+    return tagRef.value.toJson()
+  }
 }
 
 function print() {
@@ -30,8 +36,16 @@ defineExpose({toJson})
 <template>
   <div class="loose-tag" @click="print">
     <div class="tag-section">
-      <Tag
+      <StatusTag
+        v-if="shard.has('tiers')"
         :ref="tagRef"
+        :shard="shard"
+        @delete="emit('delete')"
+        @resized="emit('resized')"
+      />
+      <Tag
+        v-else
+        :ref="statusRef"
         :shard="shard"
         @delete="emit('delete')"
         @resized="emit('resized')"

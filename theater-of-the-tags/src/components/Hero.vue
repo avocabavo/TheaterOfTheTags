@@ -4,7 +4,7 @@ import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import type { HeroData, Might, ThemeShard, ThemeType } from '../lib/schema';
+import type { HeroData, Might, StatusTagShard, TagData, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
@@ -15,6 +15,9 @@ import { useFieldCollector } from '../lib/util';
 import PlayerName from './PlayerName.vue';
 import Masonry from 'masonry-layout'
 import Backpack from './Backpack.vue';
+import LooseTag from './LooseTag.vue';
+import NewLooseTags from './NewLooseTags.vue';
+import { createTagShard, type TagCreationProps } from '../lib/Tag';
 
 const { mode } = useMode()
 
@@ -56,7 +59,17 @@ function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTag
   console.log(`Handling theme creation for a ${data.might} - ${data.themeType} theme called ${data.primaryTagName}`)
   const newShard = createThemeShard(data)
   addTheme(newShard)
-  reflowMasonry()
+}
+
+const {
+  items: looseTags,
+  push: addLooseTag,
+  remove: removeLooseTag,
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry, reflowMasonry)
+
+function handleCreateLooseTag(data: TagCreationProps) {
+  const newShard = createTagShard(data)
+  addLooseTag(newShard)
 }
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
@@ -65,12 +78,19 @@ const backpackRef = ref<typeof Backpack | null>()
 
 const themeRefs = ref<any[]>([])
 
+const looseTagRefs = ref<any[]>([])
+
 function setThemeRef(el: any) {
   if (el) themeRefs.value.push(el)
 }
 
+function setLooseTagRef(el: any) {
+  if (el) looseTagRefs.value.push(el)
+}
+
 onBeforeUpdate(()=> {
   themeRefs.value = []
+  looseTagRefs.value = []
 })
 
 let masonry: Masonry | null = null
@@ -106,7 +126,8 @@ function toJson() {
     playerName: playerName.value,
     quintessences: quintessences.value,
     backpack: backpackRef.value?.toJson(),
-    themes: themeRefs.value.map(t=> t.toJson())
+    themes: themeRefs.value.map(t=> t.toJson()),
+    looseTags: looseTagRefs.value.map(lt=> lt.toJson()),
   }
 }
 
@@ -179,6 +200,22 @@ function print() {
       class="grid-item"
       v-if="mode !== 'scene'"
       @create="handleCreateTheme"
+    />
+
+    <LooseTag
+      class="grid-item"
+      v-for="(looseTag, index) in looseTags"
+      :key="looseTag.get('uuid')"
+      :ref="setLooseTagRef"
+      :shard="looseTag"
+      @delete="removeLooseTag(index)"
+      @resized="reflowMasonry"
+    />
+
+    <NewLooseTags
+      class="grid-item"
+      v-if="mode !== 'scene'"
+      @createTag="handleCreateLooseTag"
     />
   </div>
 </template>

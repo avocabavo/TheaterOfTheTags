@@ -1,0 +1,51 @@
+<script setup lang="ts">
+import type { TagNature } from '../lib/schema';
+import NewTag from './NewTag.vue';
+
+function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+  emit('createTag', data)
+}
+
+const emit = defineEmits<{
+  (e: 'createTag', payload: { name: string; nature: TagNature; scratched: boolean}): void
+}>()
+
+</script>
+
+<template>
+  <div class="new-loose-tags">
+    <div class="tag-section">
+      <NewTag
+        nature="primary"
+        @create="handleCreateTag"
+      />
+      <NewTag
+        nature="weakness"
+        @create="handleCreateTag"
+      />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.new-loose-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: #444;
+
+  border: 0.25rem solid black;
+
+  box-sizing: border-box;
+  width: 25rem;
+}
+
+.tag-section {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+</style>

@@ -22,7 +22,7 @@ const emit = defineEmits<{
   <div class="new-loose-tags">
     <div class="tag-section">
       <NewTag
-        nature="primary"
+        nature="power"
         @create="handleCreateTag"
       />
       <NewTag

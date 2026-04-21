@@ -5,6 +5,7 @@ import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
+import EditableText from './EditableText.vue';
 
 const { mode } = useMode()
 
@@ -47,6 +48,7 @@ function reduce(n: number = 1) {
 
 const emit = defineEmits<{
   (e: 'delete'): void
+  (e: 'resized'): void
 }>()
 
 function toJson() {
@@ -75,7 +77,15 @@ defineExpose({toJson})
 
     <p class="upper-half">
       <span class="tiny-static-words">TAG</span>
-      <span class="status-tag-name">{{ name }}</span>
+      <!-- <span class="status-tag-name">{{ name }}</span> -->
+      <EditableText
+        v-model="name"
+        tag="p"
+        class="status-tag-name"
+        placeholder="Enter Status Name..."
+        :disabled="mode !== 'creation'"
+        @resized="emit('resized')"
+      />
     </p>
     <div class="status-row">
       <button
@@ -103,6 +113,9 @@ defineExpose({toJson})
   margin: 0.5rem;
   padding: 0.5rem 1.5rem;
   border-radius: 9999rem;
+
+  width: 100%;
+  max-width: 25rem;
 
   display: flex;
   flex-direction: column;
@@ -162,7 +175,7 @@ defineExpose({toJson})
   color: inherit;
   cursor: pointer;
 
-  width: 2rem;
+  width: 2.25rem;
   height: 3.5rem;
 
   display: flex;

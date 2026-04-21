@@ -6,7 +6,7 @@ export const doc = new Y.Doc()
 const roomName = window.location.pathname ?? '/'
 
 export const provider = new WebsocketProvider(
-  'ws://localhost:1234',
+  import.meta.env.VITE_YJS_WS_URL,
   roomName,
   doc,
 )

@@ -38,14 +38,14 @@ defineExpose({toJson})
     <div class="tag-section">
       <StatusTag
         v-if="shard.has('tiers')"
-        :ref="tagRef"
+        ref="statusRef"
         :shard="shard"
         @delete="emit('delete')"
         @resized="emit('resized')"
       />
       <Tag
         v-else
-        :ref="statusRef"
+        ref="tagRef"
         :shard="shard"
         @delete="emit('delete')"
         @resized="emit('resized')"

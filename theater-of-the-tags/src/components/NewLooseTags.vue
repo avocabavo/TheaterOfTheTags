@@ -4,16 +4,16 @@ import NewStatusTag from './NewStatusTag.vue';
 import NewTag from './NewTag.vue';
 
 function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
-  emit('createTag', data)
+  emit('create-tag', data)
 }
 
 function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: boolean[]}) {
-  emit('createStatus', data)
+  emit('create-status', data)
 }
 
 const emit = defineEmits<{
-  (e: 'createTag', payload: { name: string; nature: TagNature; scratched: boolean}): void
-  (e: 'createStatus', payload: { name: string; nature: StatusNature; tiers?: boolean[] }): void
+  (e: 'create-tag', payload: { name: string; nature: TagNature; scratched: boolean}): void
+  (e: 'create-status', payload: { name: string; nature: StatusNature; tiers?: boolean[] }): void
 }>()
 
 </script>

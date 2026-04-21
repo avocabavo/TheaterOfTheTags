@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
+import YAML from 'yaml'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
@@ -47,6 +48,25 @@ function reduce(n: number = 1) {
 const emit = defineEmits<{
   (e: 'delete'): void
 }>()
+
+function toJson() {
+  return {
+    name: name.value,
+    nature: nature.value,
+    tiers: tiers.items.value
+  }
+}
+function toYaml() { return YAML.stringify(toJson(), null, 2)}
+
+function print() {
+  console.log(toYaml())
+}
+
+async function copyToClipboard() {
+  await navigator.clipboard.writeText(toYaml())
+}
+
+defineExpose({toJson})
 </script>
 
 <template>

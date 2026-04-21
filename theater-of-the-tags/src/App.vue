@@ -13,7 +13,6 @@ import Theme from './components/Theme.vue'
 import { createHeroShard } from './lib/Hero'
 import Hero from './components/Hero.vue'
 
-const roomName = window.location.pathname ?? '/'
 getProvider(roomName)
 
 const newStatusName = ref('')

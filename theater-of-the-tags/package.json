@@ -7,9 +7,6 @@
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:yjs\"",
     "dev:web": "vite",
     "dev:yjs": "PORT=1234 /usr/bin/y-websocket-server",
-    "demo": "vite --mode webrtc",
-    "build": "vue-tsc -b && vite build",
-    "build:webrtc": "vue-tsc -b && vite build --mode webrtc",
     "preview": "vite preview"
   },
   "dependencies": {

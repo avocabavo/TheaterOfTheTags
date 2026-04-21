@@ -3,14 +3,13 @@ import { WebsocketProvider } from 'y-websocket'
 
 export const doc = new Y.Doc()
 
-export function getProvider(roomName: string): WebsocketProvider {
-  const provider = new WebsocketProvider(
-    'ws://localhost:1234',
-    roomName,
-    doc,
-  )
-  return provider
-}
+const roomName = window.location.pathname ?? '/'
+
+export const provider = new WebsocketProvider(
+  'ws://localhost:1234',
+  roomName,
+  doc,
+)
 
 export const powerTags = doc.getMap<number>('powerTags')
 export const statusTags = doc.getMap<Y.Map<any>>('statusTags')

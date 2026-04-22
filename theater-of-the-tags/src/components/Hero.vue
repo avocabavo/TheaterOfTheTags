@@ -19,6 +19,7 @@ import LooseTag from './LooseTag.vue';
 import NewLooseTags from './NewLooseTags.vue';
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag';
+import EditableText from './EditableText.vue';
 
 const { mode } = useMode()
 
@@ -186,7 +187,9 @@ function print() {
       </div>
 
       <div class="quintessences">
-        <p class="static-words">QUINTESSENCES</p>
+        <div class="small static-words">
+          <p>QUINTESSENCES</p>
+        </div>
         <div
           class="quintessence-box"
           v-for="(quintessence, index) in quintessences"
@@ -197,6 +200,13 @@ function print() {
           @drop="onQuintessenceDrop(index)"
         >
           <DeleteButton v-if="mode === 'narrator'" @delete="removeQuintessence(index)" />
+          <!-- <EditableText
+            v-model="quintessence"
+            tag="p"
+            placeholder="Enter Quintessence"
+            :disabled="mode !== 'narrator'"
+            @resized="reflowMasonry"
+          /> -->
           <p>{{ quintessence }}</p>
         </div>
         <div class="quintessence-box">
@@ -362,5 +372,7 @@ function print() {
 
 .quintessence-box p {
   margin: 0.25rem;
+
+  color: black;
 }
 </style>

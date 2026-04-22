@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { ref, onMounted, onUnmounted, type Ref } from 'vue'
+import { ref, onMounted, onUnmounted, type Ref, shallowRef } from 'vue'
 import { getYArray } from './yHelpers'
 
 function cloneYMap(item: Y.Map<any>): Y.Map<any> {
@@ -151,8 +151,12 @@ export function useYChildMap(
   key: string,
   clearCallback?: (()=> any) | null,
   setCallback?: (()=> any) | null,
-) {
-  const child = ref<Y.Map<any> | null>(null)
+): {
+  child: Ref<Y.Map<any> | null>,
+  clear: ()=>void,
+  set: (newMap?: Y.Map<any>)=>void
+} {
+  const child = shallowRef<Y.Map<any> | null>(null)
 
   function sync() {
     let value = ymap.get(key)

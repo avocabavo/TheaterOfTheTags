@@ -12,7 +12,7 @@ import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
 import { nextTick, onBeforeUpdate, ref } from 'vue';
-import { useFieldCollector } from '../lib/util';
+import { useDragDrop, useFieldCollector } from '../lib/util';
 
 const { mode } = useMode()
 
@@ -78,32 +78,15 @@ onBeforeUpdate(()=> {
   weaknessTagRefs.value = []
 })
 
-const powerDraggingIndex = ref<number | null>(null)
-const weaknessDraggingIndex = ref<number | null>(null)
+const {
+  onDrag: onPowerDragStart,
+  onDrop: onPowerDrop,
+} = useDragDrop(movePowerTag, ()=> emit('resized'))
 
-function onPowerDragStart(index: number) {
-  if (mode.value !== 'creation') return
-  powerDraggingIndex.value = index
-}
-function onWeaknessDragStart(index: number) {
-  if (mode.value !== 'creation') return
-  weaknessDraggingIndex.value = index
-}
-
-function onPowerDrop(targetIndex: number) {
-  if (mode.value !== 'creation') return
-  if (powerDraggingIndex.value === null) return
-  movePowerTag(powerDraggingIndex.value, targetIndex)
-  powerDraggingIndex.value = null
-  nextTick(()=> emit('resized'))
-}
-function onWeaknessDrop(targetIndex: number) {
-  if (mode.value !== 'creation') return
-  if (weaknessDraggingIndex.value === null) return
-  moveWeaknessTag(weaknessDraggingIndex.value, targetIndex)
-  weaknessDraggingIndex.value = null
-  nextTick(()=> emit('resized'))
-}
+const {
+  onDrag: onWeaknessDragStart,
+  onDrop: onWeaknessDrop,
+} = useDragDrop(moveWeaknessTag, ()=> emit('resized'))
 
 function toJson() {
   return {

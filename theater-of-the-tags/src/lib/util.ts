@@ -35,17 +35,24 @@ export function useFieldCollector(): { fieldRefs: Ref<any[]>, setFieldRef: (el: 
   return { fieldRefs, setFieldRef }
 }
 
-export function useDragDrop(move: (from: number, to: number)=> void, dropCallback?: ()=>any): {
+const dragTracker: { draggee: Object | null } = { draggee: null }
+export function useDragDrop(
+  move: (from: number, to: number)=> void,
+  dropCallback?: ()=>any,
+): {
   draggingIndex: Ref<number | null>,
   onDrag: (index: number)=> void,
   onDrop: (targetIndex: number)=> void
 } {
+  const dragObject = {}
   const draggingIndex = ref<number | null>(null)
   function onDrag(index: number) {
     draggingIndex.value = index
+    dragTracker.draggee = dragObject
   }
   function onDrop(targetIndex: number) {
     if (draggingIndex.value === null) return
+    if (dragObject !== dragTracker.draggee) return
     move(draggingIndex.value, targetIndex)
     draggingIndex.value = null
     if (dropCallback) dropCallback()

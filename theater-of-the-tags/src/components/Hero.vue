@@ -11,7 +11,7 @@ import Theme from './Theme.vue';
 import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
 import CharacterName from './CharacterName.vue';
-import { useFieldCollector } from '../lib/util';
+import { useDragDrop, useFieldCollector } from '../lib/util';
 import PlayerName from './PlayerName.vue';
 import Masonry from 'masonry-layout'
 import Backpack from './Backpack.vue';
@@ -45,20 +45,10 @@ const {
   move: moveTheme,
 } = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry, reflowMasonry)
 
-const themeDraggingIndex = ref<number | null>(null)
-
-function onThemeDragStart(index: number) {
-  if (mode.value !== 'creation') return
-  themeDraggingIndex.value = index
-}
-
-function onThemeDrop(targetIndex: number) {
-  if (mode.value !== 'creation') return
-  if (themeDraggingIndex.value === null) return
-  moveTheme(themeDraggingIndex.value, targetIndex)
-  themeDraggingIndex.value = null
-  nextTick(reflowMasonry)
-}
+const {
+  onDrag: onThemeDragStart,
+  onDrop: onThemeDrop,
+} = useDragDrop(moveTheme, reflowMasonry)
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -82,7 +72,13 @@ const {
   items: looseTags,
   push: addLooseTag,
   remove: removeLooseTag,
+  move: moveLooseTag,
 } = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry, reflowMasonry)
+
+const {
+  onDrag: onLooseTagDrag,
+  onDrop: onLooseTagDrop,
+} = useDragDrop(moveLooseTag, reflowMasonry)
 
 function handleCreateLooseTag(data: TagCreationProps) {
   const newShard = createTagShard(data)
@@ -236,6 +232,10 @@ function print() {
       :key="looseTag.get('uuid')"
       :ref="setLooseTagRef"
       :shard="looseTag"
+      draggable="true"
+      @dragstart="onLooseTagDrag(index)"
+      @dragover.prevent
+      @drop="onLooseTagDrop(index)"
       @delete="removeLooseTag(index)"
       @resized="reflowMasonry"
     />

@@ -75,7 +75,7 @@ defineExpose({toJson})
   <div :class="['status-tag', nature]">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-    <p class="upper-half">
+    <div class="upper-half">
       <span class="tiny-static-words">TAG</span>
       <!-- <span class="status-tag-name">{{ name }}</span> -->
       <EditableText
@@ -86,7 +86,7 @@ defineExpose({toJson})
         :disabled="mode !== 'creation'"
         @resized="emit('resized')"
       />
-    </p>
+    </div>
     <div class="status-row">
       <button
         type="button"

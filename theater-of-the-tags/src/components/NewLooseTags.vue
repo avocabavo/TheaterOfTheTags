@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { StatusNature, TagNature } from '../lib/schema';
+import type { TagNature } from '../lib/schema';
+import type { StatusCreationProps } from '../lib/StatusTag';
 import NewStatusTag from './NewStatusTag.vue';
 import NewTag from './NewTag.vue';
 
@@ -7,7 +8,7 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   emit('create-tag', data)
 }
 
-function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: boolean[], initialTier?: number}) {
+function handleCreateStatus(data: StatusCreationProps) {
   console.log('handling create status in new loose tags')
   console.log(data)
   emit('create-status', data)
@@ -15,12 +16,7 @@ function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: b
 
 const emit = defineEmits<{
   (e: 'create-tag', payload: { name: string; nature: TagNature; scratched: boolean}): void
-  (e: 'create-status', payload: {
-    name: string;
-    nature: StatusNature;
-    tiers?: boolean[],
-    initialTier?: number
-  }): void
+  (e: 'create-status', payload: StatusCreationProps): void
 }>()
 
 </script>

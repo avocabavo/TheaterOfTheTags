@@ -126,8 +126,8 @@ export function useYArray<T>(
       if (item == null) {
         throw new Error(`Item at index ${from} is null or undefined`)
       }
-      const clone = item.clone()
       if (item instanceof Y.Map) {
+        const clone = item.clone()
         yarray.delete(from, 1)
         yarray.insert(to, [clone])
         return

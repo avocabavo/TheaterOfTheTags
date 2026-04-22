@@ -36,7 +36,13 @@ const {
   items: quintessences,
   push: pushQuintessence,
   remove: removeQuintessence,
+  move: moveQuintessence,
 } = useYArray<string>(props.shard, 'quintessences', reflowMasonry, reflowMasonry)
+
+const {
+  onDrag: onQuintessenceDrag,
+  onDrop: onQuintessenceDrop,
+} = useDragDrop(moveQuintessence, reflowMasonry)
 
 const {
   items: themes,
@@ -182,8 +188,13 @@ function print() {
       <div class="quintessences">
         <p class="static-words">QUINTESSENCES</p>
         <div
-          v-for="(quintessence, index) in quintessences"
           class="quintessence-box"
+          v-for="(quintessence, index) in quintessences"
+          :key="quintessence"
+          draggable="true"
+          @dragstart="onQuintessenceDrag(index)"
+          @dragover.prevent
+          @drop="onQuintessenceDrop(index)"
         >
           <DeleteButton v-if="mode === 'narrator'" @delete="removeQuintessence(index)" />
           <p>{{ quintessence }}</p>

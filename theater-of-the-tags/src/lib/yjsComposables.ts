@@ -2,6 +2,18 @@ import * as Y from 'yjs'
 import { ref, onMounted, onUnmounted, type Ref } from 'vue'
 import { getYArray } from './yHelpers'
 
+function cloneYMap(item: Y.Map<any>): Y.Map<any> {
+  const tempDoc = new Y.Doc()
+  const tempMap = tempDoc.getMap()
+
+  // copy content via update
+  const update = Y.encodeStateAsUpdate(item.doc!)
+  Y.applyUpdate(tempDoc, update)
+
+  // extract equivalent structure
+  return tempMap.clone() // or reconstruct from temp
+}
+
 export function useYMapField<T, K extends keyof T>(
   ymap: Y.Map<any>,
   key: K,
@@ -98,22 +110,41 @@ export function useYArray<T>(
 
   function move(from: number, to: number) {
     if (from === to) return
-    if (!yarray) return
+    if (yarray == null) return
 
     console.log(`moving from ${from} to ${to} within an array of length ${yarray.length}`)
 
-    const item = yarray.get(from)
-    if (item instanceof Y.Map) {
-      const itemClone = new Y.Map()
-      item.forEach((value, key)=> {
-        itemClone.set(key, value)
-      })
-      yarray.delete(from, 1)
-      yarray.insert(to, [itemClone])
-      return
+    // const item = yarray.get(from)
+    // if (item instanceof Y.Map) {
+    //   const itemClone = new Y.Map()
+    //   item.forEach((value, key)=> {
+    //     itemClone.set(key, value)
+    //   })
+    //   yarray.delete(from, 1)
+    //   yarray.insert(to, [itemClone])
+    //   return
+    // }
+    // yarray.delete(from, 1)
+    // yarray.insert(to, [item])
+
+    const doc = yarray.doc
+    if (doc == null) {
+      throw new Error('trying to rearrange a Y.Array that is not part of a Y.doc')
     }
-    yarray.delete(from, 1)
-    yarray.insert(to, [item])
+    doc.transact(()=> {
+      if (yarray == null) {
+        throw new Error('trying to rearrange a null Y.Array')
+      }
+      const item = yarray.get(from)
+      const clone = item.clone()
+      if (item instanceof Y.Map) {
+        yarray.delete(from, 1)
+        yarray.insert(to, [clone])
+        return
+      }
+      yarray.delete(from, 1)
+      yarray.insert(to, [item])
+    })
   }
 
   return {

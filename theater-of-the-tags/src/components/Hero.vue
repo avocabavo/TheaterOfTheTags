@@ -42,7 +42,23 @@ const {
   items: themes,
   push: addTheme,
   remove: removeTheme,
+  move: moveTheme,
 } = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry, reflowMasonry)
+
+const themeDraggingIndex = ref<number | null>(null)
+
+function onThemeDragStart(index: number) {
+  if (mode.value !== 'creation') return
+  themeDraggingIndex.value = index
+}
+
+function onThemeDrop(targetIndex: number) {
+  if (mode.value !== 'creation') return
+  if (themeDraggingIndex.value === null) return
+  moveTheme(themeDraggingIndex.value, targetIndex)
+  themeDraggingIndex.value = null
+  nextTick(reflowMasonry)
+}
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -200,6 +216,10 @@ function print() {
       :key="theme.get('uuid')"
       :ref="setThemeRef"
       :shard="theme"
+      draggable="true"
+      @dragstart="onThemeDragStart(index)"
+      @dragover.prevent
+      @drop="onThemeDrop(index)"
       @delete="removeTheme(index)"
       @resized="reflowMasonry"
     />

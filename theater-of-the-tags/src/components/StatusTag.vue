@@ -80,7 +80,7 @@ defineExpose({toJson})
       <!-- <span class="status-tag-name">{{ name }}</span> -->
       <EditableText
         v-model="name"
-        tag="p"
+        tag="h2"
         class="status-tag-name"
         placeholder="Enter Status Name..."
         :disabled="mode !== 'creation'"
@@ -112,7 +112,8 @@ defineExpose({toJson})
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem 1.5rem;
-  border-radius: 9999rem;
+  border: 0.2rem solid rgba(0, 0, 0, 0.5);
+  border-radius: 3.5rem / 50%;
 
   width: 100%;
   max-width: 25rem;
@@ -183,6 +184,10 @@ defineExpose({toJson})
   align-items: center;
 
   background: rgba(255, 255, 255, 0.75);
+}
+
+.hindering .tier-button {
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .tier-label {

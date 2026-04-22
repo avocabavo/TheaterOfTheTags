@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'create', payload: { name: string; nature: StatusNature; tiers?: boolean[] }): void
+  (e: 'create', payload: { name: string; nature: StatusNature; tiers?: boolean[]; initialTier?: number }): void
 }>()
 
 const name = ref('')
@@ -21,6 +21,7 @@ function createStatus() {
   emit('create', {
     name: trimmed,
     nature: props.nature,
+    initialTier: 2,
   })
 
   name.value = ''
@@ -52,7 +53,11 @@ const readyToCreate = computed(()=> name.value.trim())
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem 1.5rem;
+  border: 0.2rem solid rgba(0, 0, 0, 0.5);
   border-radius: 9999rem;
+
+  width: 100%;
+  max-width: 25rem;
 
   display: flex;
   flex-direction: column;
@@ -67,5 +72,18 @@ const readyToCreate = computed(()=> name.value.trim())
 .status-tag.hindering {
   background-color: darkred;
   color: white;
+}
+
+.new-status-tag {
+  opacity: 0.8;
+  border-style: dashed;
+}
+
+.status-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: larger;
+  background: rgba(255, 255, 255, 0.75);
+  color: black;
 }
 </style>

@@ -7,13 +7,20 @@ function handleCreateTag(data: {name: string, nature: TagNature, scratched: bool
   emit('create-tag', data)
 }
 
-function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: boolean[]}) {
+function handleCreateStatus(data: {name: string, nature: StatusNature, tiers?: boolean[], initialTier?: number}) {
+  console.log('handling create status in new loose tags')
+  console.log(data)
   emit('create-status', data)
 }
 
 const emit = defineEmits<{
   (e: 'create-tag', payload: { name: string; nature: TagNature; scratched: boolean}): void
-  (e: 'create-status', payload: { name: string; nature: StatusNature; tiers?: boolean[] }): void
+  (e: 'create-status', payload: {
+    name: string;
+    nature: StatusNature;
+    tiers?: boolean[],
+    initialTier?: number
+  }): void
 }>()
 
 </script>

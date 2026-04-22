@@ -77,7 +77,7 @@ defineExpose({
   padding: 0.5rem;
   margin: 0.5rem;
   border: 0.2rem solid rgba(0, 0, 0, 0.5);
-  border-radius: 999rem;
+  border-radius: 2rem / 50%;
 
   width: 100%;
   max-width: 25rem;

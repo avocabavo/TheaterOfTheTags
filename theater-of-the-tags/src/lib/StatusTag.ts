@@ -7,16 +7,27 @@ export type StatusCreationProps = {
   name: string
   nature?: StatusNature
   tiers?: Array<boolean>
+  initialTier?: number
 }
 export function createStatusTagShard({
   name,
   nature = 'helpful',
   tiers = Array(LIMIT).fill(false),
+  initialTier
 }: StatusCreationProps): StatusTagShard {
   const statusTagShard: StatusTagShard = new Y.Map()
 
   const yTiers = new Y.Array<boolean>()
   yTiers.push(tiers)
+
+  if (
+    initialTier != null
+    && initialTier >= 1
+    && initialTier <= tiers.length
+  ) {
+    yTiers.delete(initialTier-1, 1)
+    yTiers.insert(initialTier-1, [true])
+  }
 
   statusTagShard.set('uuid', crypto.randomUUID())
   statusTagShard.set('name', name)

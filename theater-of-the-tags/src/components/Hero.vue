@@ -4,7 +4,7 @@ import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import type { HeroData, Might, StatusTagShard, TagData, TagShard, ThemeShard, ThemeType } from '../lib/schema';
+import type { HeroData, Might, StatusTagShard, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
@@ -74,6 +74,8 @@ function handleCreateLooseTag(data: TagCreationProps) {
 }
 
 function handleCreateLooseStatus(data: StatusCreationProps) {
+  console.log('handling create loose status in hero')
+  console.log(data)
   const newShard = createStatusTagShard(data)
   addLooseTag(newShard)
 }

@@ -64,6 +64,7 @@ export function useYArray<T>(
   push: (item: T) => void
   remove: (index: number) => void
   move: (from: number, to: number)=> void
+  set: (index: number, value: T)=> void
   yarray: ()=> Y.Array<any> | null
 } {
   const items = ref<T[]>([]) as Ref<T[]>
@@ -137,11 +138,24 @@ export function useYArray<T>(
     })
   }
 
+  function set(index: number, value: T) {
+    if (!yarray) return
+    const doc = yarray.doc
+    if (doc == null) {
+      throw new Error('trying to set a vallue in a Y.Array that is not part of a Y.doc')
+    }
+    doc.transact(()=> {
+      yarray?.delete(index, 1)
+      yarray?.insert(index, [value])
+    })
+  }
+
   return {
     items,
     push,
     remove,
     move,
+    set,
     yarray: () => yarray
   }
 }

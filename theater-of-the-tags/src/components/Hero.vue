@@ -38,6 +38,7 @@ const {
   push: pushQuintessence,
   remove: removeQuintessence,
   move: moveQuintessence,
+  set: setQuintessence,
 } = useYArray<string>(props.shard, 'quintessences', reflowMasonry, reflowMasonry)
 
 const {
@@ -200,14 +201,12 @@ function print() {
           @drop="onQuintessenceDrop(index)"
         >
           <DeleteButton v-if="mode === 'narrator'" @delete="removeQuintessence(index)" />
-          <!-- <EditableText
-            v-model="quintessence"
+          <EditableText
+            :model-value="quintessence"
+            @update:modelValue="val => setQuintessence(index, val)"
             tag="p"
-            placeholder="Enter Quintessence"
             :disabled="mode !== 'narrator'"
-            @resized="reflowMasonry"
-          /> -->
-          <p>{{ quintessence }}</p>
+          />
         </div>
         <div class="quintessence-box">
           <input
@@ -370,7 +369,7 @@ function print() {
   gap: 0.5rem;
 }
 
-.quintessence-box p {
+.quintessence-box :deep(p) {
   margin: 0.25rem;
 
   color: black;

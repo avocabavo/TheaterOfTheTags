@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { TagNature } from '../lib/schema'
+import type { TagCreationProps } from '../lib/Tag';
 
 const props = defineProps<{
   nature: TagNature
 }>()
 
 const emit = defineEmits<{
-  (e: 'create', payload: { name: string; nature: TagNature; scratched: boolean}): void
+  (e: 'create', payload: TagCreationProps): void
 }>()
 
 const name = ref('')
@@ -29,7 +30,7 @@ const readyToCreate = computed(()=> name.value.trim())
 </script>
 
 <template>
-  <div :class="['tag', nature, 'new-tag']">
+  <div class="tag new-tag" :class="nature">
     <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
 
     <input

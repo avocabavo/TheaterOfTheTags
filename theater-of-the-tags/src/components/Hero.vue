@@ -4,7 +4,7 @@ import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import type { HeroData, Might, StatusTagShard, TagShard, ThemeShard, ThemeType } from '../lib/schema';
+import { RelationshipShard, type HeroData, type Might, type StatusTagShard, type TagShard, type ThemeShard, type ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
@@ -20,6 +20,9 @@ import NewLooseTags from './NewLooseTags.vue';
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag';
 import EditableText from './EditableText.vue';
+import { createRelationshipShard, type RelationshipCreationProps } from '../lib/Relationship';
+import Relationship from './Relationship.vue';
+import NewRelationship from './NewRelationship.vue';
 
 const { mode } = useMode()
 
@@ -29,9 +32,24 @@ const props = defineProps<{
 
 const grid = ref(null)
 
-const newQuintessence = ref('')
-
 const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
+
+const {
+  items: relationships,
+  push: pushRelationship,
+  remove: removeRelationship,
+  move: moveRelationship,
+} = useYArray<RelationshipShard>(props.shard, 'relationships', reflowMasonry)
+
+const {
+  onDrag: onRelationshipDrag,
+  onDrop: onRelationshipDrop,
+} = useDragDrop(moveRelationship, reflowMasonry)
+
+function handleCreateRelationship(data: RelationshipCreationProps) {
+  const newShard = createRelationshipShard(data)
+  pushRelationship(newShard)
+}
 
 const {
   items: quintessences,
@@ -40,6 +58,8 @@ const {
   move: moveQuintessence,
   set: setQuintessence,
 } = useYArray<string>(props.shard, 'quintessences', reflowMasonry)
+
+const newQuintessence = ref('')
 
 const {
   onDrag: onQuintessenceDrag,
@@ -102,11 +122,17 @@ function handleCreateLooseStatus(data: StatusCreationProps) {
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
+const relationshipRefs = ref<any[]>([])
+
 const backpackRef = ref<typeof Backpack | null>()
 
 const themeRefs = ref<any[]>([])
 
 const looseTagRefs = ref<any[]>([])
+
+function setRelationshipRef(el: any) {
+  if (el) relationshipRefs.value.push(el)
+}
 
 function setThemeRef(el: any) {
   if (el) themeRefs.value.push(el)
@@ -117,6 +143,7 @@ function setLooseTagRef(el: any) {
 }
 
 onBeforeUpdate(()=> {
+  relationshipRefs.value = []
   themeRefs.value = []
   looseTagRefs.value = []
 })
@@ -154,6 +181,7 @@ function toJson() {
       ...fieldRefs.value.map(b=> b.toJson())
     ),
     playerName: playerName.value,
+    relationships: relationshipRefs.value.map(r=> r.toJson()),
     quintessences: quintessences.value,
     backpack: backpackRef.value?.toJson(),
     themes: themeRefs.value.map(t=> t.toJson()),
@@ -176,6 +204,27 @@ function print() {
       </div>
       <CharacterName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
       <PlayerName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
+
+      <div class="tag-section">
+        <div class="small static-words">
+          <p>FELLOWSHIP RELATIONSHIP</p>
+        </div>
+        <Relationship
+          v-for="(relationship, index) in relationships"
+          :key="relationship.get('uuid')"
+          :shard="relationship"
+          draggable="true"
+          @dragstart="onRelationshipDrag(index)"
+          @dragover.prevent
+          @drop="onRelationshipDrop(index)"
+          @delete="removeRelationship(index)"
+          @resized="reflowMasonry"
+        />
+        <NewRelationship
+          v-if="mode !== 'scene'"
+          @create="handleCreateRelationship"
+        />
+      </div>
 
       <div class="tag-section">
         <div class="promise-holder">

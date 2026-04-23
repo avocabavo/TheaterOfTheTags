@@ -164,8 +164,7 @@ export function useYArray<T>(
 export function useYChildMap(
   ymap: Y.Map<any>,
   key: string,
-  clearCallback?: (()=> any) | null,
-  setCallback?: (()=> any) | null,
+  callbackOnChange?: (()=> any) | null,
 ): {
   child: Ref<Y.Map<any> | null>,
   clear: ()=>void,
@@ -199,7 +198,7 @@ export function useYChildMap(
     if (ymap.has(key)) {
       ymap.delete(key)
     }
-    if (clearCallback) clearCallback()
+    if (callbackOnChange) callbackOnChange()
   }
 
   function set(newMap?: Y.Map<any>) {
@@ -207,13 +206,13 @@ export function useYChildMap(
       if (ymap.has(key)) {
         ymap.delete(key)
       }
-      if (setCallback) setCallback()
+      if (callbackOnChange) callbackOnChange()
       return
     }
 
     if (newMap instanceof Y.Map) {
       ymap.set(key, newMap)
-      if (setCallback) setCallback()
+      if (callbackOnChange) callbackOnChange()
       return
     }
 

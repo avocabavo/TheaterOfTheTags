@@ -2,16 +2,16 @@
 import * as Y from 'yjs'
 import YAML from 'yaml'
 import Tag from './Tag.vue'
-import { createTagShard } from '../lib/Tag';
+import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { mightOptions } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
-import type { TagNature, TagShard, ThemeData } from '../lib/schema';
+import type { TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './/buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
-import { nextTick, onBeforeUpdate, ref } from 'vue';
+import { onBeforeUpdate, ref } from 'vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
 
 const { mode } = useMode()
@@ -24,15 +24,14 @@ const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
 
 const { items: powerTags, push: addPowerTag, remove: removePowerTag, move:movePowerTag } =
-  useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'), ()=> emit('resized'))
+  useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'))
 
 const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag, move: moveWeaknessTag } =
-  useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'), ()=> emit('resized'))
+  useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'))
 
 const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
   props.shard,
   'primaryTag',
-  ()=> emit('resized'),
   ()=> emit('resized'),
 )
 
@@ -41,7 +40,7 @@ const emit = defineEmits<{
   (e: 'resized'): void,
 }>()
 
-function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+function handleCreateTag(data: TagCreationProps) {
   const newShard = createTagShard(data)
 
   switch (data.nature) {

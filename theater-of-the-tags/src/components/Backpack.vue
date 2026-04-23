@@ -25,7 +25,6 @@ const {
   props.shard,
   'backpack',
   ()=> emit('resized'),
-  ()=> emit('resized')
 )
 
 const emit = defineEmits<{

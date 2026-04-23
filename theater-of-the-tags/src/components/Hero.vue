@@ -6,7 +6,7 @@ import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { HeroData, Might, StatusTagShard, TagShard, ThemeShard, ThemeType } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
-import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
 import { createThemeShard } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
@@ -39,7 +39,7 @@ const {
   remove: removeQuintessence,
   move: moveQuintessence,
   set: setQuintessence,
-} = useYArray<string>(props.shard, 'quintessences', reflowMasonry, reflowMasonry)
+} = useYArray<string>(props.shard, 'quintessences', reflowMasonry)
 
 const {
   onDrag: onQuintessenceDrag,
@@ -51,7 +51,7 @@ const {
   push: addTheme,
   remove: removeTheme,
   move: moveTheme,
-} = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry, reflowMasonry)
+} = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry)
 
 const {
   onDrag: onThemeDragStart,
@@ -81,7 +81,7 @@ const {
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry, reflowMasonry)
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry)
 
 const {
   onDrag: onLooseTagDrag,
@@ -144,6 +144,8 @@ watch(mode, async ()=> {
   await nextTick()
   reflowMasonry()
 })
+
+const readyToCreateQuintessence = computed(()=> newQuintessence.value.trim())
 
 function toJson() {
   return {
@@ -210,11 +212,17 @@ function print() {
         </div>
         <div class="quintessence-box">
           <input
+            class="quintessence-input"
             v-model="newQuintessence"
             @keydown.enter="createQuintessence"
             placeholder="new quintessence"
           >
-          <button @click="createQuintessence">+</button>
+          <button
+            type="button"
+            class="add-quintessence-button"
+            @click="createQuintessence"
+            :disabled="!readyToCreateQuintessence"
+          >+</button>
         </div>
       </div>
     </div>
@@ -371,7 +379,32 @@ function print() {
 
 .quintessence-box :deep(p) {
   margin: 0.25rem;
-
   color: black;
+}
+
+.quintessence-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: larger;
+  background: rgba(255, 255, 255, 0.75);
+  color: black;
+}
+
+.add-quintessence-button {
+  aspect-ratio: 1;
+  margin-top: 0;
+  margin-left: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999rem;
+  background: transparent;
+  color: black;
+  cursor: pointer;
+
+  font-size: large;
+}
+.add-quintessence-button:disabled {
+  color: gray;
+  cursor: not-allowed;
 }
 </style>

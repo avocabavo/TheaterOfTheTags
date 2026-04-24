@@ -87,3 +87,48 @@ server {
 ```
 
 That setup should connect standard-port traffic from the browser to the http and ws services started by npm.
+
+# Production
+
+Instead of starting both the ws and http services with vite, use pm2 to keep the ws service up, and compile the vite app into a SPA.
+
+Start yjs service in pm2
+```sh
+pm2 start ecosystem.config.js
+```
+
+Build the vite project and deploy
+```sh
+npm run build
+sudo mkdir -p /var/www/theater-of-the-tags
+sudo cp -r ./dist/* /var/www/theater-of-the-tags/
+```
+
+And use the following for the production nginx app
+
+```
+server {
+    listen 443 ssl http2;
+    server_name tags.avomath.com/;
+
+    ssl_certificate /etc/letsencrypt/live/tags.avomath.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tags.avomath.com/privkey.pem;
+
+    root /var/www/theater-of-the-tags;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /yjs/ {
+        proxy_pass http://localhost:1234/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host $host;
+    }
+}
+```

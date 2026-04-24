@@ -5,9 +5,9 @@ import Tag from './Tag.vue'
 import NewTag from './NewTag.vue';
 import { useMode } from '../lib/modeStore';
 import { useYArray } from '../lib/yjsComposables';
-import type { TagNature, TagShard } from '../lib/schema';
-import { createTagShard } from '../lib/Tag';
-import { nextTick, onBeforeUpdate, ref } from 'vue';
+import type { TagShard } from '../lib/schema';
+import { createTagShard, type TagCreationProps } from '../lib/Tag';
+import { onBeforeUpdate, ref } from 'vue';
 import { useDragDrop } from '../lib/util';
 
 const { mode } = useMode()
@@ -31,7 +31,7 @@ const emit = defineEmits<{
   (e: 'resized'): void,
 }>()
 
-function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+function handleCreateTag(data: TagCreationProps) {
   const newShard = createTagShard(data)
   addBackpackTag(newShard)
 }

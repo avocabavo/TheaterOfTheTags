@@ -26,7 +26,10 @@ export function createHeroShard({
   const themes = new Y.Array<ReturnType<typeof createHeroShard>>()
   heroShard.set('themes', themes)
 
-  const looseTags = new Y.Array<ReturnType<typeof createTagShard> | ReturnType<typeof createStatusTagShard>>()
+  const looseTags = new Y.Array<
+    ReturnType<typeof createTagShard>
+    | ReturnType<typeof createStatusTagShard>
+  >()
   heroShard.set('looseTags', looseTags)
 
   return heroShard

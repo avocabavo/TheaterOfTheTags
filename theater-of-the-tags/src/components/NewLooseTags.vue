@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import type { TagNature } from '../lib/schema';
 import type { StatusCreationProps } from '../lib/StatusTag';
+import type { TagCreationProps } from '../lib/Tag';
 import NewStatusTag from './NewStatusTag.vue';
 import NewTag from './NewTag.vue';
 
-function handleCreateTag(data: {name: string, nature: TagNature, scratched: boolean}) {
+function handleCreateTag(data: TagCreationProps) {
   emit('create-tag', data)
 }
 
 function handleCreateStatus(data: StatusCreationProps) {
-  console.log('handling create status in new loose tags')
-  console.log(data)
   emit('create-status', data)
 }
 
 const emit = defineEmits<{
-  (e: 'create-tag', payload: { name: string; nature: TagNature; scratched: boolean}): void
+  (e: 'create-tag', payload: TagCreationProps): void
   (e: 'create-status', payload: StatusCreationProps): void
 }>()
 

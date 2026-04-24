@@ -13,7 +13,7 @@ const props = defineProps<{
 }>()
 
 const companion = useYMapField<RelationshipData, 'companion'>(props.shard, 'companion', '')
-const { child: tag, clear: clearTag, set: setTag } = useYChildMap(
+const { child: tag } = useYChildMap(
   props.shard,
   'tag',
   ()=> emit('resized'),

@@ -26,8 +26,12 @@ const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType',
 const { items: powerTags, push: addPowerTag, remove: removePowerTag, move:movePowerTag } =
   useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'))
 
-const { items: weaknessTags, push: addWeaknessTag, remove: removeWeaknessTag, move: moveWeaknessTag } =
-  useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'))
+const {
+  items: weaknessTags,
+  push: addWeaknessTag,
+  remove: removeWeaknessTag,
+  move: moveWeaknessTag
+} = useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'))
 
 const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
   props.shard,

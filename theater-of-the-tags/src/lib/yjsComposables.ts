@@ -2,17 +2,6 @@ import * as Y from 'yjs'
 import { ref, onMounted, onUnmounted, type Ref, shallowRef } from 'vue'
 import { getYArray } from './yHelpers'
 
-function cloneYMap(item: Y.Map<any>): Y.Map<any> {
-  const tempDoc = new Y.Doc()
-  const tempMap = tempDoc.getMap()
-
-  // copy content via update
-  const update = Y.encodeStateAsUpdate(item.doc!)
-  Y.applyUpdate(tempDoc, update)
-
-  // extract equivalent structure
-  return tempMap.clone() // or reconstruct from temp
-}
 
 export function useYMapField<T, K extends keyof T>(
   ymap: Y.Map<any>,
@@ -111,8 +100,6 @@ export function useYArray<T>(
   function move(from: number, to: number) {
     if (from === to) return
     if (yarray == null) return
-
-    console.log(`moving from ${from} to ${to} within an array of length ${yarray.length}`)
 
     const doc = yarray.doc
     if (doc == null) {

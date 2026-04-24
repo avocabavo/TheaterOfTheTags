@@ -4,11 +4,17 @@ import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import { RelationshipShard, type HeroData, type Might, type StatusTagShard, type TagShard, type ThemeShard, type ThemeType } from '../lib/schema';
+import {
+  type RelationshipShard,
+  type HeroData,
+  type StatusTagShard,
+  type TagShard,
+  type ThemeShard,
+} from '../lib/schema';
 import Bubbles from './Bubbles.vue';
 import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
-import { createThemeShard } from '../lib/Theme';
+import { createThemeShard, type ThemeCreationProps } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
 import CharacterName from './CharacterName.vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
@@ -90,8 +96,7 @@ function createQuintessence() {
   newQuintessence.value = ''
 }
 
-function handleCreateTheme(data: {might: Might, themeType: ThemeType, primaryTagName: string}) {
-  console.log(`Handling theme creation for a ${data.might} - ${data.themeType} theme called ${data.primaryTagName}`)
+function handleCreateTheme(data: ThemeCreationProps) {
   const newShard = createThemeShard(data)
   addTheme(newShard)
 }
@@ -114,8 +119,6 @@ function handleCreateLooseTag(data: TagCreationProps) {
 }
 
 function handleCreateLooseStatus(data: StatusCreationProps) {
-  console.log('handling create loose status in hero')
-  console.log(data)
   const newShard = createStatusTagShard(data)
   addLooseTag(newShard)
 }
@@ -129,10 +132,6 @@ const backpackRef = ref<typeof Backpack | null>()
 const themeRefs = ref<any[]>([])
 
 const looseTagRefs = ref<any[]>([])
-
-function setRelationshipRef(el: any) {
-  if (el) relationshipRefs.value.push(el)
-}
 
 function setThemeRef(el: any) {
   if (el) themeRefs.value.push(el)

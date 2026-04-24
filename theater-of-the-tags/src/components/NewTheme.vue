@@ -6,11 +6,12 @@ import {
   // originThemeTypeOptions,
   // adventureThemeTypeOptions,
   // greatnessThemeTypeOptions,
-  themeTypeOptions
+  themeTypeOptions,
 } from '../lib/schema'
+import type { ThemeCreationProps } from '../lib/Theme';
 
 const emit = defineEmits<{
-  (e: 'create', payload: { might: Might, themeType: ThemeType, primaryTagName: string}): void
+  (e: 'create', payload: ThemeCreationProps): void
 }>()
 
 const might = ref<Might | ''>('')
@@ -22,8 +23,6 @@ function createTheme() {
   if (themeType.value == '') return
   const trimmedPrimaryTagName = primaryTagName.value.trim()
   if (!trimmedPrimaryTagName) return
-
-  console.log(`Creating ${might.value} - ${themeType.value} theme called ${trimmedPrimaryTagName}`)
 
   emit('create', {
     might: might.value,

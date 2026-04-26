@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type { TagNature } from '../lib/schema'
 import type { TagCreationProps } from '../lib/Tag';
 import newTagBlack from '../assets/new-tag-black.svg'
+import newTagWhite from '../assets/new-tag-white.svg'
 
 const props = defineProps<{
   nature: TagNature
@@ -47,7 +48,11 @@ const readyToCreate = computed(()=> name.value.trim())
       @click="createTag"
       :disabled="!readyToCreate"
     >
-      <img :src="newTagBlack" alt="new tag" class="icon">
+      <img
+        :src="nature === 'weakness' ? newTagWhite : newTagBlack"
+        alt="new tag"
+        class="icon"
+      >
     </button>
   </div>
 </template>

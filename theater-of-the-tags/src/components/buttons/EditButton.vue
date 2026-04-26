@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import quill from '../../assets/quill.svg'
+import quillWhite from '../../assets/quill-white.svg'
 
 const emit = defineEmits<{
   (e: 'edit'): void
@@ -12,7 +12,7 @@ const emit = defineEmits<{
     @click.stop="emit('edit')"
     aria-label="Edit Character Name"
   >
-    <img :src="quill" alt="edit" class="icon" />
+    <img :src="quillWhite" alt="edit" class="icon" />
   </button>
 </template>
 
@@ -38,6 +38,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
 .edit-button:hover {
@@ -49,8 +50,8 @@ const emit = defineEmits<{
 }
 
 .icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 </style>

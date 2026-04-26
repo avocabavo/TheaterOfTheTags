@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import bonfire from '../../assets/bonfire.svg'
+import bonfireWhite from '../../assets/bonfire-white.svg'
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -13,7 +13,7 @@ const emit = defineEmits<{
     @click.stop="emit('delete')"
     aria-label="Delete"
   >
-    <img :src="bonfire" alt="delete" class="icon">
+    <img :src="bonfireWhite" alt="delete" class="icon">
   </button>
 </template>
 
@@ -34,15 +34,12 @@ button {
 
   opacity: 0.6;
 
-  font-size: 1rem;
-  line-height: 1;
-  text-align: center;
-
   cursor: pointer;
 
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
 .delete-button:hover {
@@ -54,8 +51,8 @@ button {
 }
 
 .icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 </style>

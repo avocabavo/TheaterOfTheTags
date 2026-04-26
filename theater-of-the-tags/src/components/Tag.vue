@@ -5,6 +5,7 @@ import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import EditableText from './EditableText.vue';
+import scratchBlack from '../assets/scratch-black.svg'
 
 const { mode } = useMode()
 
@@ -67,7 +68,9 @@ defineExpose({
       type="button"
       class="scratch-button"
       @click="toggleScratched"
-    >///</button>
+    >
+      <img :src="scratchBlack" alt="scratch" class="icon"
+    </button>
   </div>
 </template>
 
@@ -143,21 +146,30 @@ defineExpose({
 }
 
 .scratch-button {
-  aspect-ratio: 1;
+  height: 3.25rem;
+  width: 3.25rem;
   margin-top: 0;
   margin-left: 0.5rem;
-  padding: 0.35rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 999rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
 
-  font-size: xx-large;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .weakness-indicator {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 </style>

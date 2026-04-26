@@ -204,10 +204,10 @@ function print() {
       <CharacterName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
       <PlayerName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
 
+      <div class="small static-words">
+        <p>FELLOWSHIP RELATIONSHIP</p>
+      </div>
       <div class="tag-section">
-        <div class="small static-words">
-          <p>FELLOWSHIP RELATIONSHIP</p>
-        </div>
         <Relationship
           v-for="(relationship, index) in relationships"
           :key="relationship.get('uuid')"
@@ -343,14 +343,14 @@ function print() {
 }
 
 .hero-card {
+  box-sizing: border-box;
+  border: 0.25rem solid #853;
+  width: 25rem;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  box-sizing: border-box;
-  border: 0.25rem solid #853;
-
-  width: 25rem;
 
   background: #fca;
 }
@@ -365,7 +365,9 @@ function print() {
 }
 
 .tag-section {
+  box-sizing: border-box;
   width: 100%;
+  padding: 0.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -390,13 +392,13 @@ function print() {
 
 .hero-card .static-words {
   background-color: #c65;
+  color: #433;
 }
 
 .static-words p {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
   font-size: x-large;
-  color: #433;
 }
 .static-words.small p {
   font-size: large;

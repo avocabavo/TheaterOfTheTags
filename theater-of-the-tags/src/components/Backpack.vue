@@ -66,7 +66,9 @@ defineExpose({
 
 <template>
   <div class="backpack">
-    <p class="static-words" @click="print">BACKPACK</p>
+    <div class="static-words">
+      <p @click="print">BACKPACK</p>
+    </div>
     <div class="tag-section">
       <Tag
         v-for="(tag, index) in backpackTags"
@@ -97,20 +99,39 @@ defineExpose({
 <style scoped>
 .backpack {
   box-sizing: border-box;
-  width: 25rem;
   border: 0.25rem solid darkgray;
-
-  padding: 0.5rem;
+  width: 25rem;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+
   background: #444;
 }
 
-.tag-section {
+.static-words {
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.backpack .static-words {
+  background-color: #222;
+}
+
+.static-words p {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  font-size: x-large;
+}
+
+.tag-section {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;

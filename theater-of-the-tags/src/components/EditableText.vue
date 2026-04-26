@@ -100,7 +100,7 @@ function onKeydown(e: KeyboardEvent) {
 .editable-text {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   gap: 0.5rem;
 }
 

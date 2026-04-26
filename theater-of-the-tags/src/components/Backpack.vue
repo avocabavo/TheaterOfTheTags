@@ -96,22 +96,23 @@ defineExpose({
 
 <style scoped>
 .backpack {
+  box-sizing: border-box;
+  width: 25rem;
+  border: 0.25rem solid darkgray;
+
+  padding: 0.5rem;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
   background: #444;
-
-  border: 0.25rem solid darkgray;
-
-  box-sizing: border-box;
-  width: 25rem;
 }
 
 .tag-section {
   width: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.4rem;
   align-items: center;
 }

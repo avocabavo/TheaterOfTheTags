@@ -69,13 +69,14 @@ defineExpose({
       class="scratch-button"
       @click="toggleScratched"
     >
-      <img :src="scratchBlack" alt="scratch" class="icon"
+      <img :src="scratchBlack" alt="scratch" class="icon">
     </button>
   </div>
 </template>
 
 <style scoped>
 .tag {
+  box-sizing: border-box;
   position: relative;
   padding: 0.5rem;
   margin: 0.5rem;
@@ -115,6 +116,11 @@ defineExpose({
   margin: 0.5rem 0.5rem 0.5rem 1rem;
 }
 
+.tag-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .tag-name.scratched {
   position: relative;
 }
@@ -146,12 +152,13 @@ defineExpose({
 }
 
 .scratch-button {
+  flex: 0 0 auto;
   height: 3.25rem;
   width: 3.25rem;
   margin-top: 0;
   margin-left: 0.5rem;
-  border: 1px solid currentColor;
-  border-radius: 999rem;
+  border: 0.25rem solid currentColor;
+  border-radius: 50%;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -163,6 +170,7 @@ defineExpose({
 }
 
 .weakness-indicator {
+  flex: 0 0 auto;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
 }

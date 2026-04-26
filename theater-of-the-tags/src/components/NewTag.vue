@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { TagNature } from '../lib/schema'
 import type { TagCreationProps } from '../lib/Tag';
+import newTagBlack from '../assets/new-tag-black.svg'
 
 const props = defineProps<{
   nature: TagNature
@@ -45,12 +46,15 @@ const readyToCreate = computed(()=> name.value.trim())
       class="add-button"
       @click="createTag"
       :disabled="!readyToCreate"
-    >+</button>
+    >
+      <img :src="newTagBlack" alt="new tag" class="icon">
+    </button>
   </div>
 </template>
 
 <style scoped>
 .tag {
+  box-sizing: border-box;
   position: relative;
   padding: 0.5rem;
   margin: 0.5rem;
@@ -121,21 +125,26 @@ const readyToCreate = computed(()=> name.value.trim())
 }
 
 .scratch-button, .add-button {
-  aspect-ratio: 1;
+  flex: 0 0 auto;
+  height: 3.25rem;
+  width: 3.25rem;
   margin-top: 0;
   margin-left: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid currentColor;
-  border-radius: 999rem;
+  border: 0.25rem solid currentColor;
+  border-radius: 50%;
   background: transparent;
   color: inherit;
   cursor: pointer;
 
-  font-size: xx-large;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .tag-name-input {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   box-sizing: border-box;
   font-size: larger;
   background: rgba(255, 255, 255, 0.75);
@@ -148,7 +157,14 @@ const readyToCreate = computed(()=> name.value.trim())
 }
 
 .weakness-indicator {
+  flex: 0 0 auto;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 </style>

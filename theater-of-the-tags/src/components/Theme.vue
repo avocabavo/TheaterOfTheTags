@@ -227,6 +227,7 @@ defineExpose({
   background-color: #dca;
 
   width: 25rem;
+  padding: 0.5rem;
 
   display: flex;
   flex-direction: column;
@@ -269,7 +270,7 @@ defineExpose({
 .tag-section {
   width: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.4rem;
   align-items: center;
 }

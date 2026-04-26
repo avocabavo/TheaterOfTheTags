@@ -49,7 +49,7 @@ defineExpose({
 </script>
 
 <template>
-  <div :class="['tag', nature]" @click="copyToClipboard">
+  <div class="tag" :class="nature" @click="copyToClipboard">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
 
@@ -100,6 +100,7 @@ defineExpose({
 .tag.power {
   background-color: gold;
   color: black;
+  border: 0.2rem solid rgba(0, 0, 0, 0.5);
 }
 
 .tag.power,
@@ -110,6 +111,7 @@ defineExpose({
 .tag.weakness {
   background-color: darkslateblue;
   color: white;
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .tag :deep(p) {

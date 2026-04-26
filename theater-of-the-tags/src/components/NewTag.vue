@@ -83,6 +83,7 @@ const readyToCreate = computed(()=> name.value.trim())
 .tag.power {
   background-color: gold;
   color: black;
+  border: 0.2rem solid rgba(0, 0, 0, 0.5);
 }
 
 .tag.power,
@@ -93,6 +94,7 @@ const readyToCreate = computed(()=> name.value.trim())
 .tag.weakness {
   background-color: darkslateblue;
   color: white;
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .tag-name {

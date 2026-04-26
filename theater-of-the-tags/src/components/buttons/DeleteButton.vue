@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import bonfire from '../../assets/bonfire.svg'
+
 const emit = defineEmits<{
   (e: 'delete'): void
 }>()
@@ -11,7 +13,7 @@ const emit = defineEmits<{
     @click.stop="emit('delete')"
     aria-label="Delete"
   >
-    ✖
+    <img :src="bonfire" alt="delete" class="icon">
   </button>
 </template>
 
@@ -49,5 +51,11 @@ button {
 
 .delete-button:active {
   transform: scale(1.2);
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  pointer-events: none;
 }
 </style>

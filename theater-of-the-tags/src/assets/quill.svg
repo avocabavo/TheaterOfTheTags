@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="36"
+   height="36"
+   viewBox="0 0 36 36"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (1:1.4.3+202512261035+0d15f75042)"
+   sodipodi:docname="quill.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="32"
+     inkscape:cx="-1.5"
+     inkscape:cy="17.765625"
+     inkscape:window-width="3840"
+     inkscape:window-height="2088"
+     inkscape:window-x="3840"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect20"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect18"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect16"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect14"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect12"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect10"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect8"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect6"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect3"
+       is_visible="true"
+       lpeversion="1" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4-7"
+       is_visible="true"
+       lpeversion="1" />
+  </defs>
+  <g
+     inkscape:label="Background"
+     inkscape:groupmode="layer"
+     id="layer1"
+     sodipodi:insensitive="true"
+     style="display:none">
+    <rect
+       style="fill:#000000;stroke-width:0.999997;stroke-linecap:round;stroke-miterlimit:10"
+       id="rect1"
+       x="0"
+       y="0"
+       width="36"
+       height="36" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="icon">
+    <circle
+       style="fill:#ffffff;fill-opacity:1;stroke-width:1;stroke-linecap:round;stroke-miterlimit:10"
+       id="path2"
+       cx="25.447046"
+       cy="27.609283"
+       r="0.8219676" />
+    <path
+       id="path3"
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.939745;stroke-linecap:round;stroke-miterlimit:10"
+       d="M 12.487183 11.025299 C 12.021885 11.072521 11.559043 11.143828 11.101497 11.236899 C 9.6162357 11.539023 8.1161243 12.108797 7.1060187 13.238825 C 6.6009659 13.803839 6.2350313 14.501205 6.1172355 15.249833 C 5.9994397 15.99846 6.1399773 16.796956 6.5590565 17.428377 C 6.9615598 18.034823 7.5979084 18.461317 8.2837978 18.704918 C 8.9696872 18.948519 9.7057525 19.019202 10.433614 19.017647 C 11.889338 19.014547 13.364313 18.733247 14.787566 19.039013 C 15.67285 19.229204 16.493978 19.638366 17.348278 19.938483 C 17.775428 20.088542 18.213471 20.212135 18.66318 20.264455 C 19.112889 20.316769 19.57627 20.296437 20.009282 20.164242 C 20.699719 19.953458 21.294951 19.450711 21.619201 18.805734 C 21.130885 18.349058 20.605055 17.933657 20.047814 17.564214 C 17.969785 16.18651 15.45589 15.476902 12.964204 15.565072 C 13.009779 15.552035 13.054533 15.538605 13.1003 15.526272 C 12.985999 15.062741 12.740559 14.651422 12.382554 14.32486 C 11.709815 13.711121 10.636422 13.416163 9.4671013 13.524889 C 10.483079 13.309855 11.485104 13.359584 12.284986 13.665278 C 13.120612 13.984632 13.729622 14.581811 13.985902 15.333969 C 14.332003 15.275678 14.680688 15.236697 15.031049 15.216632 C 15.006103 14.713744 14.839879 14.220984 14.544116 13.777803 C 14.025366 13.000491 13.101924 12.379481 11.976429 12.050121 C 13.35935 12.073448 14.653753 12.587079 15.362475 13.39157 C 15.827644 13.919598 16.043907 14.562998 15.973581 15.208304 C 16.39265 15.225403 16.810051 15.269992 17.223262 15.341972 C 17.252748 14.849187 17.191404 14.342278 17.040853 13.868184 C 16.755764 12.970396 16.146961 12.200789 15.405331 11.799129 C 16.30731 11.958918 17.165047 12.599804 17.688287 13.506076 C 18.045011 14.123936 18.248307 14.858064 18.265131 15.585011 C 18.624961 15.691225 18.977341 15.818488 19.322079 15.966726 C 19.412289 15.763866 19.479493 15.553202 19.521381 15.337636 C 19.656743 14.641042 19.523925 13.902927 19.150014 13.280668 C 19.862982 13.78064 20.317508 14.570967 20.363042 15.386432 C 20.382292 15.731183 20.331117 16.079172 20.213696 16.407036 C 21.047143 16.872966 21.809893 17.46194 22.467775 18.154048 C 23.733352 19.485465 24.612578 21.239116 24.666368 23.075271 C 24.686932 23.777243 24.587888 24.481492 24.375095 25.15075 C 24.838241 25.222973 25.276119 25.446517 25.608215 25.777323 C 25.881272 26.049319 26.083267 26.391738 26.186205 26.763149 C 26.289145 27.13456 26.293828 27.532606 26.199738 27.906357 C 26.655794 26.75054 26.868403 25.500584 26.820423 24.258973 C 26.712324 21.461826 25.213085 18.751715 22.900386 17.174647 C 22.600514 16.090033 22.067658 15.071796 21.34805 14.206651 C 20.153718 12.770772 18.461004 11.784831 16.654035 11.312561 C 15.298808 10.958357 13.883075 10.883632 12.487183 11.025299 z "
+       transform="matrix(1.0578833,0.11503011,-0.11503011,1.0578833,1.6129468,-4.453397)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="guide"
+     sodipodi:insensitive="true"
+     style="display:none">
+    <circle
+       style="fill:#2baeb0;fill-opacity:0.327296;stroke-width:0.999997;stroke-linecap:round;stroke-miterlimit:10"
+       id="path1"
+       cx="18"
+       cy="18"
+       r="14" />
+  </g>
+</svg>

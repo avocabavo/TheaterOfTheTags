@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import quill from '../../assets/quill.svg'
+
 const emit = defineEmits<{
   (e: 'edit'): void
 }>()
@@ -10,7 +12,7 @@ const emit = defineEmits<{
     @click.stop="emit('edit')"
     aria-label="Edit Character Name"
   >
-    ✎
+    <img :src="quill" alt="edit" class="icon" />
   </button>
 </template>
 
@@ -31,7 +33,6 @@ const emit = defineEmits<{
 
   cursor: pointer;
 
-  font-size: 1.5rem;
   opacity: 0.6;
 
   display: flex;
@@ -45,5 +46,11 @@ const emit = defineEmits<{
 
 .edit-button:active {
   transform: scale(1.2);
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  pointer-events: none;
 }
 </style>

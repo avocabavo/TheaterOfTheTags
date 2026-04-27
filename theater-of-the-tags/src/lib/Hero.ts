@@ -15,6 +15,8 @@ export function createHeroShard({
   heroShard.set('uuid', crypto.randomUUID())
   heroShard.set('characterName', characterName)
   heroShard.set('playerName', playerName)
+  const relationshipTags = new Y.Array<ReturnType<typeof createTagShard>>()
+  heroShard.set('relationships', relationshipTags)
   heroShard.set('promise', 0)
   heroShard.set('quintessences', new Y.Array<string>())
 

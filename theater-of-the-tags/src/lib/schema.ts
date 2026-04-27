@@ -87,13 +87,6 @@ export const TAG_KEYS = {
   scratched: 'scratched',
 } as const
 
-export type RelationshipData = {
-  uuid: string
-  companion: string
-  tag: TagData
-}
-export type RelationshipShard = Y.Map<any>
-
 export type StatusTagData = {
   uuid: string
   name: string
@@ -138,10 +131,10 @@ export type HeroData = {
   uuid: string
   characterName: string
   playerName: string
-  relationships: Y.Array<RelationshipShard>
+  relationships: Y.Array<TagShard>
   promise: number
   quintessences: Y.Array<string>
-  backpack: Y.Array<string>
+  backpack: Y.Array<TagShard>
   notes: string
   themes: Y.Array<ThemeShard>
 }

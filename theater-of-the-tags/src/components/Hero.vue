@@ -5,7 +5,6 @@ import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import {
-  type RelationshipShard,
   type HeroData,
   type StatusTagShard,
   type TagShard,
@@ -26,9 +25,8 @@ import NewLooseTags from './NewLooseTags.vue';
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag';
 import EditableText from './EditableText.vue';
-import { createRelationshipShard, type RelationshipCreationProps } from '../lib/Relationship';
-import Relationship from './Relationship.vue';
-import NewRelationship from './NewRelationship.vue';
+import Tag from './Tag.vue'
+import NewTag from './NewTag.vue';
 
 const { mode } = useMode()
 
@@ -45,16 +43,22 @@ const {
   push: pushRelationship,
   remove: removeRelationship,
   move: moveRelationship,
-} = useYArray<RelationshipShard>(props.shard, 'relationships', reflowMasonry)
+} = useYArray<TagShard>(props.shard, 'relationships', reflowMasonry)
 
 const {
   onDrag: onRelationshipDrag,
   onDrop: onRelationshipDrop,
 } = useDragDrop(moveRelationship, reflowMasonry)
 
-function handleCreateRelationship(data: RelationshipCreationProps) {
-  const newShard = createRelationshipShard(data)
+function handleCreateRelationship(data: TagCreationProps) {
+  const newShard = createTagShard(data)
   pushRelationship(newShard)
+}
+
+const relationshipTagRefs = ref<any[]>([])
+
+function setRelationshipTagRef(el: any) {
+  if (el) relationshipTagRefs.value.push(el)
 }
 
 const {
@@ -125,8 +129,6 @@ function handleCreateLooseStatus(data: StatusCreationProps) {
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
-const relationshipRefs = ref<any[]>([])
-
 const backpackRef = ref<typeof Backpack | null>()
 
 const themeRefs = ref<any[]>([])
@@ -142,7 +144,7 @@ function setLooseTagRef(el: any) {
 }
 
 onBeforeUpdate(()=> {
-  relationshipRefs.value = []
+  relationshipTagRefs.value = []
   themeRefs.value = []
   looseTagRefs.value = []
 })
@@ -180,7 +182,7 @@ function toJson() {
       ...fieldRefs.value.map(b=> b.toJson())
     ),
     playerName: playerName.value,
-    relationships: relationshipRefs.value.map(r=> r.toJson()),
+    relationships: relationshipTagRefs.value.map(r=> r.toJson()),
     quintessences: quintessences.value,
     backpack: backpackRef.value?.toJson(),
     themes: themeRefs.value.map(t=> t.toJson()),
@@ -208,9 +210,10 @@ function print() {
         <p>FELLOWSHIP RELATIONSHIP</p>
       </div>
       <div class="tag-section">
-        <Relationship
+        <Tag
           v-for="(relationship, index) in relationships"
           :key="relationship.get('uuid')"
+          :ref="setRelationshipTagRef"
           :shard="relationship"
           draggable="true"
           @dragstart="onRelationshipDrag(index)"
@@ -219,8 +222,14 @@ function print() {
           @delete="removeRelationship(index)"
           @resized="reflowMasonry"
         />
-        <NewRelationship
+        <NewTag
           v-if="mode !== 'scene'"
+          nature="power"
+          @create="handleCreateRelationship"
+        />
+        <NewTag
+          v-if="mode !== 'scene'"
+          nature="weakness"
           @create="handleCreateRelationship"
         />
       </div>
@@ -369,7 +378,7 @@ function print() {
   width: 100%;
   padding: 0.5rem;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.4rem;
   align-items: center;
 }

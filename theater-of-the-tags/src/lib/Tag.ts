@@ -2,6 +2,8 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import { type TagNature, type TagShard } from './schema'
 
+const tagNatures: TagNature[] = ['primary', 'power', 'weakness']
+
 export type TagCreationProps = {
   name: string
   nature?: TagNature
@@ -22,6 +24,18 @@ export function createTagShard({
   return tagShard
 }
 
+function isTagNature(value: unknown): value is TagNature {
+  return tagNatures.includes(value as TagNature)
+}
+
+export function createTagShardFromData(data: any, natureOverride?: TagNature): TagShard {
+  return createTagShard({
+    name: typeof data?.name === 'string' ? data.name : '',
+    nature: natureOverride ?? (isTagNature(data?.nature) ? data.nature : 'power'),
+    scratched: Boolean(data?.scratched),
+  })
+}
+
 export function createTagShardFromYaml(yamlText: string): TagShard {
   let data: any
 
@@ -35,9 +49,5 @@ export function createTagShardFromYaml(yamlText: string): TagShard {
     throw new Error('Invalid tag data')
   }
 
-  return createTagShard({
-    name: data.name ?? '',
-    nature: data.nature ?? 'power',
-    scratched: data.scratched ?? false,
-  })
+  return createTagShardFromData(data)
 }

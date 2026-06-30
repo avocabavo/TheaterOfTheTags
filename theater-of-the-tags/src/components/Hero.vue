@@ -106,6 +106,10 @@ function handleCreateTheme(data: ThemeCreationProps) {
   addTheme(newShard)
 }
 
+function handleImportTheme(themeShard: ThemeShard) {
+  addTheme(themeShard)
+}
+
 const {
   items: looseTags,
   push: addLooseTag,
@@ -323,6 +327,7 @@ async function copyToClipboard() {
       class="grid-item"
       v-if="mode !== 'scene'"
       @create="handleCreateTheme"
+      @import="handleImportTheme"
     />
 
     <LooseTag

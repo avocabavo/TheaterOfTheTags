@@ -13,6 +13,7 @@ import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
 import { onBeforeUpdate, ref } from 'vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
+import toYamlBlack from '../assets/to-yaml-black.svg'
 
 const { mode } = useMode()
 
@@ -105,8 +106,12 @@ function toJson() {
   }
 }
 
-function print() {
-  console.log(YAML.stringify(toJson(), null, 2))
+function toYaml() {
+  return YAML.stringify(toJson(), null, 2)
+}
+
+async function copyToClipboard() {
+  await navigator.clipboard.writeText(toYaml())
 }
 
 defineExpose({
@@ -118,7 +123,18 @@ defineExpose({
   <div class="theme">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-    <p class="static-words" @click="print">THEME CARD</p>
+    <div class="static-words">
+      <p>THEME CARD</p>
+      <button
+        type="button"
+        class="copy-button"
+        aria-label="Copy theme card YAML"
+        title="Copy theme card YAML"
+        @click="copyToClipboard"
+      >
+        <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
+      </button>
+    </div>
     <div class="might">
       <label
         v-for="option in mightOptions"
@@ -236,10 +252,41 @@ defineExpose({
 }
 
 .static-words {
+  color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.static-words p {
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
   font-size: x-large;
-  color: gray;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0.2rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.copy-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .might {

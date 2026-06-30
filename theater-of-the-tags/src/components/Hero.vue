@@ -27,6 +27,7 @@ import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag
 import EditableText from './EditableText.vue';
 import Tag from './Tag.vue'
 import NewTag from './NewTag.vue';
+import toYamlBlack from '../assets/to-yaml-black.svg'
 
 const { mode } = useMode()
 
@@ -190,8 +191,12 @@ function toJson() {
   }
 }
 
-function print() {
-  console.log(YAML.stringify(toJson(), null, 2))
+function toYaml() {
+  return YAML.stringify(toJson(), null, 2)
+}
+
+async function copyToClipboard() {
+  await navigator.clipboard.writeText(toYaml())
 }
 </script>
 
@@ -201,7 +206,16 @@ function print() {
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
       <div class="static-words">
-        <p @click="print">HERO CARD</p>
+        <p>HERO CARD</p>
+        <button
+          type="button"
+          class="copy-button"
+          aria-label="Copy hero card YAML"
+          title="Copy hero card YAML"
+          @click="copyToClipboard"
+        >
+          <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
+        </button>
       </div>
       <CharacterName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
       <PlayerName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
@@ -397,7 +411,8 @@ function print() {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 0.35rem;
 }
 
 .hero-card .static-words {
@@ -412,6 +427,30 @@ function print() {
 }
 .static-words.small p {
   font-size: large;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0.2rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.copy-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .quintessences {

@@ -25,6 +25,54 @@ const themeNames = ref<string[]>([])
 const newHeroCharacterName = ref('')
 const newHeroPlayerName = ref('')
 const heroNames = ref<string[]>([])
+const showHeroForm = ref(false)
+
+const randomHeroFirstNameSyllables = [
+  'ah',
+  'ast', 'ra',
+  'bri', 'ar',
+  'cor', 'in',
+  'del', 'fab',
+  'gal', 'en',
+  'hol', 'lis',
+  'ilya', 'jun',
+  'kes', 'trel',
+  'lio', 'pam',
+  'jim', 'ril',
+  'daz', 'vue',
+  'gorm', 'bus',
+  'bla', 'ko',
+  'ro', 'ni',
+  'foo', 'bar',
+  'baz', 'ama',
+]
+
+const randomHeroLastNameParts = [
+  'ash', 'fall',
+  'bright', 'vale',
+  'cinder', 'wake',
+  'dawn', 'mere',
+  'ember', 'ly',
+  'frost', 'glen',
+  'gold', 'river',
+  'hearth', 'ward',
+  'iron', 'vale',
+  'moon', 'well',
+  'storm', 'holt',
+  'wilde', 'rose',
+  'sage', 'smith',
+  'tron', 'gofer',
+  'trax', 'man',
+  'son', 'berg',
+  'zorel', 'march',
+  'haven', 'amper',
+  'wood', 'fish',
+  'maker', 'beech',
+  'clog', 'glow',
+  'fever', 'gale',
+  'zephyr', 'camp',
+  'lion', 'find',
+]
 
 function syncStatusNames() {
   statusNames.value = Array.from(statusTags.keys())
@@ -148,6 +196,59 @@ function addHero() {
   newHeroPlayerName.value = ''
 }
 
+function openHeroForm() {
+  showHeroForm.value = true
+}
+
+function closeHeroForm() {
+  showHeroForm.value = false
+}
+
+function createHeroFromForm() {
+  const characterName = newHeroCharacterName.value.trim()
+  const playerName = newHeroPlayerName.value.trim()
+  if (!characterName || !playerName || heroes.has(characterName)) return
+
+  addHero()
+  closeHeroForm()
+}
+
+function generateRandomHeroName() {
+  const firstNameSyllableCount = Math.floor(Math.random() * 3) + Math.floor(Math.random() * 3) + 1
+  const firstNameSyllables = [...randomHeroFirstNameSyllables]
+  const firstNameParts: string[] = []
+
+  for (let i = 0; i < firstNameSyllableCount; i += 1) {
+    const index = Math.floor(Math.random() * firstNameSyllables.length)
+    firstNameParts.push(firstNameSyllables[index])
+    firstNameSyllables[index] = firstNameSyllables[firstNameSyllables.length - 1]
+    firstNameSyllables.pop()
+  }
+
+  const lastNameParts = [...new Set(randomHeroLastNameParts)]
+  const lastName: string[] = []
+
+  for (let i = 0; i < 2; i += 1) {
+    const index = Math.floor(Math.random() * lastNameParts.length)
+    lastName.push(lastNameParts[index])
+    lastNameParts[index] = lastNameParts[lastNameParts.length - 1]
+    lastNameParts.pop()
+  }
+
+  const firstName = firstNameParts.join('')
+  const familyName = lastName.join('')
+  const baseName = `${firstName[0].toUpperCase()}${firstName.slice(1)} ${familyName[0].toUpperCase()}${familyName.slice(1)}`
+  let characterName = baseName
+  let suffix = 2
+
+  while (heroes.has(characterName)) {
+    characterName = `${baseName} ${suffix}`
+    suffix += 1
+  }
+
+  newHeroCharacterName.value = characterName
+}
+
 function deleteStatus(name: string) {
   statusTags.delete(name)
 }
@@ -221,17 +322,49 @@ function deleteHero(characterName: string) {
     </div>
 
     <div class="toolbar">
-      <input
-        v-model="newHeroCharacterName"
-        placeHodlter="Enter character name"
-        @keyup.enter="addHero"
-      />
-      <input
-        v-model="newHeroPlayerName"
-        placeHolder="Enter player name"
-        @keyup.enter="addHero"
-      />
-      <button @click="addHero">Add Hero</button>
+      <button type="button" @click="openHeroForm">Add Hero</button>
+    </div>
+
+    <div
+      v-if="showHeroForm"
+      class="modal-backdrop"
+      @click.self="closeHeroForm"
+    >
+      <form class="hero-form-modal" @submit.prevent="createHeroFromForm">
+        <h2>Create Hero</h2>
+
+        <label class="form-field">
+          <span>Character Name</span>
+          <div class="character-name-row">
+            <input
+              v-model="newHeroCharacterName"
+              placeholder="Enter character name"
+            />
+            <button
+              type="button"
+              class="secondary-button"
+              @click="generateRandomHeroName"
+            >
+              Random
+            </button>
+          </div>
+        </label>
+
+        <label class="form-field">
+          <span>Player Name</span>
+          <input
+            v-model="newHeroPlayerName"
+            placeholder="Enter player name"
+          />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeHeroForm">
+            Cancel
+          </button>
+          <button type="submit">Create Hero</button>
+        </div>
+      </form>
     </div>
     <div class="tag-holder">
       <Hero
@@ -249,5 +382,92 @@ function deleteHero(characterName: string) {
 .tag-holder {
   display: flex;
   flex-wrap: wrap;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.hero-form-modal {
+  box-sizing: border-box;
+  width: min(100%, 28rem);
+  padding: 1rem;
+  border: 0.25rem solid #853;
+  border-radius: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  background: #fca;
+  color: #433;
+}
+
+.hero-form-modal h2 {
+  margin: 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  font-weight: 600;
+}
+
+.form-field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+  border: 0.15rem solid #853;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+
+.character-name-row,
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.character-name-row input {
+  flex: 1 1 auto;
+}
+
+.modal-actions {
+  justify-content: flex-end;
+}
+
+.hero-form-modal button {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.75rem;
+  border: 0.15rem solid #853;
+  border-radius: 0.35rem;
+  background: #c65;
+  color: #433;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hero-form-modal .secondary-button {
+  background: #f7d5b7;
+}
+
+@media (max-width: 32rem) {
+  .character-name-row,
+  .modal-actions {
+    flex-direction: column;
+  }
 }
 </style>

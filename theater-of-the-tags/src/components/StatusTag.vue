@@ -152,9 +152,8 @@ defineExpose({toJson})
   font-size: larger;
 }
 
-.status-tag-name h2 {
-  margin-top: 0.3rem;
-  margin-bottom: 0.6rem;
+.status-tag-name :deep(.editable-component) {
+  margin: 0.3rem 0 0.6rem 0;
 }
 
 .status-row {

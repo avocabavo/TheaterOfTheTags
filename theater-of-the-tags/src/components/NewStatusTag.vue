@@ -64,6 +64,7 @@ const readyToCreate = computed(()=> name.value.trim())
 
 <style scoped>
 .status-tag {
+  box-sizing: border-box;
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem 1.5rem;

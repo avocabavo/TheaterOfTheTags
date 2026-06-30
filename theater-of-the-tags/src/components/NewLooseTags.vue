@@ -57,9 +57,11 @@ const emit = defineEmits<{
 }
 
 .tag-section {
+  box-sizing: border-box;
   width: 100%;
+  padding: 0.5rem;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.4rem;
   align-items: center;
 }

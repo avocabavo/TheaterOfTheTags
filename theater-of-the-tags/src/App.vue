@@ -103,6 +103,10 @@ const heroEntries = computed(()=>
     .filter((entry): entry is { characterName: string; shard: Y.Map<any> }=> !!entry.shard)
 )
 
+function heroId(characterName: string) {
+  return `hero-${encodeURIComponent(characterName)}`
+}
+
 function addStatus() {
   const name = newStatusName.value.trim()
   if (!name || statusTags.has(name)) return
@@ -163,7 +167,7 @@ function deleteHero(characterName: string) {
 
 <template>
   <main>
-    <NavigationBar />
+    <NavigationBar :heroes="heroEntries" />
 
     <div class="toolbar">
       <input
@@ -232,6 +236,7 @@ function deleteHero(characterName: string) {
     <div class="tag-holder">
       <Hero
         v-for="entry in heroEntries"
+        :id="heroId(entry.characterName)"
         :key="entry.characterName"
         :shard="entry.shard"
         @delete="deleteHero(entry.characterName)"

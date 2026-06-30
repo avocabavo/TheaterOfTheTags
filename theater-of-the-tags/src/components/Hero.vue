@@ -340,6 +340,7 @@ function print() {
   border: 3px solid black;
   width: 100%;
   padding: 1rem;
+  scroll-margin-top: 5.5rem;
 }
 .hero>* {
   margin-bottom: 16px;

@@ -644,75 +644,7 @@ function deleteHero(name: string) {
 </template>
 
 <style>
-.tag-holder {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.hero-form-modal {
-  box-sizing: border-box;
-  width: min(100%, 28rem);
-  padding: 1rem;
-  border: 0.25rem solid #853;
-  border-radius: 0.5rem;
-
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-
-  background: #fca;
-  color: #433;
-}
-
-.hero-form-modal h2 {
-  margin: 0;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  font-weight: 600;
-}
-
-.form-field input,
-.form-field textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  padding: 0.45rem 0.55rem;
-  border: 0.15rem solid #853;
-  border-radius: 0.25rem;
-  font: inherit;
-}
-
-.form-field textarea {
-  min-height: 12rem;
-  resize: vertical;
-}
-
-.form-error {
-  margin: 0;
-  color: #8b1e1e;
-  font-weight: 600;
-}
-
-.character-name-row,
-.modal-actions {
+.character-name-row {
   display: flex;
   gap: 0.5rem;
 }
@@ -721,76 +653,8 @@ function deleteHero(name: string) {
   flex: 1 1 auto;
 }
 
-.modal-actions {
-  justify-content: flex-end;
-}
-
-.hero-form-modal button {
-  flex: 0 0 auto;
-  padding: 0.45rem 0.75rem;
-  border: 0.15rem solid #853;
-  border-radius: 0.35rem;
-  background: #c65;
-  color: #433;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.hero-form-modal .secondary-button {
-  background: #f7d5b7;
-}
-
-.situation-form-modal {
-  border-color: #777;
-  background: #f4f4f4;
-  color: #222;
-}
-
-.situation-form-modal .form-field input,
-.situation-form-modal .form-field textarea {
-  border-color: #777;
-}
-
-.situation-form-modal button {
-  border-color: #777;
-  background: #d7d7d7;
-  color: #222;
-}
-
-.situation-form-modal .secondary-button {
-  background: white;
-}
-
-.fellowship-form-modal {
-  border-color: #2c7ea0;
-  background: #bfe9ff;
-  color: #12384a;
-}
-
-.fellowship-form-modal .form-field input,
-.fellowship-form-modal .form-field textarea {
-  border-color: #2c7ea0;
-}
-
-.fellowship-form-modal button {
-  border-color: #2c7ea0;
-  background: #62b7dc;
-  color: #12384a;
-}
-
-.fellowship-form-modal .secondary-button {
-  background: #e4f6ff;
-}
-
-.hero-form-modal button:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-
 @media (max-width: 32rem) {
-  .character-name-row,
-  .modal-actions {
+  .character-name-row {
     flex-direction: column;
   }
 }

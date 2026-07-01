@@ -111,21 +111,11 @@ defineExpose({
 }
 
 .static-words {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-around;
 }
 
 .backpack .static-words {
   background-color: #222;
-}
-
-.static-words p {
-  margin-top: 0.2rem;
-  margin-bottom: 0.2rem;
-  font-size: x-large;
 }
 
 .tag-section {

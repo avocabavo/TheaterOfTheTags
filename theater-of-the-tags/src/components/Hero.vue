@@ -411,51 +411,9 @@ async function copyToClipboard() {
   justify-content: space-around;
 }
 
-.static-words {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-}
-
 .hero-card .static-words {
   background-color: #c65;
   color: #433;
-}
-
-.static-words p {
-  margin-top: 0.2rem;
-  margin-bottom: 0.2rem;
-  font-size: x-large;
-}
-.static-words.small p {
-  font-size: large;
-}
-
-.copy-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0.2rem;
-  border: 1px solid currentColor;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.copy-button:hover,
-.copy-button:focus-visible {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.copy-icon {
-  width: 1rem;
-  height: 1rem;
 }
 
 .quintessences {

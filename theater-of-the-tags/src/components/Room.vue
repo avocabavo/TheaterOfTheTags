@@ -486,11 +486,6 @@ function importRoom() {
   padding: 0.35rem;
 }
 
-.copy-icon {
-  width: 1rem;
-  height: 1rem;
-}
-
 .import-message,
 .import-error {
   margin: 0.75rem 0 0;
@@ -601,19 +596,6 @@ function importRoom() {
   background: rgba(255, 255, 255, 0.65);
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 220;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.55);
-}
-
 .room-import-modal {
   box-sizing: border-box;
   width: min(100%, 32rem);
@@ -633,29 +615,9 @@ function importRoom() {
   margin: 0;
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-weight: 600;
-}
-
 .form-field textarea {
-  box-sizing: border-box;
-  width: 100%;
   min-height: 16rem;
-  min-width: 0;
-  padding: 0.45rem 0.55rem;
   border: 0.15rem solid #777;
-  border-radius: 0.25rem;
-  resize: vertical;
-  font: inherit;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
 }
 
 .room-import-modal .secondary-button {
@@ -693,8 +655,7 @@ function importRoom() {
   .room-heading,
   .room-actions,
   .collection-box,
-  .box-actions,
-  .modal-actions {
+  .box-actions {
     align-items: stretch;
     flex-direction: column;
   }

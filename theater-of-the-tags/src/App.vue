@@ -12,6 +12,7 @@ import {
   situationOrder,
   situations,
 } from './lib/yjs'
+import { refreshTappedTags, rollInvokedTags } from './lib/usage'
 import {
   createHeroShard,
   createHeroShardFromData,
@@ -552,6 +553,8 @@ function deleteHero(name: string) {
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"
+      @roll="rollInvokedTags"
+      @refresh="refreshTappedTags"
     />
     <Room
       id="room"

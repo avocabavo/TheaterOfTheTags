@@ -20,6 +20,7 @@ export function createTagShard({
   tagShard.set('name', name)
   tagShard.set('nature', nature)
   tagShard.set('scratched', scratched)
+  tagShard.set('usage', 'ready')
 
   return tagShard
 }

@@ -4,6 +4,8 @@ export type TagNature = 'primary' | 'power' | 'weakness'
 
 export type StatusNature = 'helpful' | 'hindering'
 
+export type Usage = 'ready' | 'invoked' | 'tapped'
+
 export type Might = 'origin' | 'adventure' | 'greatness'
 export const mightOptions: Array<Might> = ['origin', 'adventure', 'greatness']
 
@@ -78,6 +80,7 @@ export type TagData = {
   name: string
   nature: TagNature
   scratched: boolean
+  usage: Usage
 }
 export type TagShard = Y.Map<any>
 export const TAG_KEYS = {
@@ -85,6 +88,7 @@ export const TAG_KEYS = {
   name: 'name',
   nature: 'nature',
   scratched: 'scratched',
+  usage: 'usage',
 } as const
 
 export type StatusTagData = {
@@ -92,6 +96,7 @@ export type StatusTagData = {
   name: string
   nature: StatusNature
   tiers: boolean[]
+  usage: Usage
 }
 export type StatusTagShard = Y.Map<any>
 export const STATUS_TAG_KEYS = {
@@ -99,6 +104,7 @@ export const STATUS_TAG_KEYS = {
   name: 'name',
   nature: 'nature',
   tiers: 'tiers',
+  usage: 'usage',
 } as const
 
 export type ThemeData = {

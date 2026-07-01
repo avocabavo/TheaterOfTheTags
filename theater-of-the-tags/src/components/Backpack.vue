@@ -52,7 +52,7 @@ const {
 } = useDragDrop(moveBackpackTag, ()=> emit('resized'))
 
 function toJson() {
-  return backpackTags.value.map(t=> t.toJSON())
+  return backpackTagRefs.value.map(t=> t.toJson())
 }
 
 function print() {

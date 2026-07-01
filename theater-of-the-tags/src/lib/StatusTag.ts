@@ -34,6 +34,7 @@ export function createStatusTagShard({
   statusTagShard.set('name', name)
   statusTagShard.set('nature', nature)
   statusTagShard.set('tiers', yTiers)
+  statusTagShard.set('usage', 'ready')
 
   return statusTagShard
 }

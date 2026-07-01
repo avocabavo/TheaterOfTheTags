@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import YAML from 'yaml'
-import type { TagData, TagNature, TagShard } from '../lib/schema'
+import type { TagData, TagNature, TagShard, Usage } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
@@ -16,9 +16,15 @@ const props = defineProps<{
 const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
 const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as TagNature)
 const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
+const usage = useYMapField<TagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
 
 function toggleScratched() {
   scratched.value = !scratched.value
+}
+
+function toggleUsage() {
+  if (usage.value === 'tapped') return
+  usage.value = usage.value === 'ready' ? 'invoked' : 'ready'
 }
 
 const emit = defineEmits<{
@@ -51,7 +57,18 @@ defineExpose({
 <template>
   <div class="tag" :class="nature" @click="copyToClipboard">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
-    <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
+    <button
+      v-if="mode !== 'creation'"
+      type="button"
+      class="usage-indicator"
+      :class="{ tapped: usage === 'tapped' }"
+      :aria-label="`Tag usage: ${usage}`"
+      :title="`Usage: ${usage}`"
+      @click.stop="toggleUsage"
+    >
+      <span v-if="usage === 'tapped'">🮮</span>
+      <span v-else>{{ usage === 'invoked' ? '☑' : '☐' }}</span>
+    </button>
 
     <EditableText
       v-model="name"
@@ -171,10 +188,24 @@ defineExpose({
   padding: 0;
 }
 
-.weakness-indicator {
+.usage-indicator {
   flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.usage-indicator.tapped {
+  cursor: default;
 }
 
 .icon {

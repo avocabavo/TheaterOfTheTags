@@ -114,7 +114,7 @@ function valueToJson(value: any): any {
 function mapToJson(map: Y.Map<any>) {
   return Object.fromEntries(
     Array.from(map.entries())
-      .filter(([key])=> key !== 'uuid')
+      .filter(([key])=> !['uuid', 'usage'].includes(key))
       .map(([key, value])=> [key, valueToJson(value)])
   )
 }

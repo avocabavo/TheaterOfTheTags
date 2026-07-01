@@ -2,7 +2,7 @@
 import * as Y from 'yjs'
 import YAML from 'yaml'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
-import type { StatusTagData } from '../lib/schema';
+import type { StatusTagData, Usage } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import EditableText from './EditableText.vue';
@@ -16,6 +16,12 @@ const props = defineProps<{
 const name = useYMapField<StatusTagData, 'name'>(props.shard, 'name', '')
 const nature = useYMapField<StatusTagData, 'nature'>(props.shard, 'nature', 'helpful')
 const tiers = useYArray<boolean>(props.shard, 'tiers')
+const usage = useYMapField<StatusTagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
+
+function toggleUsage() {
+  if (usage.value === 'tapped') return
+  usage.value = usage.value === 'ready' ? 'invoked' : 'ready'
+}
 
 function advanceTier(startIndex: number) {
   const arr = tiers.yarray()
@@ -76,6 +82,18 @@ defineExpose({toJson})
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
     <div class="upper-half">
+      <button
+        v-if="mode !== 'creation'"
+        type="button"
+        class="usage-indicator"
+        :class="{ tapped: usage === 'tapped' }"
+        :aria-label="`Status tag usage: ${usage}`"
+        :title="`Usage: ${usage}`"
+        @click.stop="toggleUsage"
+      >
+        <span v-if="usage === 'tapped'">🮮</span>
+        <span v-else>{{ usage === 'invoked' ? '☑' : '☐' }}</span>
+      </button>
       <span class="tiny-static-words">TAG</span>
       <!-- <span class="status-tag-name">{{ name }}</span> -->
       <EditableText
@@ -142,6 +160,25 @@ defineExpose({toJson})
   align-items: baseline;
   margin-top: 0;
   margin-bottom: 0.25rem;
+}
+
+.usage-indicator {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.4rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.usage-indicator.tapped {
+  cursor: default;
 }
 
 .tiny-static-words {

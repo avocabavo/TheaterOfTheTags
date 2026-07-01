@@ -11,6 +11,12 @@ import RollTable, {
   type RollTableRowData,
 } from './RollTable.vue'
 
+declare global {
+  interface Window {
+    testRoll?: (a: number, b: number)=> void
+  }
+}
+
 type HistoryEntry = {
   id: string
   rollName: string
@@ -179,9 +185,7 @@ function syncRollHistory() {
   }
 }
 
-function createRollRow(): RollTableRow {
-  const first = rollD6()
-  const second = rollD6()
+function createRollRow(first = rollD6(), second = rollD6()): RollTableRow {
 
   return {
     kind: 'roll',
@@ -191,8 +195,7 @@ function createRollRow(): RollTableRow {
   }
 }
 
-function handleRoll() {
-  const rollRow = createRollRow()
+function commitRoll(rollRow: RollTableRow) {
   const rows = [...invokedRows.value, rollRow]
   const rollName = currentRollName.value.trim() || 'ROLL'
 
@@ -203,6 +206,26 @@ function handleRoll() {
   }])
   currentRollName.value = 'ROLL'
   rollInvokedTags()
+}
+
+function handleRoll() {
+  commitRoll(createRollRow())
+}
+
+function testRoll(a: number, b: number) {
+  if (
+    !Number.isInteger(a)
+    || !Number.isInteger(b)
+    || a < 1
+    || a > 6
+    || b < 1
+    || b > 6
+  ) {
+    console.warn('testRoll(a, b) expects two integer d6 values from 1 to 6')
+    return
+  }
+
+  commitRoll(createRollRow(a, b))
 }
 
 function updateHistoryRollName(entryId: string, rollName: string) {
@@ -259,11 +282,17 @@ onMounted(()=> {
   syncRollHistory()
   doc.on('update', syncInvokedTags)
   yRollHistory.observe(syncRollHistory)
+  // Debug helper disabled. To re-enable manual dice testing from the browser
+  // console, uncomment this line and the matching cleanup in onUnmounted:
+  // window.testRoll = testRoll
 })
 
 onUnmounted(()=> {
   doc.off('update', syncInvokedTags)
   yRollHistory.unobserve(syncRollHistory)
+  // if (window.testRoll === testRoll) {
+  //   delete window.testRoll
+  // }
   stopResize()
 })
 </script>

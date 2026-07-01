@@ -83,11 +83,29 @@ const result = computed(()=> (
 
 const resultClass = computed(()=> {
   if (result.value == null) return ''
-  if (rollRow.value?.dice[0] === 1 && rollRow.value.dice[1] === 1) return 'low-result'
-  if (rollRow.value?.dice[0] === 6 && rollRow.value.dice[1] === 6) return 'high-result'
+  if (rollRow.value?.dice[0] === 1 && rollRow.value.dice[1] === 1) return 'critically-low-result'
+  if (rollRow.value?.dice[0] === 6 && rollRow.value.dice[1] === 6) return 'critically-high-result'
   if (result.value < 7) return 'low-result'
   if (result.value > 9) return 'high-result'
   return 'mixed-result'
+})
+
+const powerToSpend = computed(()=> Math.max(1, modifier.value))
+
+const outcomeText = computed(()=> {
+  switch (resultClass.value) {
+    case 'low-result':
+    case 'critically-low-result':
+      return 'CONSEQUENCES'
+    case 'mixed-result':
+      return `Spend ${powerToSpend.value} power, then CONSEQUENCES`
+    case 'high-result':
+      return `Spend ${powerToSpend.value} power`
+    case 'critically-high-result':
+      return `Spend ${powerToSpend.value + 1} power`
+    default:
+      return ''
+  }
 })
 
 const tableStyle = computed(()=> ({
@@ -150,6 +168,9 @@ const tableStyle = computed(()=> ({
           {{ result }}
         </td>
       </tr>
+      <tr v-if="result != null" class="outcome-row">
+        <td colspan="2">{{ outcomeText }}</td>
+      </tr>
     </tbody>
   </table>
 </template>
@@ -196,6 +217,12 @@ const tableStyle = computed(()=> ({
   border-top-width: 1px;
 }
 
+.outcome-row td {
+  border-top-width: 1px;
+  font-weight: 900;
+  text-align: center;
+}
+
 .roll-table th:last-child,
 .roll-table td:last-child {
   width: 4rem;
@@ -224,8 +251,20 @@ const tableStyle = computed(()=> ({
   color: white;
 }
 
+.critically-low-result {
+  font-size: 1em;
+  background: var(--roll-table-color);
+  color: white;
+  border: 2px dashed var(--roll-table-color);
+}
+
 .high-result {
   font-size: 3em;
+  font-weight: 1000;
+}
+
+.critically-high-result {
+  font-size: 5em;
   font-weight: 1000;
 }
 

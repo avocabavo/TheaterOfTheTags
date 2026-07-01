@@ -3,6 +3,7 @@ import * as Y from 'yjs'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import NavigationBar from './components/NavigationBar.vue'
+import Room from './components/Room.vue'
 import { fellowships, heroes, situations } from './lib/yjs'
 import {
   createHeroShard,
@@ -423,6 +424,11 @@ function deleteHero(name: string) {
 <template>
   <main>
     <NavigationBar
+      :situations="situationEntries"
+      :fellowships="fellowshipEntries"
+      :heroes="heroEntries"
+    />
+    <Room
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"

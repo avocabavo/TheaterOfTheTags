@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import { computed, onBeforeUpdate, ref } from 'vue'
+import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue'
 import Bubbles from './Bubbles.vue'
 import DeleteButton from './buttons/DeleteButton.vue'
 import EditableText from './EditableText.vue'
@@ -19,6 +19,7 @@ import { createTagShard, type TagCreationProps } from '../lib/Tag'
 import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop, useFieldCollector } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
+import Masonry from 'masonry-layout'
 
 const { mode } = useMode()
 
@@ -30,6 +31,8 @@ const emit = defineEmits<{
   (e: 'delete'): void
   (e: 'resized'): void
 }>()
+
+const grid = ref(null)
 
 const fellowshipName = useYMapField<FellowshipData, 'fellowshipName'>(
   props.shard,
@@ -43,26 +46,26 @@ const {
   remove: removeSpecialImprovement,
   move: moveSpecialImprovement,
   set: setSpecialImprovement,
-} = useYArray<string>(props.shard, 'specialImprovements', ()=> emit('resized'))
+} = useYArray<string>(props.shard, 'specialImprovements', reflowMasonry)
 
 const newSpecialImprovement = ref('')
 
 const {
   onDrag: onSpecialImprovementDrag,
   onDrop: onSpecialImprovementDrop,
-} = useDragDrop(moveSpecialImprovement, ()=> emit('resized'))
+} = useDragDrop(moveSpecialImprovement, reflowMasonry)
 
 const {
   items: looseTags,
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> emit('resized'))
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry)
 
 const {
   onDrag: onLooseTagDrag,
   onDrop: onLooseTagDrop,
-} = useDragDrop(moveLooseTag, ()=> emit('resized'))
+} = useDragDrop(moveLooseTag, reflowMasonry)
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
@@ -74,6 +77,30 @@ function setLooseTagRef(el: any) {
 
 onBeforeUpdate(()=> {
   looseTagRefs.value = []
+})
+
+let masonry: Masonry | null = null
+
+onMounted(async ()=> {
+  await nextTick()
+  if (!grid.value) return
+  masonry = new Masonry(grid.value, {
+    itemSelector: '.grid-item',
+    columnWidth: '.grid-sizer',
+    gutter: 16,
+  })
+  reflowMasonry()
+})
+
+async function reflowMasonry() {
+  await nextTick()
+  masonry?.reloadItems?.()
+  masonry?.layout?.()
+}
+
+watch(mode, async ()=> {
+  await nextTick()
+  reflowMasonry()
 })
 
 function createSpecialImprovement() {
@@ -120,10 +147,10 @@ defineExpose({
 </script>
 
 <template>
-  <div class="fellowship">
-    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+  <div ref="grid" class="fellowship">
+    <div class="fellowship-card grid-item grid-sizer">
+      <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
-    <div class="fellowship-card">
       <div class="static-words">
         <p>FELLOWSHIP</p>
         <button
@@ -143,7 +170,7 @@ defineExpose({
           tag="h1"
           placeholder="Enter Fellowship Name ..."
           :disabled="mode !== 'creation'"
-          @resized="emit('resized')"
+          @resized="reflowMasonry"
         />
       </div>
 
@@ -151,7 +178,7 @@ defineExpose({
         <Quest
           :shard="shard"
           :ref="setFieldRef"
-          @resized="emit('resized')"
+          @resized="reflowMasonry"
         />
       </div>
 
@@ -186,6 +213,7 @@ defineExpose({
           <EditableText
             :model-value="improvement"
             @update:modelValue="val => setSpecialImprovement(index, val)"
+            @resized="reflowMasonry"
             tag="p"
             :disabled="mode !== 'narrator'"
           />
@@ -212,16 +240,18 @@ defineExpose({
       :key="looseTag.get('uuid')"
       :ref="setLooseTagRef"
       :shard="looseTag"
+      class="grid-item"
       draggable="true"
       @dragstart="onLooseTagDrag(index)"
       @dragover.prevent
       @drop="onLooseTagDrop(index)"
       @delete="removeLooseTag(index)"
-      @resized="emit('resized')"
+      @resized="reflowMasonry"
     />
 
     <NewLooseTags
       v-if="mode !== 'scene'"
+      class="grid-item"
       @create-tag="handleCreateLooseTag"
       @create-status="handleCreateLooseStatus"
     />
@@ -235,18 +265,21 @@ defineExpose({
   width: 100%;
   padding: 1rem;
   scroll-margin-top: 5.5rem;
+}
 
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-start;
+.fellowship > * {
+  margin-bottom: 16px;
+}
+
+.grid-sizer,
+.grid-item {
+  width: 25rem;
+  max-width: 100%;
 }
 
 .fellowship-card {
   box-sizing: border-box;
   border: 0.25rem solid #2c7ea0;
-  width: 25rem;
-  max-width: 100%;
 
   display: flex;
   flex-direction: column;

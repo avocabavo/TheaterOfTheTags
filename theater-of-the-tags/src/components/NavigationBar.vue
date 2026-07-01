@@ -15,7 +15,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'roll'): void
   (e: 'refresh'): void
 }>()
 
@@ -126,13 +125,6 @@ function scrollToHero(characterName: string) {
     </nav>
 
     <div class="mode-switcher">
-      <button
-        type="button"
-        class="debug-button"
-        @click="emit('roll')"
-      >
-        roll
-      </button>
       <button
         type="button"
         class="debug-button"

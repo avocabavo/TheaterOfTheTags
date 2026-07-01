@@ -4,6 +4,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import NavigationBar from './components/NavigationBar.vue'
 import Room from './components/Room.vue'
+import RollHistory from './components/RollHistory.vue'
 import {
   fellowshipOrder,
   fellowships,
@@ -12,7 +13,7 @@ import {
   situationOrder,
   situations,
 } from './lib/yjs'
-import { refreshTappedTags, rollInvokedTags } from './lib/usage'
+import { refreshTappedTags } from './lib/usage'
 import {
   createHeroShard,
   createHeroShardFromData,
@@ -553,21 +554,22 @@ function deleteHero(name: string) {
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"
-      @roll="rollInvokedTags"
       @refresh="refreshTappedTags"
     />
-    <Room
-      id="room"
-      :situations="situationEntries"
-      :fellowships="fellowshipEntries"
-      :heroes="heroEntries"
-      @add-situation="openSituationForm"
-      @import-situation="openSituationImportForm"
-      @add-fellowship="openFellowshipForm"
-      @import-fellowship="openFellowshipImportForm"
-      @add-hero="openHeroForm"
-      @import-hero="openHeroImportForm"
-    />
+    <div class="app-body">
+      <div class="app-content">
+        <Room
+          id="room"
+          :situations="situationEntries"
+          :fellowships="fellowshipEntries"
+          :heroes="heroEntries"
+          @add-situation="openSituationForm"
+          @import-situation="openSituationImportForm"
+          @add-fellowship="openFellowshipForm"
+          @import-fellowship="openFellowshipImportForm"
+          @add-hero="openHeroForm"
+          @import-hero="openHeroImportForm"
+        />
 
     <div
       v-if="showSituationForm"
@@ -783,10 +785,38 @@ function deleteHero(name: string) {
         @delete="deleteHero(entry.name)"
       />
     </div>
+      </div>
+      <RollHistory />
+    </div>
   </main>
 </template>
 
 <style>
+main {
+  height: 100vh;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.app-body {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
 .character-name-row {
   display: flex;
   gap: 0.5rem;
@@ -799,6 +829,24 @@ function deleteHero(name: string) {
 @media (max-width: 32rem) {
   .character-name-row {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 48rem) {
+  main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .app-body {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .app-content {
+    width: 100%;
+    height: auto;
+    overflow: visible;
   }
 }
 </style>

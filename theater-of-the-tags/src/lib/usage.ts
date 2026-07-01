@@ -1,6 +1,12 @@
 import * as Y from 'yjs'
 import { doc, fellowships, heroes, situations } from './yjs'
-import type { Usage } from './schema'
+import type { StatusNature, TagNature, Usage } from './schema'
+
+export type InvokedTagSummary = {
+  uuid: string
+  name: string
+  impact: string
+}
 
 function isTagShard(value: unknown): value is Y.Map<any> {
   return value instanceof Y.Map && value.has('name') && (
@@ -58,6 +64,57 @@ function updateMatchingUsage(from: Usage, to: Usage) {
     visitTopLevelLooseTags(fellowships, visitor)
     heroes.forEach(hero=> visitHeroTags(hero, visitor))
   })
+}
+
+function formatImpact(value: number) {
+  return value > 0 ? `+${value}` : `${value}`
+}
+
+function highestTier(tag: Y.Map<any>) {
+  const tiers = tag.get('tiers')
+  if (!(tiers instanceof Y.Array)) return 0
+
+  const values = tiers.toArray()
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (values[index]) return index + 1
+  }
+
+  return 0
+}
+
+function tagImpact(tag: Y.Map<any>) {
+  if (tag.has('tiers')) {
+    const nature = tag.get('nature') as StatusNature
+    const tier = highestTier(tag)
+    return nature === 'hindering' ? -tier : tier
+  }
+
+  const nature = tag.get('nature') as TagNature
+
+  if (nature === 'weakness') return -1
+
+  return tag.get('scratched') ? 3 : 1
+}
+
+export function getInvokedTagSummaries(): InvokedTagSummary[] {
+  const summaries: InvokedTagSummary[] = []
+
+  const visitor = (tag: Y.Map<any>)=> {
+    if (tag.get('usage') !== 'invoked') return
+    const fallbackId = `invoked-${summaries.length}`
+
+    summaries.push({
+      uuid: typeof tag.get('uuid') === 'string' ? tag.get('uuid') : fallbackId,
+      name: typeof tag.get('name') === 'string' ? tag.get('name') : '',
+      impact: formatImpact(tagImpact(tag)),
+    })
+  }
+
+  visitTopLevelLooseTags(situations, visitor)
+  visitTopLevelLooseTags(fellowships, visitor)
+  heroes.forEach(hero=> visitHeroTags(hero, visitor))
+
+  return summaries
 }
 
 export function rollInvokedTags() {

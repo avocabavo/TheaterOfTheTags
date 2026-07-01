@@ -13,6 +13,7 @@ import RollTable, {
 
 type HistoryEntry = {
   id: string
+  rollName: string
   rows: RollTableRowData[]
 }
 
@@ -20,6 +21,15 @@ const widthRem = ref(15)
 const invokedTags = ref<InvokedTagSummary[]>([])
 const rollHistoryEntries = ref<HistoryEntry[]>([])
 const historyListRef = ref<HTMLElement | null>(null)
+const currentRollName = ref('ROLL')
+
+const rollColors = [
+  '#500000',
+  '#300030',
+  '#000050',
+  '#005000',
+  '#2A2A2A'
+]
 
 let startingX = 0
 let startingWidthPx = 0
@@ -77,6 +87,7 @@ function isHistoryEntry(entry: any): entry is HistoryEntry {
   return entry
     && typeof entry === 'object'
     && typeof entry.id === 'string'
+    && (entry.rollName == null || typeof entry.rollName === 'string')
     && Array.isArray(entry.rows)
     && entry.rows.every(isRollTableRowData)
 }
@@ -97,7 +108,12 @@ function scrollHistoryToBottom() {
 
 function syncRollHistory() {
   const shouldStickToBottom = historyIsScrolledToBottom()
-  rollHistoryEntries.value = yRollHistory.toArray().filter(isHistoryEntry)
+  rollHistoryEntries.value = yRollHistory.toArray()
+    .filter(isHistoryEntry)
+    .map(entry=> ({
+      ...entry,
+      rollName: entry.rollName || 'ROLL',
+    }))
 
   if (shouldStickToBottom) {
     nextTick(scrollHistoryToBottom)
@@ -119,12 +135,33 @@ function createRollRow(): RollTableRow {
 function handleRoll() {
   const rollRow = createRollRow()
   const rows = [...invokedRows.value, rollRow]
+  const rollName = currentRollName.value.trim() || 'ROLL'
 
   yRollHistory.push([{
     id: rollRow.id,
+    rollName,
     rows,
   }])
+  currentRollName.value = 'ROLL'
   rollInvokedTags()
+}
+
+function updateHistoryRollName(entryId: string, rollName: string) {
+  const index = yRollHistory.toArray().findIndex(entry=> entry?.id === entryId)
+  if (index < 0) return
+
+  const entry = yRollHistory.get(index)
+  if (!isHistoryEntry(entry)) return
+
+  const updatedEntry: HistoryEntry = {
+    ...entry,
+    rollName,
+  }
+
+  yRollHistory.doc?.transact(()=> {
+    yRollHistory.delete(index, 1)
+    yRollHistory.insert(index, [updatedEntry])
+  })
 }
 
 function handlePointerMove(event: PointerEvent) {
@@ -193,16 +230,21 @@ onUnmounted(()=> {
 
       <div ref="historyListRef" class="history-list">
         <RollTable
-          v-for="entry in rollHistoryEntries"
+          v-for="(entry, index) in rollHistoryEntries"
           :key="entry.id"
+          :color="rollColors[index % rollColors.length]"
+          :roll-name="entry.rollName"
           :rows="entry.rows"
           history
+          @update:roll-name="value => updateHistoryRollName(entry.id, value)"
         />
       </div>
 
       <RollTable
+        v-model:roll-name="currentRollName"
         :rows="currentRows"
         empty-text="No invoked tags"
+        @submit="handleRoll"
       />
 
       <button
@@ -210,7 +252,7 @@ onUnmounted(()=> {
         class="roll-button"
         @click="handleRoll"
       >
-        Roll
+        Roll!
       </button>
     </div>
   </aside>
@@ -291,11 +333,12 @@ onUnmounted(()=> {
 .history-list {
   flex: 1 1 auto;
   min-height: 2rem;
-  overflow-y: auto;
+  overflow-y: scroll;
+  margin-right: -0.75rem;
 
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 2.4rem;
 }
 
 .roll-button {

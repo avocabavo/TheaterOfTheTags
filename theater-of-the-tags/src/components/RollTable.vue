@@ -25,8 +25,15 @@ export type RollTableRowData = TagTableRow | RollTableRow
 
 const props = defineProps<{
   rows: RollTableRowData[]
+  rollName?: string
+  color?: string
   emptyText?: string
   history?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:rollName', value: string): void
+  (e: 'submit'): void
 }>()
 
 const dieImages = [
@@ -40,6 +47,11 @@ const dieImages = [
 
 function dieImage(value: number) {
   return dieImages[value - 1] ?? d6One
+}
+
+function updateRollName(event: Event) {
+  if (!(event.target instanceof HTMLInputElement)) return
+  emit('update:rollName', event.target.value)
 }
 
 function parseImpact(impact: string) {
@@ -67,14 +79,34 @@ const modifier = computed(()=> tagRows.value.reduce(
 const result = computed(()=> (
   rollRow.value ? modifier.value + parseImpact(rollRow.value.impact) : null
 ))
+
+const resultClass = computed(()=> {
+  if (result.value == null) return ''
+  if (result.value < 7) return 'low-result'
+  if (result.value > 9) return 'high-result'
+  return 'mixed-result'
+})
+
+const tableStyle = computed(()=> ({
+  '--roll-table-color': props.color ?? '#1e1e2f',
+}))
 </script>
 
 <template>
-  <table :class="['roll-table', { 'history-table': history }]">
+  <table
+    :class="['roll-table', { 'history-table': history }]"
+    :style="tableStyle"
+  >
     <thead>
       <tr>
-        <th scope="col">Tag</th>
-        <th scope="col">Impact</th>
+        <th colspan="2">
+          <input
+            class="roll-name-input"
+            :value="props.rollName ?? 'ROLL'"
+            @input="updateRollName"
+            @keydown.enter.prevent="emit('submit')"
+          >
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -110,7 +142,9 @@ const result = computed(()=> (
       </tr>
       <tr v-if="result != null" class="summary-row result-row">
         <th scope="row">Result</th>
-        <td class="impact-cell summary-impact">{{ formatImpact(result) }}</td>
+        <td :class="['impact-cell', 'summary-impact', 'result-impact', resultClass]">
+          {{ result }}
+        </td>
       </tr>
     </tbody>
   </table>
@@ -122,19 +156,34 @@ const result = computed(()=> (
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.9rem;
+  color: var(--roll-table-color);
 }
 
 .roll-table th,
 .roll-table td {
   padding: 0.4rem 0.35rem;
-  border-top: 1px solid rgba(30, 30, 47, 0.2);
+  border-top: 1px solid color-mix(in srgb, var(--roll-table-color), transparent 72%);
   text-align: left;
   vertical-align: top;
 }
 
+.roll-name-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--roll-table-color), transparent 45%);
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+}
+
 .summary-row th,
 .summary-row td {
-  border-top: 0.15rem solid rgba(30, 30, 47, 0.45);
+  border-top: 0.15rem solid color-mix(in srgb, var(--roll-table-color), transparent 38%);
   font-weight: 800;
 }
 
@@ -158,7 +207,28 @@ const result = computed(()=> (
 }
 
 .summary-impact {
-  color: #08060d;
+  color: var(--roll-table-color);
+}
+
+.result-impact {
+  line-height: 1;
+}
+
+.low-result {
+  font-size: 2em;
+  background: var(--roll-table-color);
+  color: white;
+}
+
+.high-result {
+  font-size: 3em;
+  font-weight: 1000;
+}
+
+.mixed-result {
+  font-size: 2em;
+  font-style: italic;
+  border: 2px dashed var(--roll-table-color);
 }
 
 .history-table {

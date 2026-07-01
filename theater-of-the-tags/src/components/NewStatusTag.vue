@@ -15,16 +15,42 @@ const emit = defineEmits<{
 
 const name = ref('')
 
+function parseStatusNameAndTier(rawName: string, initialTier?: number) {
+  const match = rawName.match(/^(.*)-([1-6])$/)
+
+  if (!match) {
+    return {
+      name: rawName,
+      initialTier,
+    }
+  }
+
+  const parsedName = match[1].trim()
+
+  if (!parsedName) {
+    return {
+      name: rawName,
+      initialTier,
+    }
+  }
+
+  return {
+    name: parsedName,
+    initialTier: initialTier ?? Number(match[2]),
+  }
+}
+
 function createStatus(initialTier?: number) {
   const trimmed = name.value.trim()
   if (!trimmed) return
+  const parsed = parseStatusNameAndTier(trimmed, initialTier)
 
   const data: StatusCreationProps = {
-    name: trimmed,
+    name: parsed.name,
     nature: props.nature,
   }
-  if (initialTier != null) {
-    data.initialTier = initialTier
+  if (parsed.initialTier != null) {
+    data.initialTier = parsed.initialTier
   }
 
   emit('create', data)

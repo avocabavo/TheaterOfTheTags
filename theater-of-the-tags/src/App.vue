@@ -10,8 +10,19 @@ import { heroes, statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
 import { createThemeShard } from './lib/Theme'
 import Theme from './components/Theme.vue'
-import { createHeroShard } from './lib/Hero'
+import {
+  createHeroShard,
+  createHeroShardFromData,
+  getHeroCharacterNameFromData,
+  parseHeroDataFromYaml,
+} from './lib/Hero'
 import Hero from './components/Hero.vue'
+
+type HeroEntry = {
+  name: string
+  characterName: string
+  shard: Y.Map<any>
+}
 
 const newStatusName = ref('')
 const statusNames = ref<string[]>([])
@@ -26,6 +37,9 @@ const newHeroCharacterName = ref('')
 const newHeroPlayerName = ref('')
 const heroNames = ref<string[]>([])
 const showHeroForm = ref(false)
+const showHeroImportForm = ref(false)
+const heroYamlText = ref('')
+const heroImportError = ref('')
 
 const randomHeroFirstNameSyllables = [
   'ah', 'ast', 'ra', 'bri', 'ar', 'cor', 'in',
@@ -58,6 +72,7 @@ function syncThemeNames() {
 
 function syncHeroNames() {
   heroNames.value = Array.from(heroes.keys())
+    .filter((name): name is string => typeof name === 'string' && !!name.trim())
 }
 
 const observer = ()=> {
@@ -114,11 +129,20 @@ const themeEntries = computed(()=>
 
 const heroEntries = computed(()=>
   heroNames.value
-    .map(characterName=> ({
-      characterName,
-      shard: heroes.get(characterName)
-    }))
-    .filter((entry): entry is { characterName: string; shard: Y.Map<any> }=> !!entry.shard)
+    .map(name=> {
+      const shard = heroes.get(name)
+      const shardCharacterName = shard?.get('characterName')
+      const characterName = typeof shardCharacterName === 'string' && shardCharacterName.trim()
+        ? shardCharacterName
+        : name
+
+      return {
+        name,
+        characterName,
+        shard
+      }
+    })
+    .filter((entry): entry is HeroEntry=> !!entry.shard)
 )
 
 function heroId(characterName: string) {
@@ -174,6 +198,16 @@ function closeHeroForm() {
   showHeroForm.value = false
 }
 
+function openHeroImportForm() {
+  heroImportError.value = ''
+  showHeroImportForm.value = true
+}
+
+function closeHeroImportForm() {
+  showHeroImportForm.value = false
+  heroImportError.value = ''
+}
+
 function createHeroFromForm() {
   const characterName = newHeroCharacterName.value.trim()
   const playerName = newHeroPlayerName.value.trim()
@@ -181,6 +215,32 @@ function createHeroFromForm() {
 
   addHero()
   closeHeroForm()
+}
+
+function importHeroFromYaml() {
+  heroImportError.value = ''
+
+  try {
+    const heroData = parseHeroDataFromYaml(heroYamlText.value)
+    const characterName = getHeroCharacterNameFromData(heroData)
+
+    if (!characterName) {
+      heroImportError.value = 'Hero YAML needs a character name'
+      return
+    }
+
+    if (heroes.has(characterName)) {
+      heroImportError.value = 'A hero with that character name already exists'
+      return
+    }
+
+    const heroShard = createHeroShardFromData(heroData)
+    heroes.set(characterName, heroShard)
+    heroYamlText.value = ''
+    closeHeroImportForm()
+  } catch (e) {
+    heroImportError.value = e instanceof Error ? e.message : 'Invalid hero YAML'
+  }
 }
 
 function generateRandomHeroName() {
@@ -293,6 +353,7 @@ function deleteHero(characterName: string) {
 
     <div class="toolbar">
       <button type="button" @click="openHeroForm">Add Hero</button>
+      <button type="button" @click="openHeroImportForm">Import Hero YAML</button>
     </div>
 
     <div
@@ -333,6 +394,33 @@ function deleteHero(characterName: string) {
             Cancel
           </button>
           <button type="submit">Create Hero</button>
+        </div>
+      </form>
+    </div>
+    <div
+      v-if="showHeroImportForm"
+      class="modal-backdrop"
+      @click.self="closeHeroImportForm"
+    >
+      <form class="hero-form-modal" @submit.prevent="importHeroFromYaml">
+        <h2>Import Hero YAML</h2>
+
+        <label class="form-field">
+          <span>Hero YAML</span>
+          <textarea
+            v-model="heroYamlText"
+            placeholder="Paste hero YAML"
+            @input="heroImportError = ''"
+          />
+        </label>
+
+        <p v-if="heroImportError" class="form-error">{{ heroImportError }}</p>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeHeroImportForm">
+            Cancel
+          </button>
+          <button type="submit" :disabled="!heroYamlText.trim()">Import</button>
         </div>
       </form>
     </div>
@@ -394,7 +482,8 @@ function deleteHero(characterName: string) {
   font-weight: 600;
 }
 
-.form-field input {
+.form-field input,
+.form-field textarea {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -402,6 +491,17 @@ function deleteHero(characterName: string) {
   border: 0.15rem solid #853;
   border-radius: 0.25rem;
   font: inherit;
+}
+
+.form-field textarea {
+  min-height: 12rem;
+  resize: vertical;
+}
+
+.form-error {
+  margin: 0;
+  color: #8b1e1e;
+  font-weight: 600;
 }
 
 .character-name-row,
@@ -432,6 +532,11 @@ function deleteHero(characterName: string) {
 
 .hero-form-modal .secondary-button {
   background: #f7d5b7;
+}
+
+.hero-form-modal button:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
 @media (max-width: 32rem) {

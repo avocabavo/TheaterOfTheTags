@@ -2,6 +2,7 @@ import * as Y from 'yjs'
 import type { StatusNature, StatusTagShard } from './schema'
 
 export const LIMIT = 6
+const statusNatures: StatusNature[] = ['helpful', 'hindering']
 
 export type StatusCreationProps = {
   name: string
@@ -35,4 +36,24 @@ export function createStatusTagShard({
   statusTagShard.set('tiers', yTiers)
 
   return statusTagShard
+}
+
+function isStatusNature(value: unknown): value is StatusNature {
+  return statusNatures.includes(value as StatusNature)
+}
+
+export function createStatusTagShardFromData(data: any): StatusTagShard {
+  const tiers = Array.isArray(data?.tiers)
+    ? data.tiers.slice(0, LIMIT).map(Boolean)
+    : Array(LIMIT).fill(false)
+
+  while (tiers.length < LIMIT) {
+    tiers.push(false)
+  }
+
+  return createStatusTagShard({
+    name: typeof data?.name === 'string' ? data.name : '',
+    nature: isStatusNature(data?.nature) ? data.nature : 'helpful',
+    tiers,
+  })
 }

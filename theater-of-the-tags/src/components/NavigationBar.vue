@@ -1,15 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useMode, type AppMode } from '../lib/modeStore'
 
-defineProps<{
+const props = defineProps<{
   heroes: {
-    characterName: string
+    characterName?: string
   }[]
 }>()
 
 const { mode, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
+
+const navigableHeroes = computed(()=> props.heroes.filter(
+  (hero): hero is { characterName: string }=>
+    typeof hero.characterName === 'string' && hero.characterName.trim().length > 0
+))
 
 function heroId(characterName: string) {
   return `hero-${encodeURIComponent(characterName)}`
@@ -32,7 +38,7 @@ function scrollToHero(characterName: string) {
 
     <nav class="hero-navigation" aria-label="Hero navigation">
       <button
-        v-for="hero in heroes"
+        v-for="hero in navigableHeroes"
         :key="hero.characterName"
         type="button"
         class="hero-button"

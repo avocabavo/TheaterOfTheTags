@@ -137,8 +137,20 @@ export type HeroData = {
   backpack: Y.Array<TagShard>
   notes: string
   themes: Y.Array<ThemeShard>
+  looseTags: Y.Array<TagShard | StatusTagShard>
 }
 export type HeroShard = Y.Map<any>
 
 export type BackpackData = Array<TagShard>
 export type BackpackShard = Y.Array<TagShard>
+
+export type FellowshipData = {
+  fellowshipName: string
+  looseTags: Y.Array<TagShard | StatusTagShard>
+  quest: string
+  abandon: number
+  improve: number
+  milestone: number
+  specialImprovements: Y.Array<string>
+}
+export type FellowshipShard = Y.Map<any>

@@ -4,6 +4,7 @@ import { WebsocketProvider } from 'y-websocket'
 export const doc = new Y.Doc()
 
 export const roomName = window.location.pathname ?? '/'
+export const room = doc.getMap<any>('room')
 
 export const provider = new WebsocketProvider(
   import.meta.env.VITE_YJS_WS_URL,

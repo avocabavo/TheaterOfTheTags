@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import { computed, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import {
-  fellowships,
-  heroes,
+  fellowships as fellowshipMap,
+  heroes as heroMap,
+  room,
   roomName,
-  situations,
+  situations as situationMap,
 } from '../lib/yjs'
+import { useMode } from '../lib/modeStore'
+import { useYMapField } from '../lib/yjsComposables'
+import { useWatchWithDebounce } from '../lib/util'
 import {
   createFellowshipShardFromData,
   getFellowshipNameFromData,
@@ -43,10 +47,25 @@ type ImportResult = {
   failures: string[]
 }
 
+type RoomData = {
+  roomDescription: string
+}
+
 const props = defineProps<{
   situations: SituationEntry[]
   fellowships: FellowshipEntry[]
   heroes: HeroEntry[]
+}>()
+
+const { mode } = useMode()
+
+const emit = defineEmits<{
+  (e: 'add-situation'): void
+  (e: 'import-situation'): void
+  (e: 'add-fellowship'): void
+  (e: 'import-fellowship'): void
+  (e: 'add-hero'): void
+  (e: 'import-hero'): void
 }>()
 
 const showImportForm = ref(false)
@@ -55,6 +74,30 @@ const importMessage = ref('')
 const importError = ref('')
 
 const displayRoomName = computed(()=> decodeURIComponent(roomName || '/'))
+const situationCount = computed(()=> props.situations.length)
+const fellowshipCount = computed(()=> props.fellowships.length)
+const heroCount = computed(()=> props.heroes.length)
+const roomDescription = useYMapField<RoomData, 'roomDescription'>(
+  room,
+  'roomDescription',
+  ''
+)
+const localRoomDescription = ref(roomDescription.value)
+const descriptionRef = ref<HTMLTextAreaElement | null>(null)
+
+useWatchWithDebounce(roomDescription, localRoomDescription, null, autoResizeDescription)
+
+function autoResizeDescription() {
+  const el = descriptionRef.value
+  if (!el) return
+
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
+}
+
+onMounted(()=> {
+  nextTick(autoResizeDescription)
+})
 
 function valueToJson(value: any): any {
   if (value instanceof Y.Map) {
@@ -78,6 +121,7 @@ function mapToJson(map: Y.Map<any>) {
 
 function toJson() {
   return {
+    roomDescription: roomDescription.value,
     situations: props.situations.map(entry=> mapToJson(entry.shard)),
     fellowships: props.fellowships.map(entry=> mapToJson(entry.shard)),
     heroes: props.heroes.map(entry=> mapToJson(entry.shard)),
@@ -190,27 +234,31 @@ function importRoom() {
     return
   }
 
+  if (typeof data.roomDescription === 'string') {
+    roomDescription.value = data.roomDescription
+  }
+
   const results = [
     importCollection(
       'Situation',
       data.situations,
       getSituationNameFromData,
-      name=> situations.has(name),
-      (name, item)=> situations.set(name, createSituationShardFromData(item)),
+      name=> situationMap.has(name),
+      (name, item)=> situationMap.set(name, createSituationShardFromData(item)),
     ),
     importCollection(
       'Fellowship',
       data.fellowships,
       getFellowshipNameFromData,
-      name=> fellowships.has(name),
-      (name, item)=> fellowships.set(name, createFellowshipShardFromData(item)),
+      name=> fellowshipMap.has(name),
+      (name, item)=> fellowshipMap.set(name, createFellowshipShardFromData(item)),
     ),
     importCollection(
       'Hero',
       data.heroes,
       getHeroCharacterNameFromData,
-      name=> heroes.has(name),
-      (name, item)=> heroes.set(name, createHeroShardFromData(item)),
+      name=> heroMap.has(name),
+      (name, item)=> heroMap.set(name, createHeroShardFromData(item)),
     ),
   ]
 
@@ -226,28 +274,78 @@ function importRoom() {
 
 <template>
   <section class="room">
-    <div class="room-heading">
-      <div>
-        <p class="label">ROOM</p>
-        <h2>{{ displayRoomName }}</h2>
+    <div class="tome">
+      <div class="page page-left">
+        <div class="room-heading">
+          <div>
+            <p class="label">ROOM</p>
+            <h2>{{ displayRoomName }}</h2>
+          </div>
+
+          <div class="room-actions">
+            <button
+              type="button"
+              class="icon-button"
+              aria-label="Copy room YAML"
+              title="Copy room YAML"
+              @click="copyToClipboard"
+            >
+              <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
+            </button>
+            <button type="button" @click="openImportForm">Import Room</button>
+          </div>
+        </div>
+
+        <p v-if="importMessage" class="import-message">{{ importMessage }}</p>
+        <p v-if="importError" class="import-error">{{ importError }}</p>
+
+        <div class="room-description">
+          <textarea
+            ref="descriptionRef"
+            v-model="localRoomDescription"
+            class="description-input"
+            :disabled="mode !== 'narrator'"
+            placeholder="Enter room description..."
+            @input="autoResizeDescription"
+          />
+        </div>
       </div>
 
-      <div class="room-actions">
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Copy room YAML"
-          title="Copy room YAML"
-          @click="copyToClipboard"
-        >
-          <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
-        </button>
-        <button type="button" @click="openImportForm">Import Room</button>
+      <div class="page page-right">
+        <div class="collection-box situation-box">
+          <div>
+            <p class="box-label">SITUATIONS</p>
+            <p class="box-count">{{ situationCount }}</p>
+          </div>
+          <div class="box-actions">
+            <button type="button" @click="emit('add-situation')">Add</button>
+            <button type="button" @click="emit('import-situation')">Import</button>
+          </div>
+        </div>
+
+        <div class="collection-box fellowship-box">
+          <div>
+            <p class="box-label">FELLOWSHIPS</p>
+            <p class="box-count">{{ fellowshipCount }}</p>
+          </div>
+          <div class="box-actions">
+            <button type="button" @click="emit('add-fellowship')">Add</button>
+            <button type="button" @click="emit('import-fellowship')">Import</button>
+          </div>
+        </div>
+
+        <div class="collection-box hero-box">
+          <div>
+            <p class="box-label">HEROES</p>
+            <p class="box-count">{{ heroCount }}</p>
+          </div>
+          <div class="box-actions">
+            <button type="button" @click="emit('add-hero')">Add</button>
+            <button type="button" @click="emit('import-hero')">Import</button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <p v-if="importMessage" class="import-message">{{ importMessage }}</p>
-    <p v-if="importError" class="import-error">{{ importError }}</p>
 
     <div
       v-if="showImportForm"
@@ -284,10 +382,57 @@ function importRoom() {
 .room {
   box-sizing: border-box;
   width: 100%;
-  padding: 1rem 1.5rem;
-  border-bottom: 0.15rem solid rgba(255, 255, 255, 0.18);
-  background: #282838;
-  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  color: #2d2418;
+  scroll-margin-top: 5.5rem;
+}
+
+.tome {
+  position: relative;
+  box-sizing: border-box;
+  width: min(100%, 68rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  filter: drop-shadow(0 0.45rem 0.65rem rgba(0, 0, 0, 0.25));
+}
+
+.tome::before {
+  content: "";
+  position: absolute;
+  top: 0.65rem;
+  bottom: 0.65rem;
+  left: 50%;
+  width: 0.22rem;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #9a7b52, #f0d9ad, #7a5b36);
+  border-radius: 999rem;
+  z-index: 1;
+}
+
+.page {
+  box-sizing: border-box;
+  min-height: 17rem;
+  padding: 1.15rem;
+  border: 0.22rem solid #8c6a3e;
+  background:
+    linear-gradient(90deg, rgba(139, 103, 59, 0.12), transparent 12%, transparent 88%, rgba(139, 103, 59, 0.1)),
+    #f8e8c8;
+}
+
+.page-left {
+  border-right-width: 0.1rem;
+  border-radius: 1.25rem 0.3rem 0.3rem 1.25rem;
+}
+
+.page-right {
+  border-left-width: 0.1rem;
+  border-radius: 0.3rem 1.25rem 1.25rem 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
 }
 
 .room-heading {
@@ -299,7 +444,7 @@ function importRoom() {
 
 .label {
   margin: 0;
-  color: #c9c9d8;
+  color: #705632;
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -318,13 +463,18 @@ function importRoom() {
 .room button {
   flex: 0 0 auto;
   padding: 0.45rem 0.75rem;
-  border: 0.15rem solid #aaa;
+  border: 0.15rem solid #8c6a3e;
   border-radius: 0.35rem;
-  background: #f4f4f4;
-  color: #222;
+  background: #fff7df;
+  color: #2d2418;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+.room button:hover,
+.room button:focus-visible {
+  background: white;
 }
 
 .icon-button {
@@ -353,6 +503,102 @@ function importRoom() {
 
 .import-error {
   color: #923727;
+}
+
+.room-description {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.description-input {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+
+  min-height: 12rem;
+  overflow: hidden;
+  resize: none;
+
+  font-size: larger;
+  line-height: 1.4;
+
+  padding: 0.75rem 0.85rem;
+
+  border: 0.1rem solid #d6c7a1;
+  border-radius: 0.5rem;
+
+  background: linear-gradient(180deg, #f8f1d4 0%, #efe4b0 100%);
+  color: #4a3b1f;
+
+  box-shadow:
+    inset 0 0 0.5rem rgba(0,0,0,0.08),
+    0 0.1rem 0.25rem rgba(0,0,0,0.1);
+
+  outline: none;
+}
+
+.description-input::placeholder {
+  color: #8a7a4f;
+}
+
+.description-input:disabled {
+  opacity: 1;
+}
+
+.collection-box {
+  box-sizing: border-box;
+  min-height: 4.65rem;
+  padding: 0.65rem;
+  border: 0.2rem solid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.situation-box {
+  border-color: #777;
+  background: #f4f4f4;
+  color: #222;
+}
+
+.fellowship-box {
+  border-color: #2c7ea0;
+  background: #bfe9ff;
+  color: #12384a;
+}
+
+.hero-box {
+  border-color: #853;
+  background: #fca;
+  color: #433;
+}
+
+.box-label,
+.box-count {
+  margin: 0;
+}
+
+.box-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.box-count {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.box-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.collection-box button {
+  padding: 0.35rem 0.55rem;
+  border-color: currentColor;
+  background: rgba(255, 255, 255, 0.65);
 }
 
 .modal-backdrop {
@@ -422,8 +668,32 @@ function importRoom() {
 }
 
 @media (max-width: 32rem) {
+  .room {
+    padding: 1rem;
+  }
+
+  .tome {
+    grid-template-columns: 1fr;
+  }
+
+  .tome::before {
+    display: none;
+  }
+
+  .page-left,
+  .page-right {
+    border-width: 0.22rem;
+    border-radius: 1rem;
+  }
+
+  .page-right {
+    margin-top: 0.75rem;
+  }
+
   .room-heading,
   .room-actions,
+  .collection-box,
+  .box-actions,
   .modal-actions {
     align-items: stretch;
     flex-direction: column;

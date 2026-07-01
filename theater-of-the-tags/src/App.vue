@@ -433,22 +433,13 @@ function deleteHero(name: string) {
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"
+      @add-situation="openSituationForm"
+      @import-situation="openSituationImportForm"
+      @add-fellowship="openFellowshipForm"
+      @import-fellowship="openFellowshipImportForm"
+      @add-hero="openHeroForm"
+      @import-hero="openHeroImportForm"
     />
-
-    <div class="toolbar">
-      <button type="button" @click="openSituationForm">Add Situation</button>
-      <button type="button" @click="openSituationImportForm">Import Situation YAML</button>
-    </div>
-
-    <div class="toolbar">
-      <button type="button" @click="openFellowshipForm">Add Fellowship</button>
-      <button type="button" @click="openFellowshipImportForm">Import Fellowship YAML</button>
-    </div>
-
-    <div class="toolbar">
-      <button type="button" @click="openHeroForm">Add Hero</button>
-      <button type="button" @click="openHeroImportForm">Import Hero YAML</button>
-    </div>
 
     <div
       v-if="showSituationForm"

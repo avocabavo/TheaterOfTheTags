@@ -49,6 +49,12 @@ function navLabel(name: string) {
   return name.slice(0, 5)
 }
 
+function scrollToRoom() {
+  document
+    .getElementById('room')
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 function scrollToSituation(situationName: string) {
   document
     .getElementById(situationId(situationName))
@@ -70,7 +76,13 @@ function scrollToHero(characterName: string) {
 
 <template>
   <div class="navbar">
-    <h1 class="title">Theater of the Tags</h1>
+    <button
+      type="button"
+      class="title"
+      @click="scrollToRoom"
+    >
+      Theater of the Tags
+    </button>
 
     <nav class="hero-navigation" aria-label="Hero navigation">
       <button
@@ -144,10 +156,21 @@ function scrollToHero(characterName: string) {
 
 .title {
   flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   font-size: 1.25rem;
   font-weight: 600;
+  font-family: inherit;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.title:hover,
+.title:focus-visible {
+  text-decoration: underline;
 }
 
 .hero-navigation {

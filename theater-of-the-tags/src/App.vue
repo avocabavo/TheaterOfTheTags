@@ -429,6 +429,7 @@ function deleteHero(name: string) {
       :heroes="heroEntries"
     />
     <Room
+      id="room"
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"

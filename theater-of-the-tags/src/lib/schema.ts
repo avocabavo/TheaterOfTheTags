@@ -154,3 +154,9 @@ export type FellowshipData = {
   specialImprovements: Y.Array<string>
 }
 export type FellowshipShard = Y.Map<any>
+
+export type SituationData = {
+  situationName: string
+  looseTags: Y.Array<TagShard | StatusTagShard>
+}
+export type SituationShard = Y.Map<any>

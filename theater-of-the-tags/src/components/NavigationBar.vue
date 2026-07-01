@@ -3,6 +3,9 @@ import { computed } from 'vue'
 import { useMode, type AppMode } from '../lib/modeStore'
 
 const props = defineProps<{
+  situations: {
+    situationName?: string
+  }[]
   fellowships: {
     fellowshipName?: string
   }[]
@@ -15,6 +18,11 @@ const { mode, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
 
+const navigableSituations = computed(()=> props.situations.filter(
+  (situation): situation is { situationName: string }=>
+    typeof situation.situationName === 'string' && situation.situationName.trim().length > 0
+))
+
 const navigableFellowships = computed(()=> props.fellowships.filter(
   (fellowship): fellowship is { fellowshipName: string }=>
     typeof fellowship.fellowshipName === 'string' && fellowship.fellowshipName.trim().length > 0
@@ -24,6 +32,10 @@ const navigableHeroes = computed(()=> props.heroes.filter(
   (hero): hero is { characterName: string }=>
     typeof hero.characterName === 'string' && hero.characterName.trim().length > 0
 ))
+
+function situationId(situationName: string) {
+  return `situation-${encodeURIComponent(situationName)}`
+}
 
 function fellowshipId(fellowshipName: string) {
   return `fellowship-${encodeURIComponent(fellowshipName)}`
@@ -35,6 +47,12 @@ function heroId(characterName: string) {
 
 function navLabel(name: string) {
   return name.slice(0, 5)
+}
+
+function scrollToSituation(situationName: string) {
+  document
+    .getElementById(situationId(situationName))
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function scrollToFellowship(fellowshipName: string) {
@@ -55,6 +73,17 @@ function scrollToHero(characterName: string) {
     <h1 class="title">Theater of the Tags</h1>
 
     <nav class="hero-navigation" aria-label="Hero navigation">
+      <button
+        v-for="situation in navigableSituations"
+        :key="situation.situationName"
+        type="button"
+        class="nav-button situation-button"
+        :title="situation.situationName"
+        :aria-label="`Scroll to ${situation.situationName}`"
+        @click="scrollToSituation(situation.situationName)"
+      >
+        {{ navLabel(situation.situationName) }}
+      </button>
       <button
         v-for="fellowship in navigableFellowships"
         :key="fellowship.fellowshipName"
@@ -144,6 +173,12 @@ function scrollToHero(characterName: string) {
   cursor: pointer;
 }
 
+.situation-button {
+  border: 0.2rem solid #777;
+  background: #f4f4f4;
+  color: #222;
+}
+
 .fellowship-button {
   border: 0.2rem solid #2c7ea0;
   background: #bfe9ff;
@@ -154,6 +189,12 @@ function scrollToHero(characterName: string) {
   border: 0.2rem solid #853;
   background: #fca;
   color: #433;
+}
+
+.situation-button:hover,
+.situation-button:focus-visible {
+  background: #d7d7d7;
+  color: #222;
 }
 
 .fellowship-button:hover,

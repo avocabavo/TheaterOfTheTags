@@ -6,7 +6,7 @@ import NavigationBar from './components/NavigationBar.vue'
 import StatusTag from './components/StatusTag.vue'
 import Tag from './components/Tag.vue'
 import { createStatusTagShard } from './lib/StatusTag'
-import { fellowships, heroes, statusTags, tags, themes } from './lib/yjs'
+import { fellowships, heroes, situations, statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
 import { createThemeShard } from './lib/Theme'
 import Theme from './components/Theme.vue'
@@ -24,6 +24,13 @@ import {
   getFellowshipNameFromData,
   parseFellowshipDataFromYaml,
 } from './lib/Fellowship'
+import Situation from './components/Situation.vue'
+import {
+  createSituationShard,
+  createSituationShardFromData,
+  getSituationNameFromData,
+  parseSituationDataFromYaml,
+} from './lib/Situation'
 
 type HeroEntry = {
   name: string
@@ -37,6 +44,12 @@ type FellowshipEntry = {
   shard: Y.Map<any>
 }
 
+type SituationEntry = {
+  name: string
+  situationName: string
+  shard: Y.Map<any>
+}
+
 const newStatusName = ref('')
 const statusNames = ref<string[]>([])
 
@@ -45,6 +58,13 @@ const tagNames = ref<string[]>([])
 
 const newThemePrimaryTagName = ref('')
 const themeNames = ref<string[]>([])
+
+const newSituationName = ref('')
+const situationNames = ref<string[]>([])
+const showSituationForm = ref(false)
+const showSituationImportForm = ref(false)
+const situationYamlText = ref('')
+const situationImportError = ref('')
 
 const newFellowshipName = ref('')
 const fellowshipNames = ref<string[]>([])
@@ -90,6 +110,11 @@ function syncThemeNames() {
   themeNames.value = Array.from(themes.keys())
 }
 
+function syncSituationNames() {
+  situationNames.value = Array.from(situations.keys())
+    .filter((name): name is string => typeof name === 'string' && !!name.trim())
+}
+
 function syncFellowshipNames() {
   fellowshipNames.value = Array.from(fellowships.keys())
     .filter((name): name is string => typeof name === 'string' && !!name.trim())
@@ -104,6 +129,7 @@ const observer = ()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncSituationNames()
   syncFellowshipNames()
   syncHeroNames()
 }
@@ -112,11 +138,13 @@ onMounted(()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncSituationNames()
   syncFellowshipNames()
   syncHeroNames()
   statusTags.observe(observer)
   tags.observe(observer)
   themes.observe(observer)
+  situations.observe(observer)
   fellowships.observe(observer)
   heroes.observe(observer)
 })
@@ -125,6 +153,7 @@ onUnmounted(()=> {
   statusTags.unobserve(observer)
   tags.unobserve(observer)
   themes.unobserve(observer)
+  situations.unobserve(observer)
   fellowships.unobserve(observer)
   heroes.unobserve(observer)
 })
@@ -154,6 +183,24 @@ const themeEntries = computed(()=>
       shard: themes.get(name)
     }))
     .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
+)
+
+const situationEntries = computed(()=>
+  situationNames.value
+    .map(name=> {
+      const shard = situations.get(name)
+      const shardSituationName = shard?.get('situationName')
+      const situationName = typeof shardSituationName === 'string' && shardSituationName.trim()
+        ? shardSituationName
+        : name
+
+      return {
+        name,
+        situationName,
+        shard
+      }
+    })
+    .filter((entry): entry is SituationEntry=> !!entry.shard)
 )
 
 const fellowshipEntries = computed(()=>
@@ -196,6 +243,10 @@ function heroId(characterName: string) {
   return `hero-${encodeURIComponent(characterName)}`
 }
 
+function situationId(situationName: string) {
+  return `situation-${encodeURIComponent(situationName)}`
+}
+
 function fellowshipId(fellowshipName: string) {
   return `fellowship-${encodeURIComponent(fellowshipName)}`
 }
@@ -226,6 +277,66 @@ function addTheme() {
     primaryTagName: name
   }))
   newThemePrimaryTagName.value = ''
+}
+
+function addSituation() {
+  const situationName = newSituationName.value.trim()
+  if (!situationName || situations.has(situationName)) return
+
+  situations.set(situationName, createSituationShard({ situationName }))
+  newSituationName.value = ''
+}
+
+function openSituationForm() {
+  showSituationForm.value = true
+}
+
+function closeSituationForm() {
+  showSituationForm.value = false
+}
+
+function openSituationImportForm() {
+  situationImportError.value = ''
+  showSituationImportForm.value = true
+}
+
+function closeSituationImportForm() {
+  showSituationImportForm.value = false
+  situationImportError.value = ''
+}
+
+function createSituationFromForm() {
+  const situationName = newSituationName.value.trim()
+  if (!situationName || situations.has(situationName)) return
+
+  addSituation()
+  closeSituationForm()
+}
+
+function importSituationFromYaml() {
+  situationImportError.value = ''
+
+  try {
+    const situationData = parseSituationDataFromYaml(situationYamlText.value)
+    const situationName = getSituationNameFromData(situationData)
+
+    if (!situationName) {
+      situationImportError.value = 'Situation YAML needs a situation name'
+      return
+    }
+
+    if (situations.has(situationName)) {
+      situationImportError.value = 'A situation with that name already exists'
+      return
+    }
+
+    const situationShard = createSituationShardFromData(situationData)
+    situations.set(situationName, situationShard)
+    situationYamlText.value = ''
+    closeSituationImportForm()
+  } catch (e) {
+    situationImportError.value = e instanceof Error ? e.message : 'Invalid situation YAML'
+  }
 }
 
 function addFellowship() {
@@ -402,6 +513,10 @@ function deleteTheme(name: string) {
   themes.delete(name)
 }
 
+function deleteSituation(name: string) {
+  situations.delete(name)
+}
+
 function deleteFellowship(name: string) {
   fellowships.delete(name)
 }
@@ -413,7 +528,11 @@ function deleteHero(name: string) {
 
 <template>
   <main>
-    <NavigationBar :fellowships="fellowshipEntries" :heroes="heroEntries" />
+    <NavigationBar
+      :situations="situationEntries"
+      :fellowships="fellowshipEntries"
+      :heroes="heroEntries"
+    />
 
     <div class="toolbar">
       <input
@@ -467,8 +586,79 @@ function deleteHero(name: string) {
     </div>
 
     <div class="toolbar">
+      <button type="button" @click="openSituationForm">Add Situation</button>
+      <button type="button" @click="openSituationImportForm">Import Situation YAML</button>
+    </div>
+
+    <div class="toolbar">
       <button type="button" @click="openFellowshipForm">Add Fellowship</button>
       <button type="button" @click="openFellowshipImportForm">Import Fellowship YAML</button>
+    </div>
+
+    <div class="toolbar">
+      <button type="button" @click="openHeroForm">Add Hero</button>
+      <button type="button" @click="openHeroImportForm">Import Hero YAML</button>
+    </div>
+
+    <div
+      v-if="showSituationForm"
+      class="modal-backdrop"
+      @click.self="closeSituationForm"
+    >
+      <form class="hero-form-modal situation-form-modal" @submit.prevent="createSituationFromForm">
+        <h2>Create Situation</h2>
+
+        <label class="form-field">
+          <span>Situation Name</span>
+          <input
+            v-model="newSituationName"
+            placeholder="Enter situation name"
+          />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeSituationForm">
+            Cancel
+          </button>
+          <button type="submit">Create Situation</button>
+        </div>
+      </form>
+    </div>
+    <div
+      v-if="showSituationImportForm"
+      class="modal-backdrop"
+      @click.self="closeSituationImportForm"
+    >
+      <form class="hero-form-modal situation-form-modal" @submit.prevent="importSituationFromYaml">
+        <h2>Import Situation YAML</h2>
+
+        <label class="form-field">
+          <span>Situation YAML</span>
+          <textarea
+            v-model="situationYamlText"
+            placeholder="Paste situation YAML"
+            @input="situationImportError = ''"
+          />
+        </label>
+
+        <p v-if="situationImportError" class="form-error">{{ situationImportError }}</p>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeSituationImportForm">
+            Cancel
+          </button>
+          <button type="submit" :disabled="!situationYamlText.trim()">Import</button>
+        </div>
+      </form>
+    </div>
+    <div class="tag-holder">
+      <Situation
+        v-for="entry in situationEntries"
+        :id="situationId(entry.situationName)"
+        :key="entry.name"
+        :shard="entry.shard"
+        @delete="deleteSituation(entry.name)"
+      />
     </div>
 
     <div
@@ -530,11 +720,6 @@ function deleteHero(name: string) {
         :shard="entry.shard"
         @delete="deleteFellowship(entry.name)"
       />
-    </div>
-
-    <div class="toolbar">
-      <button type="button" @click="openHeroForm">Add Hero</button>
-      <button type="button" @click="openHeroImportForm">Import Hero YAML</button>
     </div>
 
     <div
@@ -713,6 +898,27 @@ function deleteHero(name: string) {
 
 .hero-form-modal .secondary-button {
   background: #f7d5b7;
+}
+
+.situation-form-modal {
+  border-color: #777;
+  background: #f4f4f4;
+  color: #222;
+}
+
+.situation-form-modal .form-field input,
+.situation-form-modal .form-field textarea {
+  border-color: #777;
+}
+
+.situation-form-modal button {
+  border-color: #777;
+  background: #d7d7d7;
+  color: #222;
+}
+
+.situation-form-modal .secondary-button {
+  background: white;
 }
 
 .fellowship-form-modal {

@@ -61,7 +61,11 @@ defineExpose({
       v-if="mode !== 'creation'"
       type="button"
       class="usage-indicator"
-      :class="{ tapped: usage === 'tapped' }"
+      :class="{
+        tapped: usage === 'tapped',
+        hidden: scratched && usage === 'ready',
+      }"
+      :disabled="scratched && usage === 'ready'"
       :aria-label="`Tag usage: ${usage}`"
       :title="`Usage: ${usage}`"
       @click.stop="toggleUsage"
@@ -206,6 +210,10 @@ defineExpose({
 
 .usage-indicator.tapped {
   cursor: default;
+}
+
+.usage-indicator.hidden {
+  visibility: hidden;
 }
 
 .icon {

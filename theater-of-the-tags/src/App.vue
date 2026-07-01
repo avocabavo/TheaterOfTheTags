@@ -3,13 +3,7 @@ import * as Y from 'yjs'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import NavigationBar from './components/NavigationBar.vue'
-import StatusTag from './components/StatusTag.vue'
-import Tag from './components/Tag.vue'
-import { createStatusTagShard } from './lib/StatusTag'
-import { fellowships, heroes, situations, statusTags, tags, themes } from './lib/yjs'
-import { createTagShard } from './lib/Tag'
-import { createThemeShard } from './lib/Theme'
-import Theme from './components/Theme.vue'
+import { fellowships, heroes, situations } from './lib/yjs'
 import {
   createHeroShard,
   createHeroShardFromData,
@@ -50,15 +44,6 @@ type SituationEntry = {
   shard: Y.Map<any>
 }
 
-const newStatusName = ref('')
-const statusNames = ref<string[]>([])
-
-const newTagName = ref('')
-const tagNames = ref<string[]>([])
-
-const newThemePrimaryTagName = ref('')
-const themeNames = ref<string[]>([])
-
 const newSituationName = ref('')
 const situationNames = ref<string[]>([])
 const showSituationForm = ref(false)
@@ -98,18 +83,6 @@ const randomHeroLastNameParts = [
   'clog', 'glow', 'fever', 'gale', 'zephyr', 'camp', 'lion', 'find',
 ]
 
-function syncStatusNames() {
-  statusNames.value = Array.from(statusTags.keys())
-}
-
-function syncTagNames() {
-  tagNames.value = Array.from(tags.keys())
-}
-
-function syncThemeNames() {
-  themeNames.value = Array.from(themes.keys())
-}
-
 function syncSituationNames() {
   situationNames.value = Array.from(situations.keys())
     .filter((name): name is string => typeof name === 'string' && !!name.trim())
@@ -126,64 +99,25 @@ function syncHeroNames() {
 }
 
 const observer = ()=> {
-  syncStatusNames()
-  syncTagNames()
-  syncThemeNames()
   syncSituationNames()
   syncFellowshipNames()
   syncHeroNames()
 }
 
 onMounted(()=> {
-  syncStatusNames()
-  syncTagNames()
-  syncThemeNames()
   syncSituationNames()
   syncFellowshipNames()
   syncHeroNames()
-  statusTags.observe(observer)
-  tags.observe(observer)
-  themes.observe(observer)
   situations.observe(observer)
   fellowships.observe(observer)
   heroes.observe(observer)
 })
 
 onUnmounted(()=> {
-  statusTags.unobserve(observer)
-  tags.unobserve(observer)
-  themes.unobserve(observer)
   situations.unobserve(observer)
   fellowships.unobserve(observer)
   heroes.unobserve(observer)
 })
-
-const statusEntries = computed(()=>
-  statusNames.value
-    .map(name=> ({
-      name,
-      shard: statusTags.get(name)
-    }))
-    .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
-)
-
-const tagEntries = computed(()=>
-  tagNames.value
-    .map(name=> ({
-      name,
-      shard: tags.get(name)
-    }))
-    .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
-)
-
-const themeEntries = computed(()=>
-  themeNames.value
-    .map(name=> ({
-      name,
-      shard: themes.get(name)
-    }))
-    .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
-)
 
 const situationEntries = computed(()=>
   situationNames.value
@@ -249,34 +183,6 @@ function situationId(situationName: string) {
 
 function fellowshipId(fellowshipName: string) {
   return `fellowship-${encodeURIComponent(fellowshipName)}`
-}
-
-function addStatus() {
-  const name = newStatusName.value.trim()
-  if (!name || statusTags.has(name)) return
-
-  statusTags.set(name, createStatusTagShard({name}))
-  newStatusName.value = ''
-}
-
-function addTag() {
-  const name = newTagName.value.trim()
-  if (!name || tags.has(name)) return
-
-  tags.set(name, createTagShard({name}))
-  newTagName.value = ''
-}
-
-function addTheme() {
-  const name = newThemePrimaryTagName.value.trim()
-  if (!name || themes.has(name)) return
-
-  themes.set(name, createThemeShard({
-    might: 'origin',
-    themeType: 'circumstance',
-    primaryTagName: name
-  }))
-  newThemePrimaryTagName.value = ''
 }
 
 function addSituation() {
@@ -501,18 +407,6 @@ function generateRandomHeroName() {
   newHeroCharacterName.value = characterName
 }
 
-function deleteStatus(name: string) {
-  statusTags.delete(name)
-}
-
-function deleteTag(name: string) {
-  tags.delete(name)
-}
-
-function deleteTheme(name: string) {
-  themes.delete(name)
-}
-
 function deleteSituation(name: string) {
   situations.delete(name)
 }
@@ -533,57 +427,6 @@ function deleteHero(name: string) {
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"
     />
-
-    <div class="toolbar">
-      <input
-        v-model="newStatusName"
-        placeholder="Enter status name"
-        @keyup.enter="addStatus"
-      />
-      <button @click="addStatus">Add Status</button>
-    </div>
-    <div class="tag-holder">
-      <StatusTag
-        v-for="entry in statusEntries"
-        :key="entry.name"
-        :shard="entry.shard"
-        @delete="deleteStatus(entry.name)"
-      />
-    </div>
-
-    <div class="toolbar">
-      <input
-        v-model="newTagName"
-        placeHolder="Enter tag name"
-        @keyup.enter="addTag"
-      />
-      <button @click="addTag">Add Tag</button>
-    </div>
-    <div class="tag-holder">
-      <Tag
-        v-for="entry in tagEntries"
-        :key="entry.name"
-        :shard="entry.shard"
-        @delete="deleteTag(entry.name)"
-      />
-    </div>
-
-    <div class="toolbar">
-      <input
-        v-model="newThemePrimaryTagName"
-        placeHolder="Enter theme name"
-        @keyup.enter="addTheme"
-      />
-      <button @click="addTheme">Add Theme</button>
-    </div>
-    <div class="tag-holder">
-      <Theme
-        v-for="entry in themeEntries"
-        :key="entry.name"
-        :shard="entry.shard"
-        @delete="deleteTheme(entry.name)"
-      />
-    </div>
 
     <div class="toolbar">
       <button type="button" @click="openSituationForm">Add Situation</button>

@@ -19,3 +19,7 @@ export const themes = doc.getMap<Y.Map<any>>('themes')
 export const situations = doc.getMap<Y.Map<any>>('situations')
 export const fellowships = doc.getMap<Y.Map<any>>('fellowships')
 export const heroes = doc.getMap<Y.Map<any>>('heroes')
+
+export const situationOrder = doc.getArray<string>('situationOrder')
+export const fellowshipOrder = doc.getArray<string>('fellowshipOrder')
+export const heroOrder = doc.getArray<string>('heroOrder')

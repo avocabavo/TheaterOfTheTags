@@ -4,7 +4,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import NavigationBar from './components/NavigationBar.vue'
 import Room from './components/Room.vue'
-import { fellowships, heroes, situations } from './lib/yjs'
+import {
+  fellowshipOrder,
+  fellowships,
+  heroOrder,
+  heroes,
+  situationOrder,
+  situations,
+} from './lib/yjs'
 import {
   createHeroShard,
   createHeroShardFromData,
@@ -26,6 +33,7 @@ import {
   getSituationNameFromData,
   parseSituationDataFromYaml,
 } from './lib/Situation'
+import { useDragDrop } from './lib/util'
 
 type HeroEntry = {
   name: string
@@ -84,19 +92,67 @@ const randomHeroLastNameParts = [
   'clog', 'glow', 'fever', 'gale', 'zephyr', 'camp', 'lion', 'find',
 ]
 
-function syncSituationNames() {
-  situationNames.value = Array.from(situations.keys())
+function normalizeOrderedNames(map: Y.Map<any>, order: Y.Array<string>) {
+  const keys = Array.from(map.keys())
     .filter((name): name is string => typeof name === 'string' && !!name.trim())
+  const keySet = new Set(keys)
+  const seen = new Set<string>()
+  const normalized: string[] = []
+
+  order.toArray().forEach(name=> {
+    if (!keySet.has(name) || seen.has(name)) return
+    seen.add(name)
+    normalized.push(name)
+  })
+
+  keys.forEach(name=> {
+    if (seen.has(name)) return
+    seen.add(name)
+    normalized.push(name)
+  })
+
+  const current = order.toArray()
+  const changed = (
+    current.length !== normalized.length
+    || current.some((name, index)=> name !== normalized[index])
+  )
+
+  if (changed) {
+    order.doc?.transact(()=> {
+      order.delete(0, order.length)
+      order.insert(0, normalized)
+    })
+  }
+
+  return normalized
+}
+
+function moveOrderedName(order: Y.Array<string>, from: number, to: number) {
+  if (from === to) return
+  const name = order.get(from)
+  if (!name) return
+
+  order.doc?.transact(()=> {
+    order.delete(from, 1)
+    order.insert(to, [name])
+  })
+}
+
+function appendOrderedName(order: Y.Array<string>, name: string) {
+  if (order.toArray().includes(name)) return
+  order.push([name])
+}
+
+function syncSituationNames() {
+  situationNames.value = normalizeOrderedNames(situations, situationOrder)
 }
 
 function syncFellowshipNames() {
-  fellowshipNames.value = Array.from(fellowships.keys())
-    .filter((name): name is string => typeof name === 'string' && !!name.trim())
+  fellowshipNames.value = normalizeOrderedNames(fellowships, fellowshipOrder)
 }
 
 function syncHeroNames() {
-  heroNames.value = Array.from(heroes.keys())
-    .filter((name): name is string => typeof name === 'string' && !!name.trim())
+  heroNames.value = normalizeOrderedNames(heroes, heroOrder)
 }
 
 const observer = ()=> {
@@ -110,15 +166,78 @@ onMounted(()=> {
   syncFellowshipNames()
   syncHeroNames()
   situations.observe(observer)
+  situationOrder.observe(observer)
   fellowships.observe(observer)
+  fellowshipOrder.observe(observer)
   heroes.observe(observer)
+  heroOrder.observe(observer)
 })
 
 onUnmounted(()=> {
   situations.unobserve(observer)
+  situationOrder.unobserve(observer)
   fellowships.unobserve(observer)
+  fellowshipOrder.unobserve(observer)
   heroes.unobserve(observer)
+  heroOrder.unobserve(observer)
 })
+
+const {
+  onDrag: onSituationDrag,
+  onDrop: onSituationDrop,
+} = useDragDrop((from, to)=> moveOrderedName(situationOrder, from, to), syncSituationNames)
+
+const {
+  onDrag: onFellowshipDrag,
+  onDrop: onFellowshipDrop,
+} = useDragDrop((from, to)=> moveOrderedName(fellowshipOrder, from, to), syncFellowshipNames)
+
+const {
+  onDrag: onHeroDrag,
+  onDrop: onHeroDrop,
+} = useDragDrop((from, to)=> moveOrderedName(heroOrder, from, to), syncHeroNames)
+
+type TopLevelDragKind = 'situation' | 'fellowship' | 'hero'
+let activeTopLevelDrag: TopLevelDragKind | null = null
+
+function startedOnTopLevelDraggable(event: DragEvent) {
+  const target = event.target
+  const currentTarget = event.currentTarget
+  if (!(target instanceof Element)) return false
+  if (!(currentTarget instanceof HTMLElement)) return false
+
+  return target.closest('[draggable="true"]') === currentTarget
+}
+
+function handleTopLevelDragStart(
+  event: DragEvent,
+  kind: TopLevelDragKind,
+  index: number,
+  onDrag: (index: number)=> void,
+) {
+  if (!startedOnTopLevelDraggable(event)) {
+    activeTopLevelDrag = null
+    return
+  }
+
+  activeTopLevelDrag = kind
+  onDrag(index)
+}
+
+function handleTopLevelDrop(
+  kind: TopLevelDragKind,
+  index: number,
+  onDrop: (index: number)=> void,
+) {
+  if (activeTopLevelDrag !== kind) return
+
+  onDrop(index)
+  activeTopLevelDrag = null
+}
+
+function clearTopLevelDrag() {
+  activeTopLevelDrag = null
+}
 
 const situationEntries = computed(()=>
   situationNames.value
@@ -191,6 +310,7 @@ function addSituation() {
   if (!situationName || situations.has(situationName)) return
 
   situations.set(situationName, createSituationShard({ situationName }))
+  appendOrderedName(situationOrder, situationName)
   newSituationName.value = ''
 }
 
@@ -239,6 +359,7 @@ function importSituationFromYaml() {
 
     const situationShard = createSituationShardFromData(situationData)
     situations.set(situationName, situationShard)
+    appendOrderedName(situationOrder, situationName)
     situationYamlText.value = ''
     closeSituationImportForm()
   } catch (e) {
@@ -251,6 +372,7 @@ function addFellowship() {
   if (!fellowshipName || fellowships.has(fellowshipName)) return
 
   fellowships.set(fellowshipName, createFellowshipShard({ fellowshipName }))
+  appendOrderedName(fellowshipOrder, fellowshipName)
   newFellowshipName.value = ''
 }
 
@@ -299,6 +421,7 @@ function importFellowshipFromYaml() {
 
     const fellowshipShard = createFellowshipShardFromData(fellowshipData)
     fellowships.set(fellowshipName, fellowshipShard)
+    appendOrderedName(fellowshipOrder, fellowshipName)
     fellowshipYamlText.value = ''
     closeFellowshipImportForm()
   } catch (e) {
@@ -315,6 +438,7 @@ function addHero() {
   heroes.set(characterName, createHeroShard({
     characterName, playerName
   }))
+  appendOrderedName(heroOrder, characterName)
   newHeroCharacterName.value = ''
   newHeroPlayerName.value = ''
 }
@@ -365,6 +489,7 @@ function importHeroFromYaml() {
 
     const heroShard = createHeroShardFromData(heroData)
     heroes.set(characterName, heroShard)
+    appendOrderedName(heroOrder, characterName)
     heroYamlText.value = ''
     closeHeroImportForm()
   } catch (e) {
@@ -494,10 +619,15 @@ function deleteHero(name: string) {
     </div>
     <div class="tag-holder">
       <Situation
-        v-for="entry in situationEntries"
+        v-for="(entry, index) in situationEntries"
         :id="situationId(entry.situationName)"
         :key="entry.name"
         :shard="entry.shard"
+        draggable="true"
+        @dragstart="handleTopLevelDragStart($event, 'situation', index, onSituationDrag)"
+        @dragend="clearTopLevelDrag"
+        @dragover.prevent
+        @drop="handleTopLevelDrop('situation', index, onSituationDrop)"
         @delete="deleteSituation(entry.name)"
       />
     </div>
@@ -555,10 +685,15 @@ function deleteHero(name: string) {
     </div>
     <div class="tag-holder">
       <Fellowship
-        v-for="entry in fellowshipEntries"
+        v-for="(entry, index) in fellowshipEntries"
         :id="fellowshipId(entry.fellowshipName)"
         :key="entry.name"
         :shard="entry.shard"
+        draggable="true"
+        @dragstart="handleTopLevelDragStart($event, 'fellowship', index, onFellowshipDrag)"
+        @dragend="clearTopLevelDrag"
+        @dragover.prevent
+        @drop="handleTopLevelDrop('fellowship', index, onFellowshipDrop)"
         @delete="deleteFellowship(entry.name)"
       />
     </div>
@@ -633,10 +768,15 @@ function deleteHero(name: string) {
     </div>
     <div class="tag-holder">
       <Hero
-        v-for="entry in heroEntries"
+        v-for="(entry, index) in heroEntries"
         :id="heroId(entry.characterName)"
         :key="entry.name"
         :shard="entry.shard"
+        draggable="true"
+        @dragstart="handleTopLevelDragStart($event, 'hero', index, onHeroDrag)"
+        @dragend="clearTopLevelDrag"
+        @dragover.prevent
+        @drop="handleTopLevelDrop('hero', index, onHeroDrop)"
         @delete="deleteHero(entry.name)"
       />
     </div>

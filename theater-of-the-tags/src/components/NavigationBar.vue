@@ -3,6 +3,9 @@ import { computed } from 'vue'
 import { useMode, type AppMode } from '../lib/modeStore'
 
 const props = defineProps<{
+  fellowships: {
+    fellowshipName?: string
+  }[]
   heroes: {
     characterName?: string
   }[]
@@ -12,17 +15,32 @@ const { mode, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
 
+const navigableFellowships = computed(()=> props.fellowships.filter(
+  (fellowship): fellowship is { fellowshipName: string }=>
+    typeof fellowship.fellowshipName === 'string' && fellowship.fellowshipName.trim().length > 0
+))
+
 const navigableHeroes = computed(()=> props.heroes.filter(
   (hero): hero is { characterName: string }=>
     typeof hero.characterName === 'string' && hero.characterName.trim().length > 0
 ))
 
+function fellowshipId(fellowshipName: string) {
+  return `fellowship-${encodeURIComponent(fellowshipName)}`
+}
+
 function heroId(characterName: string) {
   return `hero-${encodeURIComponent(characterName)}`
 }
 
-function heroLabel(characterName: string) {
-  return characterName.slice(0, 5)
+function navLabel(name: string) {
+  return name.slice(0, 5)
+}
+
+function scrollToFellowship(fellowshipName: string) {
+  document
+    .getElementById(fellowshipId(fellowshipName))
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function scrollToHero(characterName: string) {
@@ -38,15 +56,26 @@ function scrollToHero(characterName: string) {
 
     <nav class="hero-navigation" aria-label="Hero navigation">
       <button
+        v-for="fellowship in navigableFellowships"
+        :key="fellowship.fellowshipName"
+        type="button"
+        class="nav-button fellowship-button"
+        :title="fellowship.fellowshipName"
+        :aria-label="`Scroll to ${fellowship.fellowshipName}`"
+        @click="scrollToFellowship(fellowship.fellowshipName)"
+      >
+        {{ navLabel(fellowship.fellowshipName) }}
+      </button>
+      <button
         v-for="hero in navigableHeroes"
         :key="hero.characterName"
         type="button"
-        class="hero-button"
+        class="nav-button hero-button"
         :title="hero.characterName"
         :aria-label="`Scroll to ${hero.characterName}`"
         @click="scrollToHero(hero.characterName)"
       >
-        {{ heroLabel(hero.characterName) }}
+        {{ navLabel(hero.characterName) }}
       </button>
     </nav>
 
@@ -102,12 +131,8 @@ function scrollToHero(characterName: string) {
   padding: 0.25rem 0;
 }
 
-.hero-button {
+.nav-button {
   flex: 0 0 auto;
-
-  border: 0.2rem solid #853;
-  background: #fca;
-  color: #433;
 
   min-width: 3.25rem;
   padding: 0.4rem 0.65rem;
@@ -117,6 +142,24 @@ function scrollToHero(characterName: string) {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+}
+
+.fellowship-button {
+  border: 0.2rem solid #2c7ea0;
+  background: #bfe9ff;
+  color: #12384a;
+}
+
+.hero-button {
+  border: 0.2rem solid #853;
+  background: #fca;
+  color: #433;
+}
+
+.fellowship-button:hover,
+.fellowship-button:focus-visible {
+  background: #62b7dc;
+  color: #12384a;
 }
 
 .hero-button:hover,

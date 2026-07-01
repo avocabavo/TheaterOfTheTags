@@ -6,7 +6,7 @@ import NavigationBar from './components/NavigationBar.vue'
 import StatusTag from './components/StatusTag.vue'
 import Tag from './components/Tag.vue'
 import { createStatusTagShard } from './lib/StatusTag'
-import { heroes, statusTags, tags, themes } from './lib/yjs'
+import { fellowships, heroes, statusTags, tags, themes } from './lib/yjs'
 import { createTagShard } from './lib/Tag'
 import { createThemeShard } from './lib/Theme'
 import Theme from './components/Theme.vue'
@@ -17,10 +17,23 @@ import {
   parseHeroDataFromYaml,
 } from './lib/Hero'
 import Hero from './components/Hero.vue'
+import Fellowship from './components/Fellowship.vue'
+import {
+  createFellowshipShard,
+  createFellowshipShardFromData,
+  getFellowshipNameFromData,
+  parseFellowshipDataFromYaml,
+} from './lib/Fellowship'
 
 type HeroEntry = {
   name: string
   characterName: string
+  shard: Y.Map<any>
+}
+
+type FellowshipEntry = {
+  name: string
+  fellowshipName: string
   shard: Y.Map<any>
 }
 
@@ -32,6 +45,13 @@ const tagNames = ref<string[]>([])
 
 const newThemePrimaryTagName = ref('')
 const themeNames = ref<string[]>([])
+
+const newFellowshipName = ref('')
+const fellowshipNames = ref<string[]>([])
+const showFellowshipForm = ref(false)
+const showFellowshipImportForm = ref(false)
+const fellowshipYamlText = ref('')
+const fellowshipImportError = ref('')
 
 const newHeroCharacterName = ref('')
 const newHeroPlayerName = ref('')
@@ -70,6 +90,11 @@ function syncThemeNames() {
   themeNames.value = Array.from(themes.keys())
 }
 
+function syncFellowshipNames() {
+  fellowshipNames.value = Array.from(fellowships.keys())
+    .filter((name): name is string => typeof name === 'string' && !!name.trim())
+}
+
 function syncHeroNames() {
   heroNames.value = Array.from(heroes.keys())
     .filter((name): name is string => typeof name === 'string' && !!name.trim())
@@ -79,6 +104,7 @@ const observer = ()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncFellowshipNames()
   syncHeroNames()
 }
 
@@ -86,10 +112,12 @@ onMounted(()=> {
   syncStatusNames()
   syncTagNames()
   syncThemeNames()
+  syncFellowshipNames()
   syncHeroNames()
   statusTags.observe(observer)
   tags.observe(observer)
   themes.observe(observer)
+  fellowships.observe(observer)
   heroes.observe(observer)
 })
 
@@ -97,6 +125,7 @@ onUnmounted(()=> {
   statusTags.unobserve(observer)
   tags.unobserve(observer)
   themes.unobserve(observer)
+  fellowships.unobserve(observer)
   heroes.unobserve(observer)
 })
 
@@ -127,6 +156,24 @@ const themeEntries = computed(()=>
     .filter((entry): entry is { name: string; shard: Y.Map<any> }=> !!entry.shard)
 )
 
+const fellowshipEntries = computed(()=>
+  fellowshipNames.value
+    .map(name=> {
+      const shard = fellowships.get(name)
+      const shardFellowshipName = shard?.get('fellowshipName')
+      const fellowshipName = typeof shardFellowshipName === 'string' && shardFellowshipName.trim()
+        ? shardFellowshipName
+        : name
+
+      return {
+        name,
+        fellowshipName,
+        shard
+      }
+    })
+    .filter((entry): entry is FellowshipEntry=> !!entry.shard)
+)
+
 const heroEntries = computed(()=>
   heroNames.value
     .map(name=> {
@@ -147,6 +194,10 @@ const heroEntries = computed(()=>
 
 function heroId(characterName: string) {
   return `hero-${encodeURIComponent(characterName)}`
+}
+
+function fellowshipId(fellowshipName: string) {
+  return `fellowship-${encodeURIComponent(fellowshipName)}`
 }
 
 function addStatus() {
@@ -175,6 +226,66 @@ function addTheme() {
     primaryTagName: name
   }))
   newThemePrimaryTagName.value = ''
+}
+
+function addFellowship() {
+  const fellowshipName = newFellowshipName.value.trim()
+  if (!fellowshipName || fellowships.has(fellowshipName)) return
+
+  fellowships.set(fellowshipName, createFellowshipShard({ fellowshipName }))
+  newFellowshipName.value = ''
+}
+
+function openFellowshipForm() {
+  showFellowshipForm.value = true
+}
+
+function closeFellowshipForm() {
+  showFellowshipForm.value = false
+}
+
+function openFellowshipImportForm() {
+  fellowshipImportError.value = ''
+  showFellowshipImportForm.value = true
+}
+
+function closeFellowshipImportForm() {
+  showFellowshipImportForm.value = false
+  fellowshipImportError.value = ''
+}
+
+function createFellowshipFromForm() {
+  const fellowshipName = newFellowshipName.value.trim()
+  if (!fellowshipName || fellowships.has(fellowshipName)) return
+
+  addFellowship()
+  closeFellowshipForm()
+}
+
+function importFellowshipFromYaml() {
+  fellowshipImportError.value = ''
+
+  try {
+    const fellowshipData = parseFellowshipDataFromYaml(fellowshipYamlText.value)
+    const fellowshipName = getFellowshipNameFromData(fellowshipData)
+
+    if (!fellowshipName) {
+      fellowshipImportError.value = 'Fellowship YAML needs a fellowship name'
+      return
+    }
+
+    if (fellowships.has(fellowshipName)) {
+      fellowshipImportError.value = 'A fellowship with that name already exists'
+      return
+    }
+
+    const fellowshipShard = createFellowshipShardFromData(fellowshipData)
+    fellowships.set(fellowshipName, fellowshipShard)
+    fellowshipYamlText.value = ''
+    closeFellowshipImportForm()
+  } catch (e) {
+    fellowshipImportError.value = e instanceof Error ? e.message : 'Invalid fellowship YAML'
+  }
 }
 
 function addHero() {
@@ -291,14 +402,18 @@ function deleteTheme(name: string) {
   themes.delete(name)
 }
 
-function deleteHero(characterName: string) {
-  heroes.delete(characterName)
+function deleteFellowship(name: string) {
+  fellowships.delete(name)
+}
+
+function deleteHero(name: string) {
+  heroes.delete(name)
 }
 </script>
 
 <template>
   <main>
-    <NavigationBar :heroes="heroEntries" />
+    <NavigationBar :fellowships="fellowshipEntries" :heroes="heroEntries" />
 
     <div class="toolbar">
       <input
@@ -348,6 +463,72 @@ function deleteHero(characterName: string) {
         :key="entry.name"
         :shard="entry.shard"
         @delete="deleteTheme(entry.name)"
+      />
+    </div>
+
+    <div class="toolbar">
+      <button type="button" @click="openFellowshipForm">Add Fellowship</button>
+      <button type="button" @click="openFellowshipImportForm">Import Fellowship YAML</button>
+    </div>
+
+    <div
+      v-if="showFellowshipForm"
+      class="modal-backdrop"
+      @click.self="closeFellowshipForm"
+    >
+      <form class="hero-form-modal fellowship-form-modal" @submit.prevent="createFellowshipFromForm">
+        <h2>Create Fellowship</h2>
+
+        <label class="form-field">
+          <span>Fellowship Name</span>
+          <input
+            v-model="newFellowshipName"
+            placeholder="Enter fellowship name"
+          />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeFellowshipForm">
+            Cancel
+          </button>
+          <button type="submit">Create Fellowship</button>
+        </div>
+      </form>
+    </div>
+    <div
+      v-if="showFellowshipImportForm"
+      class="modal-backdrop"
+      @click.self="closeFellowshipImportForm"
+    >
+      <form class="hero-form-modal fellowship-form-modal" @submit.prevent="importFellowshipFromYaml">
+        <h2>Import Fellowship YAML</h2>
+
+        <label class="form-field">
+          <span>Fellowship YAML</span>
+          <textarea
+            v-model="fellowshipYamlText"
+            placeholder="Paste fellowship YAML"
+            @input="fellowshipImportError = ''"
+          />
+        </label>
+
+        <p v-if="fellowshipImportError" class="form-error">{{ fellowshipImportError }}</p>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" @click="closeFellowshipImportForm">
+            Cancel
+          </button>
+          <button type="submit" :disabled="!fellowshipYamlText.trim()">Import</button>
+        </div>
+      </form>
+    </div>
+    <div class="tag-holder">
+      <Fellowship
+        v-for="entry in fellowshipEntries"
+        :id="fellowshipId(entry.fellowshipName)"
+        :key="entry.name"
+        :shard="entry.shard"
+        @delete="deleteFellowship(entry.name)"
       />
     </div>
 
@@ -428,9 +609,9 @@ function deleteHero(characterName: string) {
       <Hero
         v-for="entry in heroEntries"
         :id="heroId(entry.characterName)"
-        :key="entry.characterName"
+        :key="entry.name"
         :shard="entry.shard"
-        @delete="deleteHero(entry.characterName)"
+        @delete="deleteHero(entry.name)"
       />
     </div>
   </main>
@@ -532,6 +713,27 @@ function deleteHero(characterName: string) {
 
 .hero-form-modal .secondary-button {
   background: #f7d5b7;
+}
+
+.fellowship-form-modal {
+  border-color: #2c7ea0;
+  background: #bfe9ff;
+  color: #12384a;
+}
+
+.fellowship-form-modal .form-field input,
+.fellowship-form-modal .form-field textarea {
+  border-color: #2c7ea0;
+}
+
+.fellowship-form-modal button {
+  border-color: #2c7ea0;
+  background: #62b7dc;
+  color: #12384a;
+}
+
+.fellowship-form-modal .secondary-button {
+  background: #e4f6ff;
 }
 
 .hero-form-modal button:disabled {

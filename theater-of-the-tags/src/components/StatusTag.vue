@@ -127,11 +127,13 @@ defineExpose({toJson})
 .status-tag.helpful {
   background-color: #7d8;
   color: black;
+  border-color: rgba(0, 0, 0, 0.5);
 }
 
 .status-tag.hindering {
   background-color: darkred;
   color: white;
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .upper-half {

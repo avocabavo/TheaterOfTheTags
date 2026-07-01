@@ -100,7 +100,7 @@ defineExpose({
 .tag.power {
   background-color: gold;
   color: black;
-  border: 0.2rem solid rgba(0, 0, 0, 0.5);
+  border-color: rgba(0, 0, 0, 0.5);
 }
 
 .tag.power,

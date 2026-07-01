@@ -6,6 +6,10 @@ export type InvokedTagSummary = {
   uuid: string
   name: string
   impact: string
+  kind: 'tag' | 'status'
+  nature: TagNature | StatusNature
+  scratched: boolean
+  tier: number
 }
 
 function isTagShard(value: unknown): value is Y.Map<any> {
@@ -107,6 +111,10 @@ export function getInvokedTagSummaries(): InvokedTagSummary[] {
       uuid: typeof tag.get('uuid') === 'string' ? tag.get('uuid') : fallbackId,
       name: typeof tag.get('name') === 'string' ? tag.get('name') : '',
       impact: formatImpact(tagImpact(tag)),
+      kind: tag.has('tiers') ? 'status' : 'tag',
+      nature: tag.get('nature') as TagNature | StatusNature,
+      scratched: Boolean(tag.get('scratched')),
+      tier: tag.has('tiers') ? highestTier(tag) : 0,
     })
   }
 

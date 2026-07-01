@@ -12,6 +12,7 @@ export type TagTableRow = {
   id: string
   name: string
   impact: string
+  warning?: boolean
 }
 
 export type RollTableRow = {
@@ -82,6 +83,8 @@ const result = computed(()=> (
 
 const resultClass = computed(()=> {
   if (result.value == null) return ''
+  if (rollRow.value?.dice[0] === 1 && rollRow.value.dice[1] === 1) return 'low-result'
+  if (rollRow.value?.dice[0] === 6 && rollRow.value.dice[1] === 6) return 'high-result'
   if (result.value < 7) return 'low-result'
   if (result.value > 9) return 'high-result'
   return 'mixed-result'
@@ -113,6 +116,7 @@ const tableStyle = computed(()=> ({
       <tr
         v-for="row in tagRows"
         :key="row.id"
+        :class="{ 'warning-row': row.warning }"
       >
         <td>
           {{ row.name }}
@@ -233,6 +237,11 @@ const tableStyle = computed(()=> ({
 
 .history-table {
   background: rgba(255, 255, 255, 0.58);
+}
+
+.warning-row td {
+  background: var(--roll-table-color);
+  color: white;
 }
 
 .dice-row {

@@ -38,14 +38,72 @@ const panelStyle = computed(()=> ({
   width: `${widthRem.value}rem`,
 }))
 
-const invokedRows = computed<RollTableRowData[]>(()=> invokedTags.value.map(tag=> ({
-  kind: 'tag',
-  id: tag.uuid,
-  name: tag.name,
-  impact: tag.impact,
-})))
+function formatImpact(value: number) {
+  return value > 0 ? `+${value}` : `${value}`
+}
+
+function statusWinnerIndex(nature: 'helpful' | 'hindering') {
+  let bestTier = -1
+  let bestIndex = -1
+
+  invokedTags.value.forEach((tag, index)=> {
+    if (tag.kind !== 'status' || tag.nature !== nature) return
+    if (tag.tier > bestTier) {
+      bestTier = tag.tier
+      bestIndex = index
+    }
+  })
+
+  return bestIndex
+}
+
+const invokedRows = computed<RollTableRowData[]>(()=> {
+  const helpfulWinnerIndex = statusWinnerIndex('helpful')
+  const hinderingWinnerIndex = statusWinnerIndex('hindering')
+  let scratchedUpgradeUsed = false
+
+  return invokedTags.value.map((tag, index)=> {
+    let impact = Number.parseInt(tag.impact, 10)
+    let warning = false
+
+    if (tag.kind === 'status' && tag.nature === 'helpful' && index !== helpfulWinnerIndex) {
+      warning = impact !== 0
+      impact = 0
+    }
+
+    if (tag.kind === 'status' && tag.nature === 'hindering' && index !== hinderingWinnerIndex) {
+      warning = impact !== 0
+      impact = 0
+    }
+
+    if (
+      tag.kind === 'tag'
+      && tag.scratched
+      && (tag.nature === 'power' || tag.nature === 'primary')
+    ) {
+      if (scratchedUpgradeUsed) {
+        warning = impact !== 1
+        impact = 1
+      } else {
+        scratchedUpgradeUsed = true
+      }
+    }
+
+    return {
+      kind: 'tag',
+      id: tag.uuid,
+      name: tag.name,
+      impact: formatImpact(impact),
+      warning,
+    }
+  })
+})
 
 const currentRows = computed(()=> invokedRows.value)
+const warningCount = computed(()=> invokedRows.value.filter(
+  row=> row.kind === 'tag' && row.warning
+).length)
+const hasWarnings = computed(()=> warningCount.value > 0)
 
 function rollD6() {
   return Math.floor(Math.random() * 6) + 1
@@ -72,6 +130,7 @@ function isRollTableRowData(row: any): row is RollTableRowData {
 
   if (row.kind === 'tag') {
     return typeof row.name === 'string'
+      && (row.warning == null || typeof row.warning === 'boolean')
   }
 
   if (row.kind === 'roll') {
@@ -249,10 +308,22 @@ onUnmounted(()=> {
 
       <button
         type="button"
-        class="roll-button"
+        :class="['roll-button', { 'has-warnings': hasWarnings }]"
         @click="handleRoll"
       >
+        <span
+          v-if="hasWarnings"
+          class="warning-triangle"
+          aria-label="Impact warning"
+          title="Some invoked tag impacts were reduced by roll edge-case rules"
+        >!</span>
         Roll!
+        <span
+          v-if="hasWarnings"
+          class="warning-triangle"
+          aria-label="Impact warning"
+          title="Some invoked tag impacts were reduced by roll edge-case rules"
+        >!</span>
       </button>
     </div>
   </aside>
@@ -356,6 +427,28 @@ onUnmounted(()=> {
 .roll-button:hover,
 .roll-button:focus-visible {
   background: #2f2f4a;
+}
+
+.roll-button.has-warnings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.warning-triangle {
+  width: 1rem;
+  height: 0.9rem;
+  background: #ffd94d;
+  color: #1e1e2f;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 0.8rem;
+  padding-bottom: 0.05rem;
 }
 
 @media (max-width: 48rem) {

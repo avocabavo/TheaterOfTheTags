@@ -356,7 +356,7 @@ async function copyToClipboard() {
 <style scoped>
 .hero {
   position: relative;
-  border: 3px solid black;
+  border: 3px solid #853;
   width: 100%;
   padding: 1rem;
   scroll-margin-top: 5.5rem;

@@ -160,7 +160,7 @@ defineExpose({
           v-model="situationName"
           tag="h1"
           placeholder="Enter Situation Name ..."
-          :disabled="mode !== 'creation'"
+          :disabled="mode !== 'narrator'"
           @resized="reflowMasonry"
         />
       </div>

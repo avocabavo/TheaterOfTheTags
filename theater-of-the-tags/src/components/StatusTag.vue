@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import YAML from 'yaml'
+import { computed } from 'vue'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData, Usage } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
@@ -11,12 +12,14 @@ const { mode } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
+  nameEditableMode?: 'creation' | 'narrator'
 }>()
 
 const name = useYMapField<StatusTagData, 'name'>(props.shard, 'name', '')
 const nature = useYMapField<StatusTagData, 'nature'>(props.shard, 'nature', 'helpful')
 const tiers = useYArray<boolean>(props.shard, 'tiers')
 const usage = useYMapField<StatusTagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
+const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
 
 function toggleUsage() {
   if (usage.value === 'tapped') return
@@ -101,7 +104,7 @@ defineExpose({toJson})
         tag="h2"
         class="status-tag-name"
         placeholder="Enter Status Name..."
-        :disabled="mode !== 'creation'"
+        :disabled="mode !== nameEditableMode"
         @resized="emit('resized')"
       />
     </div>

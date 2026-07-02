@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import YAML from 'yaml'
+import { computed } from 'vue'
 import type { TagData, TagNature, TagShard, Usage } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
 import { useMode } from '../lib/modeStore';
@@ -11,12 +12,14 @@ const { mode } = useMode()
 
 const props = defineProps<{
   shard: TagShard
+  nameEditableMode?: 'creation' | 'narrator'
 }>()
 
 const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
 const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as TagNature)
 const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
 const usage = useYMapField<TagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
+const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
 
 function toggleScratched() {
   scratched.value = !scratched.value
@@ -80,7 +83,7 @@ defineExpose({
       class="tag-name"
       :class="{ scratched }"
       placeholder="Enter Tag Name ..."
-      :disabled="mode !== 'creation'"
+      :disabled="mode !== nameEditableMode"
       @resized="emit('resized')"
     />
 

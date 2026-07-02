@@ -40,6 +40,7 @@ defineExpose({toJson})
         v-if="shard.has('tiers')"
         ref="statusRef"
         :shard="shard"
+        name-editable-mode="narrator"
         @delete="emit('delete')"
         @resized="emit('resized')"
       />
@@ -47,6 +48,7 @@ defineExpose({toJson})
         v-else
         ref="tagRef"
         :shard="shard"
+        name-editable-mode="narrator"
         @delete="emit('delete')"
         @resized="emit('resized')"
       />

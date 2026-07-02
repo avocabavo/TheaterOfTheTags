@@ -202,6 +202,11 @@ const randomHeroLastNameParts = [
   'scroll', 'seal', 'shard', 'spiral', 'vessel', 'wreath', 'anchor', 'chalice',
   'compass', 'key', 'lock', 'window', 'belfry', 'gable', 'lintel', 'threshold',
   'full', 'all', 'prime', 'victor', 'grand',
+  'bone', 'tooth', 'blight', 'abyss', 'inferno', 'paradiso', 'devil', 'daemon', 'fey', 'person', 'angel', 'math',
+  'sound', 'xeno', 'weaver', 'balloon', 'loon', 'sphere', 'tesseract', 'orb', 'pixie', 'faun', 'nexus', 'azure',
+  'altar', 'half', 'quarter', 'vortex', 'elven', 'beard', 'bouquet', 'cornucopia', 'spice', 'falcon',
+  'triarch', 'hegemon', 'haunt', 'ghost', 'sweet', 'sour', 'loud', 'silent', 'sharp', 'soft', 'floral',
+  'volcano', 'caldera', 'axel', 'sheppard', 'moebius',
 ]
 function randomLastNamePart() {
   return randomHeroLastNameParts[Math.floor(Math.random() * randomHeroLastNameParts.length)]

@@ -5,7 +5,7 @@ import { useMode } from '../lib/modeStore';
 import { useYMapField } from '../lib/yjsComposables';
 import EditableText from './EditableText.vue';
 
-const { mode } = useMode()
+const { mode, enableNameEditing } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -32,7 +32,7 @@ const emit = defineEmits<{
       v-model="characterName"
       tag="h1"
       placeholder="Enter Character Name ..."
-      :disabled="mode !== 'creation'"
+      :disabled="!enableNameEditing || mode !== 'creation'"
       @resized="emit('resized')"
     />
   </div>

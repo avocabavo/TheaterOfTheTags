@@ -9,7 +9,7 @@ import { useMode } from '../lib/modeStore';
 import EditableText from './EditableText.vue';
 import { tagElementId } from '../lib/domIds'
 
-const { mode } = useMode()
+const { mode, enableNameEditing } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -109,7 +109,7 @@ defineExpose({toJson})
         tag="h2"
         class="status-tag-name"
         placeholder="Enter Status Name..."
-        :disabled="mode !== nameEditableMode"
+        :disabled="!enableNameEditing || mode !== nameEditableMode"
         @resized="emit('resized')"
       />
     </div>

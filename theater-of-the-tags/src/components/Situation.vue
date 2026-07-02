@@ -21,7 +21,7 @@ import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 
-const { mode } = useMode()
+const { mode, enableNameEditing } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -160,7 +160,7 @@ defineExpose({
           v-model="situationName"
           tag="h1"
           placeholder="Enter Situation Name ..."
-          :disabled="mode !== 'narrator'"
+          :disabled="!enableNameEditing || mode !== 'narrator'"
           @resized="reflowMasonry"
         />
       </div>

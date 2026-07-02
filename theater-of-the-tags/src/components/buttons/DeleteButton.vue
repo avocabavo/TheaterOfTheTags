@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import bonfireWhite from '../../assets/bonfire-white.svg'
+import { useMode } from '../../lib/modeStore'
+
+const { enableDeleting } = useMode()
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -8,6 +11,7 @@ const emit = defineEmits<{
 
 <template>
   <button
+    v-if="enableDeleting"
     type="button"
     class="delete-button"
     @click.stop="emit('delete')"

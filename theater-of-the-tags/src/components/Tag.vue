@@ -9,7 +9,7 @@ import EditableText from './EditableText.vue';
 import scratchBlack from '../assets/scratch-black.svg'
 import { tagElementId } from '../lib/domIds'
 
-const { mode } = useMode()
+const { mode, enableNameEditing } = useMode()
 
 const props = defineProps<{
   shard: TagShard
@@ -88,7 +88,7 @@ defineExpose({
       class="tag-name"
       :class="{ scratched }"
       placeholder="Enter Tag Name ..."
-      :disabled="mode !== nameEditableMode"
+      :disabled="!enableNameEditing || mode !== nameEditableMode"
       @resized="emit('resized')"
     />
 

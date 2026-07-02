@@ -2,6 +2,8 @@
 import * as Y from 'yjs'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useMode, type AppMode } from '../lib/modeStore'
+import quillWhite from '../assets/quill-white.svg'
+import bonfireWhite from '../assets/bonfire-white.svg'
 import {
   DEFAULT_FELLOWSHIP_BACKGROUND_COLOR,
   DEFAULT_HERO_BACKGROUND_COLOR,
@@ -31,7 +33,7 @@ const props = defineProps<{
   heroes: HeroNavigationEntry[]
 }>()
 
-const { mode, setMode } = useMode()
+const { mode, enableNameEditing, enableDeleting, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
 const colorVersion = ref(0)
@@ -224,6 +226,31 @@ function scrollNavigationHorizontally(event: WheelEvent) {
         {{ m }}
       </button>
     </div>
+
+    <div class="local-toggles" aria-label="Local interface toggles">
+      <label
+        class="local-toggle"
+        title="Toggle name editing"
+      >
+        <input
+          v-model="enableNameEditing"
+          type="checkbox"
+          aria-label="Enable name editing"
+        >
+        <img :src="quillWhite" alt="" class="toggle-icon" aria-hidden="true">
+      </label>
+      <label
+        class="local-toggle"
+        title="Toggle deleting"
+      >
+        <input
+          v-model="enableDeleting"
+          type="checkbox"
+          aria-label="Enable deleting"
+        >
+        <img :src="bonfireWhite" alt="" class="toggle-icon" aria-hidden="true">
+      </label>
+    </div>
   </div>
 </template>
 
@@ -361,5 +388,52 @@ function scrollNavigationHorizontally(event: WheelEvent) {
 .mode-button.active {
   background: white;
   color: #1e1e2f;
+}
+
+.local-toggles {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.local-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.local-toggle:hover,
+.local-toggle:focus-within {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.local-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 0.15rem solid transparent;
+  border-radius: 50%;
+  padding: 0.15rem;
+}
+
+.local-toggle input:checked + .toggle-icon {
+  border-color: white;
 }
 </style>

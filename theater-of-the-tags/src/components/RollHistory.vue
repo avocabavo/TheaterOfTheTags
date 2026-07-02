@@ -103,6 +103,9 @@ const invokedRows = computed<RollTableRowData[]>(()=> {
       id: tag.uuid,
       name: tag.name,
       impact: formatImpact(impact),
+      scratched: tag.kind === 'tag'
+        && tag.scratched
+        && (tag.nature === 'power' || tag.nature === 'primary'),
       warning,
     }
   })
@@ -140,6 +143,7 @@ function isRollTableRowData(row: any): row is RollTableRowData {
 
   if (row.kind === 'tag') {
     return typeof row.name === 'string'
+      && (row.scratched == null || typeof row.scratched === 'boolean')
       && (row.warning == null || typeof row.warning === 'boolean')
   }
 
@@ -428,7 +432,7 @@ onUnmounted(()=> {
 
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0;
 }
 
 .roll-history-heading {

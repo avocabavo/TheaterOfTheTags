@@ -6,12 +6,15 @@ import d6Three from '../assets/d6-3pip.svg'
 import d6Four from '../assets/d6-4pip.svg'
 import d6Five from '../assets/d6-5pip.svg'
 import d6Six from '../assets/d6-6pip.svg'
+import scratchBlack from '../assets/scratch-black.svg'
+import scratchWhite from '../assets/scratch-white.svg'
 
 export type TagTableRow = {
   kind: 'tag'
   id: string
   name: string
   impact: string
+  scratched?: boolean
   warning?: boolean
 }
 
@@ -48,6 +51,10 @@ const dieImages = [
 
 function dieImage(value: number) {
   return dieImages[value - 1] ?? d6One
+}
+
+function scratchIcon(row: TagTableRow) {
+  return row.warning ? scratchWhite : scratchBlack
 }
 
 function updateRollName(event: Event) {
@@ -123,7 +130,7 @@ const tableStyle = computed(()=> ({
         <th colspan="2">
           <input
             class="roll-name-input"
-            :value="props.rollName ?? 'ROLL'"
+            :value="props.rollName ?? 'ROLL NAME'"
             @input="updateRollName"
             @keydown.enter.prevent="emit('submit')"
           >
@@ -136,8 +143,17 @@ const tableStyle = computed(()=> ({
         :key="row.id"
         :class="{ 'warning-row': row.warning }"
       >
-        <td>
-          {{ row.name }}
+        <td class="tag-name-cell">
+          <span class="tag-name-with-marker">
+            <span>{{ row.name }}</span>
+            <img
+              v-if="row.scratched"
+              :src="scratchIcon(row)"
+              alt="scratched"
+              class="scratch-icon"
+              title="Scratched tag"
+            >
+          </span>
         </td>
         <td class="impact-cell">{{ row.impact }}</td>
       </tr>
@@ -235,6 +251,24 @@ const tableStyle = computed(()=> ({
 
 .roll-table td:first-child {
   overflow-wrap: anywhere;
+}
+
+.tag-name-cell {
+  min-width: 0;
+}
+
+.tag-name-with-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.scratch-icon {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  display: inline-block;
 }
 
 .impact-cell {

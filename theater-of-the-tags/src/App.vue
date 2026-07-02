@@ -78,38 +78,41 @@ const heroYamlText = ref('')
 const heroImportError = ref('')
 
 const randomHeroFirstNameSyllables = [
-  'a', 'ah', 'ai', 'al', 'ama', 'an', 'ara', 'ari', 'ar', 'as', 'ast', 'ava',
-  'ba', 'bar', 'baz', 'bel', 'ben', 'bla', 'bri', 'brin', 'bus',
-  'ca', 'cal', 'cas', 'cel', 'cha', 'chi', 'cor', 'cy',
-  'da', 'daz', 'del', 'den', 'di', 'dra', 'dri',
-  'e', 'el', 'ella', 'en', 'eri', 'etta', 'ev',
-  'fa', 'fab', 'fen', 'fi', 'flux', 'foo',
-  'ga', 'gal', 'gar', 'gel', 'gin', 'gorm',
-  'ha', 'hal', 'hol', 'hy',
-  'ia', 'ilya', 'in', 'io', 'is',
-  'ja', 'jen', 'jim', 'jo', 'jun',
-  'ka', 'kel', 'kes', 'ki', 'ko', 'kor',
-  'la', 'lan', 'lei', 'li', 'lio', 'lis', 'lor',
-  'ma', 'mal', 'mar', 'mei', 'mi', 'mor',
-  'na', 'nel', 'ni', 'nor',
-  'o', 'ol', 'ora', 'ori',
-  'pa', 'pam', 'per', 'pire', 'pra',
-  'qua', 'qui',
-  'ra', 'ren', 'riel', 'ril', 'ro', 'ron', 'ryn',
-  'sa', 'sel', 'sha', 'si', 'sol', 'sor',
-  'ta', 'tan', 'taur', 'tel', 'the', 'ti', 'tor', 'trel',
-  'ul', 'um',
-  'va', 'val', 'vam', 'ven', 'vi', 'vue',
-  'wen', 'wil', 'wyn',
-  'xa', 'xel',
-  'ya', 'yel', 'yor',
-  'za', 'zen', 'zor',
+  'a', 'ah', 'ai', 'al', 'ama', 'an', 'ara', 'ari', 'ar', 'as', 'ast', 'ava', 'avel', 'az',
+  'ba', 'bar', 'baz', 'bel', 'ben', 'bla', 'bo', 'bri', 'brin', 'bro', 'bryn', 'bus',
+  'ca', 'cal', 'cas', 'cel', 'cha', 'chi', 'cia', 'cin', 'cor', 'cy',
+  'da', 'daz', 'del', 'den', 'di', 'dia', 'dol', 'dra', 'dri', 'du',
+  'e', 'el', 'ela', 'ella', 'em', 'en', 'eri', 'etta', 'ev', 'ez',
+  'fa', 'fab', 'fal', 'fen', 'fer', 'fi', 'fia', 'flux', 'foo', 'fyr',
+  'ga', 'gal', 'gar', 'gel', 'gin', 'go', 'gorm', 'gra', 'gri',
+  'ha', 'hal', 'han', 'har', 'hel', 'hol', 'hy',
+  'ia', 'ian', 'ilya', 'in', 'io', 'ir', 'is', 'iva',
+  'ja', 'jan', 'jen', 'jer', 'jim', 'jo', 'jor', 'jun',
+  'ka', 'kai', 'kal', 'kel', 'kes', 'ki', 'kira', 'ko', 'kol', 'kor', 'ky',
+  'la', 'lan', 'lar', 'le', 'lei', 'len', 'li', 'lia', 'lio', 'lis', 'lor', 'lu',
+  'ma', 'mal', 'mar', 'mei', 'mel', 'mi', 'mira', 'mo', 'mor',
+  'na', 'nai', 'nal', 'nel', 'ni', 'nia', 'no', 'nor', 'ny',
+  'o', 'ol', 'ora', 'ori', 'or', 'os',
+  'pa', 'pam', 'pel', 'per', 'pire', 'po', 'pra', 'pri',
+  'qua', 'qui', 'quin',
+  'ra', 'rai', 'ral', 'ren', 'ria', 'riel', 'ril', 'ro', 'ron', 'ryn',
+  'sa', 'sai', 'sal', 'sel', 'sha', 'she', 'si', 'sia', 'sol', 'sor', 'su',
+  'ta', 'tan', 'taur', 'tel', 'the', 'thi', 'ti', 'tia', 'tor', 'trel', 'tu',
+  'ul', 'um', 'una', 'ur',
+  'va', 'val', 'vam', 'ven', 'ver', 'vi', 'via', 'vo', 'vue',
+  'wa', 'wil', 'wre', 'wyn',
+  'xa', 'xal', 'xel', 'xi',
+  'ya', 'yel', 'yo', 'yor', 'ys',
+  'za', 'zal', 'zen', 'zi', 'zor',
 ]
+function randomSyllable() {
+  return randomHeroFirstNameSyllables[Math.floor(Math.random() * randomHeroFirstNameSyllables.length)]
+}
 
 const randomHeroLastNameParts = [
   'tree', 'beech', 'ash', 'maple', 'pine', 'birch', 'willow', 'palm', 'sakura', 'oak',
-  'beast', 'lion', 'tiger', 'bear', 'deer', 'fox', 'wolf', 'ape', 'elk', 'moose', 'horse', 'pony', 'dog', 'cat', 'hog', 'monkey', 'yak',
-  'vermin', 'gopher', 'rat', 'mouse', 'shrew', 'ferret', 'stoat', 'weasel', 'skunk',
+  'beast', 'lion', 'tiger', 'bear', 'deer', 'fox', 'wolf', 'ape', 'elk', 'moose', 'horse', 'pony', 'dog', 'cat', 'hog', 'monkey', 'yak', 'hound',
+  'vermin', 'gopher', 'rat', 'mouse', 'shrew', 'ferret', 'stoat', 'weasel', 'skunk', 'badger',
   'pangolin', 'koala', 'hippo', 'zebra',
   'snake', 'cobra', 'viper', 'asp', 'garter', 'anaconda',
   'lizard', 'salamander', 'monitor', 'basilisk', 'gecko', 'chameleon',
@@ -121,10 +124,11 @@ const randomHeroLastNameParts = [
   'bird', 'hawk', 'robin', 'lark', 'pecker', 'raptor', 'phoenix', 'raven', 'crow', 'gull', 'pelican', 'penguin', 'albatross', 'eagle', 'condor', 'owl',
   'flower', 'rose', 'tulip', 'daisy', 'violet', 'dalia',
   'sky', 'sun', 'moon', 'cloud', 'dawn', 'dusk', 'rainbow', 'star', 'comet', 'nimbus',
-  'weather', 'storm', 'gale', 'deluge', 'hale', 'sleet', 'thunder', 'zephyr', 'puff', 'gust', 'rain',
+  'weather', 'storm', 'gale', 'deluge', 'hale', 'sleet', 'thunder', 'zephyr', 'puff', 'gust', 'rain', 'mist', 'fog', 'rime', 'dew', 'breeze', 'tempest', 'maelstrom', 'torrent', 'tide', 'squall',
   'glow', 'aura', 'streak', 'haze', 'bolt', 'strike', 'flare', 'halo', 'shine', 'bright',
-  'man', 'son', 'burger', 'well', 'wild', 'mere', 'moto', 'hime', 'ly', 'ward', 'holt', 'kin', 'berg',
-  'worker', 'maker', 'smith', 'strider', 'hunter', 'trapper', 'marker', 'baker', 'caster', 'mason', 'gard', 'shutter', 'piper', 'singer', 'camper', 'chanter', 'cantor', 'porter', 'wright', 'angler', 'packer', 'keeper', 'seeker', 'hander', 'gofer', 'getter', 'setter', 'walker', 'finder',
+  'man', 'son', 'burger', 'well', 'wild', 'mere', 'moto', 'hime', 'ly', 'ward', 'holt', 'berg',
+  'worker', 'maker', 'smith', 'strider', 'hunter', 'trapper', 'marker', 'baker', 'caster', 'mason', 'gard', 'shutter', 'piper', 'singer', 'camper', 'chanter', 'cantor', 'porter', 'wright', 'angler', 'packer', 'keeper', 'seeker', 'hander', 'gofer', 'getter', 'setter', 'walker', 'finder', 'stalker',
+  'father', 'mother', 'brother', 'sister', 'child', 'sire', 'kin',
   'jump', 'clap', 'snap', 'punch', 'sweep', 'step', 'leap', 'flip', 'hop', 'sprint',
   'tron', 'trax', 'meta', 'mega',
   'monster', 'gorgon', 'minotaur', 'centaur', 'scylla', 'charibdis', 'kraken', 'chimera',
@@ -136,20 +140,79 @@ const randomHeroLastNameParts = [
   'ice', 'frost', 'snow',
   'swamp', 'marsh', 'mire',
   'forest', 'grove', 'copse', 'glen', 'dale', 'wood', 'bush', 'vine', 'vale',
+  'meadow', 'field', 'prairie', 'moor', 'heather', 'bramble', 'thorn', 'briar', 'reed',
+  'harbor', 'harbour', 'port', 'isle', 'strand', 'shore', 'cliff', 'fjord', 'fen',
   'silver', 'gold', 'copper', 'iron', 'lead', 'crystal', 'bronze', 'glass',
   'near', 'over', 'under', 'far',
   'fruit', 'melon', 'apple', 'banana', 'orange', 'pear', 'peach', 'grape', 'fig',
-  'fever', 'rage', 'spirit', 'soul', 'love', 'sing',
+  'fever', 'rage', 'spirit', 'soul', 'love', 'sing', 'fair',
   'fall', 'winter', 'summer', 'autumn',
   'red', 'yellow', 'green', 'blue', 'black', 'white', 'gray', 'grey',
   'crimson', 'vermillion', 'scarlet', 'argent', 'auric',
   'steam', 'cog', 'clog', 'pipe', 'lens', 'spanner', 'strut', 'stud', 'wheel', 'gear',
-  'hearth', 'spire', 'camp', 'castle', 'tower', 'bridge', 'stool', 'chair', 'throne', 'hedge',
+  'hearth', 'spire', 'camp', 'castle', 'tower', 'bridge', 'stool', 'chair', 'throne', 'hedge', 'shrine', 'sanctum',
   'home', 'shire', 'town', 'folk', 'haven',
-  'helm', 'shield', 'spear', 'sword', 'pike', 'saber',
+  'helm', 'shield', 'spear', 'sword', 'pike', 'saber', 'blade', 'brand', 'edge', 'hilt', 'guard', 'mail', 'banner', 'standard', 'mark',
   'king', 'queen', 'duke', 'earl', 'count',
-  'monk', 'abbot', 'mage', 'sage', 'vicar', 'scribe',
+  'monk', 'abbot', 'mage', 'sage', 'vicar', 'scribe', 'oracle',
+  'rune', 'sigil', 'glyph', 'warding', 'charm', 'omen', 'relic',
+  'veil', 'shadow', 'shade', 'twilight', 'eclipse', 'lantern', 'candle', 'beacon', 'torch',
+  'stone', 'granite', 'marble', 'basalt', 'slate', 'flint', 'onyx', 'opal', 'jade', 'amber',
+  'quartz', 'pearl', 'ruby', 'sapphire', 'emerald', 'topaz', 'amethyst',
+  'cypress', 'cedar', 'yew', 'elm', 'fir', 'spruce', 'laurel', 'rowan',
+  'path', 'road', 'trail', 'crossing', 'gate', 'arch', 'wall', 'keep', 'citadel',
+  'forge', 'anvil', 'hammer', 'bellows', 'kiln', 'loom', 'needle', 'thread', 'quill',
+  'vow', 'oath', 'truth', 'grace', 'mercy', 'valor', 'honor', 'glory', 'hope', 'bond',
+  'dream', 'whisper', 'echo', 'song', 'chord', 'lyre', 'harp', 'drum',
+  'north', 'south', 'east', 'west', 'high', 'low', 'deep',
+  'elder', 'young', 'true', 'bold', 'grim', 'quick', 'still', 'quiet', 'keen',
+  'acorn', 'aspen', 'bay', 'bloom', 'bough', 'branch', 'bud', 'clover', 'fern', 'frond',
+  'hazel', 'holly', 'ivy', 'juniper', 'lily', 'lotus', 'moss', 'myrtle', 'nettle', 'orchid',
+  'petal', 'sap', 'thistle', 'wisteria', 'clove', 'hyssop', 'mossroot', 'seed', 'sprig', 'tangle',
+  'aurora', 'daybreak', 'eventide', 'midnight', 'noon', 'nightfall', 'moonrise', 'starlight',
+  'sunrise', 'sunset', 'solstice', 'equinox', 'zenith', 'nadir', 'nebula', 'nova',
+  'wind', 'whirlwind', 'cyclone', 'downpour', 'drizzle', 'hail', 'monsoon', 'spray',
+  'surge', 'wave', 'breaker', 'current', 'rapids', 'flood', 'foam', 'rainfall',
+  'boulder', 'cairn', 'cobble', 'crag', 'dust', 'geode', 'gravel', 'loam', 'ore', 'pebble',
+  'sand', 'scree', 'shale', 'summit', 'tor', 'valley', 'chalk', 'clay', 'dune', 'hollow',
+  'agate', 'beryl', 'carnelian', 'garnet', 'ivory', 'jasper', 'lapis', 'moonstone',
+  'obsidian', 'peridot', 'sunstone', 'turquoise', 'zircon', 'adamant', 'mithril',
+  'barrow', 'bastion', 'borough', 'chapel', 'court', 'courtyard', 'dungeon', 'fort',
+  'hall', 'hamlet', 'hold', 'manor', 'market', 'mill', 'monastery', 'palace',
+  'rampart', 'ruin', 'square', 'temple', 'village', 'wharf', 'alley', 'causeway',
+  'aegis', 'arrow', 'axe', 'buckler', 'chain', 'dagger', 'gauntlet', 'glaive',
+  'lance', 'longbow', 'mace', 'quiver', 'scabbard', 'staff', 'trident', 'armory',
+  'artifice', 'augur', 'blessing', 'cipher', 'conjure', 'covenant', 'fable', 'fate',
+  'fortune', 'hex', 'legend', 'mantle', 'miracle', 'mystic', 'pact', 'prophet',
+  'spell', 'talisman', 'vision', 'wonder', 'mystery', 'portent', 'rite', 'secret',
+  'anklet', 'bracelet', 'brooch', 'circlet', 'cloak', 'crown', 'diadem', 'garland',
+  'gown', 'mantlet', 'mask', 'ring', 'robe', 'sash', 'vestment',
+  'alewife', 'archer', 'bard', 'brewer', 'carver', 'chandler', 'cook', 'cooper',
+  'draper', 'dyer', 'falconer', 'farrier', 'fletcher', 'glazier', 'harper', 'jester',
+  'joiner', 'minstrel', 'potter', 'ranger', 'sailor', 'tailor', 'tanner', 'tiler',
+  'banneret', 'captain', 'champion', 'herald', 'knight', 'marshal', 'paladin', 'warden',
+  'advent', 'ardor', 'balance', 'candor', 'courage', 'delight', 'desire', 'devotion',
+  'dread', 'envy', 'fervor', 'joy', 'kindle', 'luck', 'memory', 'patience',
+  'promise', 'resolve', 'reverie', 'sorrow', 'triumph', 'wisdom', 'solace', 'yearning',
+  'after', 'before', 'middle', 'inner', 'outer', 'upper', 'nether', 'hidden',
+  'lost', 'old', 'new', 'brave', 'clear', 'dark', 'fierce', 'gentle',
+  'golden', 'lone', 'proud', 'rough', 'silvered', 'small', 'strong', 'swift',
+  'tall', 'wide', 'ashen', 'brighten', 'distant', 'noble', 'steadfast', 'wilding',
+  'circle', 'crescent', 'crownmark', 'knot', 'labyrinth', 'mirror', 'pillar', 'prism',
+  'scroll', 'seal', 'shard', 'spiral', 'vessel', 'wreath', 'anchor', 'chalice',
+  'compass', 'key', 'lock', 'window', 'belfry', 'gable', 'lintel', 'threshold',
+  'full', 'all', 'prime', 'victor', 'grand',
 ]
+function randomLastNamePart() {
+  return randomHeroLastNameParts[Math.floor(Math.random() * randomHeroLastNameParts.length)]
+}
+
+const randomHeroicPunctuation = [
+  "'", '-'
+]
+function randomPunctuation() {
+  return randomHeroicPunctuation[Math.floor(Math.random() * randomHeroicPunctuation.length)]
+}
 
 function normalizeOrderedNames(map: Y.Map<any>, order: Y.Array<string>) {
   const keys = Array.from(map.keys())
@@ -556,40 +619,68 @@ function importHeroFromYaml() {
   }
 }
 
+function diceN(n: number) {
+  return Math.floor(Math.random() * n) + 1
+}
+function testP(p: number) {
+  return Math.random() < p;
+}
+
+function generateRandomGivenName() {
+  let syllableCount = diceN(3) + diceN(2)
+  while (testP(0.3)) {
+    syllableCount += 1
+  }
+  const parts = []
+  for (let i = 0; i < syllableCount; i += 1) {
+    if (i > 0 && testP(0.01)) {
+      parts.push(randomPunctuation())
+    }
+    let syllable = randomSyllable()
+    if (i == 0 || testP(0.01)) {
+      syllable = syllable[0].toUpperCase() + syllable.slice(1)
+    }
+    parts.push(syllable)
+  }
+  return parts.join('')
+}
+
+function generateRandomSurname() {
+  let partCount = 2
+  while (testP(0.15)) {
+    partCount += 1
+  }
+  const parts = []
+  for (let i = 0; i < partCount; i += 1) {
+    if (i > 0 && testP(0.01)) {
+      parts.push(randomPunctuation())
+    }
+    let part = randomLastNamePart()
+    if (i == 0 || testP(0.01)) {
+      part = part[0].toUpperCase() + part.slice(1)
+    }
+    parts.push(part)
+  }
+  return parts.join('')
+}
+
+function generateRandomFullName() {
+  const names = []
+  names.push(generateRandomGivenName())
+  while (testP(0.05)) {
+    names.push(generateRandomGivenName())
+  }
+  names.push(generateRandomSurname())
+  while (testP(0.05)) {
+    names.push(generateRandomSurname())
+  }
+  if (testP(0.002)) names.splice(-1, 0, 'the')
+
+  return names.join(' ')
+}
+
 function generateRandomHeroName() {
-  const firstNameSyllableCount = Math.floor(Math.random() * 3) + Math.floor(Math.random() * 3) + 1
-  const firstNameSyllables = [...randomHeroFirstNameSyllables]
-  const firstNameParts: string[] = []
-
-  for (let i = 0; i < firstNameSyllableCount; i += 1) {
-    const index = Math.floor(Math.random() * firstNameSyllables.length)
-    firstNameParts.push(firstNameSyllables[index])
-    firstNameSyllables[index] = firstNameSyllables[firstNameSyllables.length - 1]
-    firstNameSyllables.pop()
-  }
-
-  const lastNameParts = [...new Set(randomHeroLastNameParts)]
-  const lastName: string[] = []
-
-  for (let i = 0; i < 2; i += 1) {
-    const index = Math.floor(Math.random() * lastNameParts.length)
-    lastName.push(lastNameParts[index])
-    lastNameParts[index] = lastNameParts[lastNameParts.length - 1]
-    lastNameParts.pop()
-  }
-
-  const firstName = firstNameParts.join('')
-  const familyName = lastName.join('')
-  const baseName = `${firstName[0].toUpperCase()}${firstName.slice(1)} ${familyName[0].toUpperCase()}${familyName.slice(1)}`
-  let characterName = baseName
-  let suffix = 2
-
-  while (heroes.has(characterName)) {
-    characterName = `${baseName} ${suffix}`
-    suffix += 1
-  }
-
-  newHeroCharacterName.value = characterName
+  newHeroCharacterName.value = generateRandomFullName()
 }
 
 function deleteSituation(name: string) {

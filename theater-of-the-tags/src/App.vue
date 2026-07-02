@@ -13,7 +13,6 @@ import {
   situationOrder,
   situations,
 } from './lib/yjs'
-import { refreshTappedTags } from './lib/usage'
 import {
   createHeroShard,
   createHeroShardFromData,
@@ -707,7 +706,6 @@ function deleteHero(name: string) {
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
       :heroes="heroEntries"
-      @refresh="refreshTappedTags"
     />
     <div class="app-body">
       <div class="app-content">

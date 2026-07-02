@@ -31,10 +31,6 @@ const props = defineProps<{
   heroes: HeroNavigationEntry[]
 }>()
 
-const emit = defineEmits<{
-  (e: 'refresh'): void
-}>()
-
 const { mode, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
@@ -202,13 +198,6 @@ function scrollToHero(characterName: string) {
 
     <div class="mode-switcher">
       <button
-        type="button"
-        class="debug-button"
-        @click="emit('refresh')"
-      >
-        refresh
-      </button>
-      <button
         v-for="m in modes"
         :key="m"
         type="button"
@@ -350,25 +339,6 @@ function scrollToHero(characterName: string) {
   text-transform: capitalize;
 
   cursor: pointer;
-}
-
-.debug-button {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-
-  font-size: 0.85rem;
-  text-transform: capitalize;
-
-  cursor: pointer;
-}
-
-.debug-button:hover,
-.debug-button:focus-visible {
-  background: rgba(255, 255, 255, 0.22);
 }
 
 .mode-button.active {

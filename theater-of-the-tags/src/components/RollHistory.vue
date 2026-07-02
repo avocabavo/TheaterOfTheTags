@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { doc, rollHistory as yRollHistory } from '../lib/yjs'
+import { useMode } from '../lib/modeStore'
 import {
   getInvokedTagSummaries,
+  refreshTappedTags,
   rollInvokedTags,
   type InvokedTagSummary,
 } from '../lib/usage'
@@ -28,6 +30,7 @@ const invokedTags = ref<InvokedTagSummary[]>([])
 const rollHistoryEntries = ref<HistoryEntry[]>([])
 const historyListRef = ref<HTMLElement | null>(null)
 const currentRollName = ref('ROLL')
+const { mode } = useMode()
 
 const rollColors = [
   '#500000',
@@ -110,6 +113,7 @@ const warningCount = computed(()=> invokedRows.value.filter(
   row=> row.kind === 'tag' && row.warning
 ).length)
 const hasWarnings = computed(()=> warningCount.value > 0)
+const canRoll = computed(()=> mode.value === 'scene')
 
 function rollD6() {
   return Math.floor(Math.random() * 6) + 1
@@ -209,6 +213,7 @@ function commitRoll(rollRow: RollTableRow) {
 }
 
 function handleRoll() {
+  if (!canRoll.value) return
   commitRoll(createRollRow())
 }
 
@@ -325,6 +330,7 @@ onUnmounted(()=> {
       </div>
 
       <RollTable
+        v-if="mode !== 'creation'"
         v-model:roll-name="currentRollName"
         :rows="currentRows"
         empty-text="No invoked tags"
@@ -332,6 +338,16 @@ onUnmounted(()=> {
       />
 
       <button
+        v-if="mode === 'narrator'"
+        type="button"
+        class="refresh-button"
+        @click="refreshTappedTags"
+      >
+        Refresh
+      </button>
+
+      <button
+        v-if="mode === 'scene'"
         type="button"
         :class="['roll-button', { 'has-warnings': hasWarnings }]"
         @click="handleRoll"
@@ -449,6 +465,24 @@ onUnmounted(()=> {
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+}
+
+.refresh-button {
+  margin: 0.5rem;
+  width: auto;
+  padding: 0.5rem 0.75rem;
+  border: 0.15rem solid #093f12;
+  border-radius: 0.35rem;
+  background: #18b436;
+  color: black;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.refresh-button:hover,
+.refresh-button:focus-visible {
+  background: #21d744;
 }
 
 .roll-button:hover,

@@ -113,25 +113,25 @@ function navItemStyle(entry: NavigationShardEntry, fallback: string) {
 function scrollToRoom() {
   document
     .getElementById('room')
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    ?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
 function scrollToSituation(situationName: string) {
   document
     .getElementById(situationId(situationName))
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    ?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
 function scrollToFellowship(fellowshipName: string) {
   document
     .getElementById(fellowshipId(fellowshipName))
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    ?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 
 function scrollToHero(characterName: string) {
   document
     .getElementById(heroId(characterName))
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    ?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
 </script>
 

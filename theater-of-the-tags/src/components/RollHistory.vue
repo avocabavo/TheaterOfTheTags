@@ -108,6 +108,9 @@ const invokedRows = computed<RollTableRowData[]>(()=> {
       scratched: tag.kind === 'tag'
         && tag.scratched
         && (tag.nature === 'power' || tag.nature === 'primary'),
+      ...(tag.improvementInstruction
+        ? { improvementInstruction: tag.improvementInstruction }
+        : {}),
       warning,
     }
   })
@@ -147,6 +150,7 @@ function isRollTableRowData(row: any): row is RollTableRowData {
     return typeof row.name === 'string'
       && (row.scratched == null || typeof row.scratched === 'boolean')
       && (row.warning == null || typeof row.warning === 'boolean')
+      && (row.improvementInstruction == null || typeof row.improvementInstruction === 'string')
   }
 
   if (row.kind === 'roll') {

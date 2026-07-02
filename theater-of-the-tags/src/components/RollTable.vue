@@ -16,6 +16,7 @@ export type TagTableRow = {
   impact: string
   scratched?: boolean
   warning?: boolean
+  improvementInstruction?: string
 }
 
 export type RollTableRow = {
@@ -101,20 +102,29 @@ const resultClass = computed(()=> {
 
 const powerToSpend = computed(()=> Math.max(1, modifier.value))
 
-const outcomeText = computed(()=> {
+const outcomeInstructions = computed(()=> {
+  const instructions = tagRows.value
+    .map(row=> row.improvementInstruction?.trim())
+    .filter((instruction): instruction is string => !!instruction)
+
   switch (resultClass.value) {
     case 'low-result':
     case 'critically-low-result':
-      return 'CONSEQUENCES'
+      instructions.push('CONSEQUENCES')
+      break
     case 'mixed-result':
-      return `Spend ${powerToSpend.value} power, then CONSEQUENCES`
+      instructions.push(`Spend ${powerToSpend.value} power`)
+      instructions.push('CONSEQUENCES')
+      break
     case 'high-result':
-      return `Spend ${powerToSpend.value} power`
+      instructions.push(`Spend ${powerToSpend.value} power`)
+      break
     case 'critically-high-result':
-      return `Spend ${powerToSpend.value + 1} power`
-    default:
-      return ''
+      instructions.push(`Spend ${powerToSpend.value + 1} power`)
+      break
   }
+
+  return instructions
 })
 
 const tableStyle = computed(()=> ({
@@ -194,8 +204,17 @@ const tableStyle = computed(()=> ({
           {{ result }}
         </td>
       </tr>
-      <tr v-if="result != null" class="outcome-row">
-        <td colspan="2">{{ outcomeText }}</td>
+      <tr v-if="result != null && outcomeInstructions.length" class="outcome-row">
+        <td colspan="2">
+          <ul class="outcome-list">
+            <li
+              v-for="(instruction, index) in outcomeInstructions"
+              :key="`${instruction}-${index}`"
+            >
+              {{ instruction }}
+            </li>
+          </ul>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -250,7 +269,20 @@ const tableStyle = computed(()=> ({
 .outcome-row td {
   border-top-width: 1px;
   font-weight: 900;
-  text-align: center;
+  text-align: left;
+}
+
+.outcome-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.outcome-list li + li {
+  margin-top: 0.25rem;
+}
+
+.outcome-list li {
+  text-align: left;
 }
 
 .roll-table th:last-child,

@@ -1,6 +1,11 @@
 import * as Y from 'yjs'
 import { doc, fellowships, heroes, situations } from './yjs'
 import type { StatusNature, TagNature, Usage } from './schema'
+import { getThemeName } from './Theme'
+
+type TagContext = {
+  improvementInstruction?: string
+}
 
 export type InvokedTagSummary = {
   uuid: string
@@ -10,6 +15,7 @@ export type InvokedTagSummary = {
   nature: TagNature | StatusNature
   scratched: boolean
   tier: number
+  improvementInstruction?: string
 }
 
 function isTagShard(value: unknown): value is Y.Map<any> {
@@ -18,31 +24,60 @@ function isTagShard(value: unknown): value is Y.Map<any> {
   )
 }
 
-function visitTag(value: unknown, visitor: (tag: Y.Map<any>)=> void) {
+function visitTag(
+  value: unknown,
+  visitor: (tag: Y.Map<any>, context: TagContext)=> void,
+  context: TagContext = {},
+) {
   if (isTagShard(value)) {
-    visitor(value)
+    visitor(value, context)
   }
 }
 
-function visitTagArray(parent: Y.Map<any>, key: string, visitor: (tag: Y.Map<any>)=> void) {
+function visitTagArray(
+  parent: Y.Map<any>,
+  key: string,
+  visitor: (tag: Y.Map<any>, context: TagContext)=> void,
+  context: TagContext = {},
+) {
   const value = parent.get(key)
   if (!(value instanceof Y.Array)) return
 
-  value.toArray().forEach(item=> visitTag(item, visitor))
+  value.toArray().forEach(item=> visitTag(item, visitor, context))
 }
 
-function visitThemeTags(theme: unknown, visitor: (tag: Y.Map<any>)=> void) {
+function visitThemeTags(theme: unknown, visitor: (tag: Y.Map<any>, context: TagContext)=> void) {
   if (!(theme instanceof Y.Map)) return
+
+  const themeName = getThemeName(theme)
+  const themeImprovementInstruction = themeName ? `Improve ${themeName}` : ''
 
   visitTag(theme.get('primaryTag'), visitor)
   visitTagArray(theme, 'powerTags', visitor)
-  visitTagArray(theme, 'weaknessTags', visitor)
+  visitTagArray(
+    theme,
+    'weaknessTags',
+    visitor,
+    themeImprovementInstruction ? { improvementInstruction: themeImprovementInstruction } : {}
+  )
 }
 
-function visitHeroTags(hero: unknown, visitor: (tag: Y.Map<any>)=> void) {
+function visitHeroTags(hero: unknown, visitor: (tag: Y.Map<any>, context: TagContext)=> void) {
   if (!(hero instanceof Y.Map)) return
 
-  visitTagArray(hero, 'relationships', visitor)
+  const characterName = hero.get('characterName')
+  const relationshipImprovementInstruction = typeof characterName === 'string' && characterName.trim()
+    ? `Improve ${characterName.trim()}'s fellowship`
+    : ''
+
+  visitTagArray(
+    hero,
+    'relationships',
+    visitor,
+    relationshipImprovementInstruction
+      ? { improvementInstruction: relationshipImprovementInstruction }
+      : {}
+  )
   visitTagArray(hero, 'backpack', visitor)
   visitTagArray(hero, 'looseTags', visitor)
 
@@ -52,7 +87,10 @@ function visitHeroTags(hero: unknown, visitor: (tag: Y.Map<any>)=> void) {
   }
 }
 
-function visitTopLevelLooseTags(collection: Y.Map<Y.Map<any>>, visitor: (tag: Y.Map<any>)=> void) {
+function visitTopLevelLooseTags(
+  collection: Y.Map<Y.Map<any>>,
+  visitor: (tag: Y.Map<any>, context: TagContext)=> void,
+) {
   collection.forEach(shard=> visitTagArray(shard, 'looseTags', visitor))
 }
 
@@ -103,18 +141,24 @@ function tagImpact(tag: Y.Map<any>) {
 export function getInvokedTagSummaries(): InvokedTagSummary[] {
   const summaries: InvokedTagSummary[] = []
 
-  const visitor = (tag: Y.Map<any>)=> {
+  const visitor = (tag: Y.Map<any>, context: TagContext)=> {
     if (tag.get('usage') !== 'invoked') return
     const fallbackId = `invoked-${summaries.length}`
+    const nature = tag.get('nature') as TagNature | StatusNature
+    const kind = tag.has('tiers') ? 'status' : 'tag'
+    const improvementInstruction = kind === 'tag' && nature === 'weakness'
+      ? context.improvementInstruction
+      : undefined
 
     summaries.push({
       uuid: typeof tag.get('uuid') === 'string' ? tag.get('uuid') : fallbackId,
       name: typeof tag.get('name') === 'string' ? tag.get('name') : '',
       impact: formatImpact(tagImpact(tag)),
-      kind: tag.has('tiers') ? 'status' : 'tag',
-      nature: tag.get('nature') as TagNature | StatusNature,
+      kind,
+      nature,
       scratched: Boolean(tag.get('scratched')),
       tier: tag.has('tiers') ? highestTier(tag) : 0,
+      ...(improvementInstruction ? { improvementInstruction } : {}),
     })
   }
 

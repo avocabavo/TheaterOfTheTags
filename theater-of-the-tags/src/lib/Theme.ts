@@ -14,6 +14,15 @@ export type ThemeCreationProps = {
   themeType: ThemeType
   primaryTagName: string
 }
+
+export function getThemeName(theme: Y.Map<any>) {
+  const primaryTag = theme.get('primaryTag')
+  if (!(primaryTag instanceof Y.Map)) return ''
+
+  const name = primaryTag.get('name')
+  return typeof name === 'string' ? name.trim() : ''
+}
+
 export function createThemeShard({
   might, themeType, primaryTagName
 }: ThemeCreationProps): ThemeShard {

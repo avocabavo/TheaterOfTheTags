@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import { nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue'
 import DeleteButton from './buttons/DeleteButton.vue'
 import EditableText from './EditableText.vue'
 import LooseTag from './LooseTag.vue'
 import NewLooseTags from './NewLooseTags.vue'
 import { useMode } from '../lib/modeStore'
 import {
+  DEFAULT_SITUATION_BACKGROUND_COLOR,
   type SituationData,
   type StatusTagShard,
   type TagShard,
@@ -18,6 +19,7 @@ import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
+import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 
 const { mode } = useMode()
 
@@ -37,6 +39,20 @@ const situationName = useYMapField<SituationData, 'situationName'>(
   'situationName',
   ''
 )
+const backgroundColor = useYMapField<SituationData, 'backgroundColor'>(
+  props.shard,
+  'backgroundColor',
+  DEFAULT_SITUATION_BACKGROUND_COLOR
+)
+const situationStyle = computed(()=> ({
+  backgroundColor: normalizeCssColor(backgroundColor.value, DEFAULT_SITUATION_BACKGROUND_COLOR),
+}))
+const backgroundColorInput = computed({
+  get: ()=> toColorInputValue(backgroundColor.value, DEFAULT_SITUATION_BACKGROUND_COLOR),
+  set: (value: string)=> {
+    backgroundColor.value = value
+  },
+})
 
 const {
   items: looseTags,
@@ -95,6 +111,7 @@ function handleCreateLooseStatus(data: StatusCreationProps) {
 function toJson() {
   return {
     situationName: situationName.value,
+    backgroundColor: backgroundColor.value,
     looseTags: looseTagRefs.value.map(lt=> lt.toJson()),
   }
 }
@@ -113,12 +130,20 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="grid" class="situation">
+  <div ref="grid" class="situation" :style="situationStyle">
     <div class="situation-card grid-item grid-sizer">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
       <div class="static-words">
         <p>SITUATION</p>
+        <input
+          v-if="mode !== 'scene'"
+          v-model="backgroundColorInput"
+          type="color"
+          class="background-color-input"
+          aria-label="Set situation background color"
+          title="Set situation background color"
+        >
         <button
           type="button"
           class="copy-button"

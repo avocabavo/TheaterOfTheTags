@@ -1,6 +1,10 @@
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import type { HeroShard, ThemeShard } from './schema'
+import {
+  DEFAULT_HERO_BACKGROUND_COLOR,
+  type HeroShard,
+  type ThemeShard,
+} from './schema'
 import { createTagShard, createTagShardFromData } from './Tag'
 import { createStatusTagShard, createStatusTagShardFromData } from './StatusTag'
 import { createThemeShardFromData } from './Theme'
@@ -8,6 +12,11 @@ import { createThemeShardFromData } from './Theme'
 export type HeroCreationProps = {
   characterName: string
   playerName: string
+}
+
+function normalizeBackgroundColor(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return DEFAULT_HERO_BACKGROUND_COLOR
+  return value.trim()
 }
 
 export function getHeroCharacterNameFromData(data: any) {
@@ -31,6 +40,7 @@ export function createHeroShard({
   heroShard.set('uuid', crypto.randomUUID())
   heroShard.set('characterName', characterName)
   heroShard.set('playerName', playerName)
+  heroShard.set('backgroundColor', DEFAULT_HERO_BACKGROUND_COLOR)
   const relationshipTags = new Y.Array<ReturnType<typeof createTagShard>>()
   heroShard.set('relationships', relationshipTags)
   heroShard.set('promise', 0)
@@ -86,6 +96,7 @@ export function createHeroShardFromData(data: any): HeroShard {
   heroShard.set('uuid', crypto.randomUUID())
   heroShard.set('characterName', characterName)
   heroShard.set('playerName', data.playerName.trim())
+  heroShard.set('backgroundColor', normalizeBackgroundColor(data.backgroundColor))
 
   const relationshipTags = new Y.Array<ReturnType<typeof createTagShard>>()
   relationshipTags.push(

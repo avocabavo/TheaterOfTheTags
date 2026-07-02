@@ -5,6 +5,7 @@ import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import {
+  DEFAULT_HERO_BACKGROUND_COLOR,
   type HeroData,
   type StatusTagShard,
   type TagShard,
@@ -28,6 +29,7 @@ import EditableText from './EditableText.vue';
 import Tag from './Tag.vue'
 import NewTag from './NewTag.vue';
 import toYamlBlack from '../assets/to-yaml-black.svg'
+import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 
 const { mode } = useMode()
 
@@ -38,6 +40,20 @@ const props = defineProps<{
 const grid = ref(null)
 
 const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
+const backgroundColor = useYMapField<HeroData, 'backgroundColor'>(
+  props.shard,
+  'backgroundColor',
+  DEFAULT_HERO_BACKGROUND_COLOR
+)
+const heroStyle = computed(()=> ({
+  backgroundColor: normalizeCssColor(backgroundColor.value, DEFAULT_HERO_BACKGROUND_COLOR),
+}))
+const backgroundColorInput = computed({
+  get: ()=> toColorInputValue(backgroundColor.value, DEFAULT_HERO_BACKGROUND_COLOR),
+  set: (value: string)=> {
+    backgroundColor.value = value
+  },
+})
 
 const {
   items: relationships,
@@ -187,6 +203,7 @@ function toJson() {
       ...fieldRefs.value.map(b=> b.toJson())
     ),
     playerName: playerName.value,
+    backgroundColor: backgroundColor.value,
     relationships: relationshipTagRefs.value.map(r=> r.toJson()),
     quintessences: quintessences.value,
     backpack: backpackRef.value?.toJson(),
@@ -205,12 +222,20 @@ async function copyToClipboard() {
 </script>
 
 <template>
-  <div ref="grid" class="hero">
+  <div ref="grid" class="hero" :style="heroStyle">
     <div class="hero-card grid-item grid-sizer">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
       <div class="static-words">
         <p>HERO CARD</p>
+        <input
+          v-if="mode !== 'scene'"
+          v-model="backgroundColorInput"
+          type="color"
+          class="background-color-input"
+          aria-label="Set hero background color"
+          title="Set hero background color"
+        >
         <button
           type="button"
           class="copy-button"

@@ -10,6 +10,7 @@ import NewLooseTags from './NewLooseTags.vue'
 import Quest from './Quest.vue'
 import { useMode } from '../lib/modeStore'
 import {
+  DEFAULT_FELLOWSHIP_BACKGROUND_COLOR,
   type FellowshipData,
   type StatusTagShard,
   type TagShard,
@@ -20,6 +21,7 @@ import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop, useFieldCollector } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
+import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 
 const { mode } = useMode()
 
@@ -39,6 +41,20 @@ const fellowshipName = useYMapField<FellowshipData, 'fellowshipName'>(
   'fellowshipName',
   ''
 )
+const backgroundColor = useYMapField<FellowshipData, 'backgroundColor'>(
+  props.shard,
+  'backgroundColor',
+  DEFAULT_FELLOWSHIP_BACKGROUND_COLOR
+)
+const fellowshipStyle = computed(()=> ({
+  backgroundColor: normalizeCssColor(backgroundColor.value, DEFAULT_FELLOWSHIP_BACKGROUND_COLOR),
+}))
+const backgroundColorInput = computed({
+  get: ()=> toColorInputValue(backgroundColor.value, DEFAULT_FELLOWSHIP_BACKGROUND_COLOR),
+  set: (value: string)=> {
+    backgroundColor.value = value
+  },
+})
 
 const {
   items: specialImprovements,
@@ -124,6 +140,7 @@ const readyToCreateSpecialImprovement = computed(()=> newSpecialImprovement.valu
 function toJson() {
   return {
     fellowshipName: fellowshipName.value,
+    backgroundColor: backgroundColor.value,
     looseTags: looseTagRefs.value.map(lt=> lt.toJson()),
     ...Object.assign(
       {},
@@ -147,12 +164,20 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="grid" class="fellowship">
+  <div ref="grid" class="fellowship" :style="fellowshipStyle">
     <div class="fellowship-card grid-item grid-sizer">
       <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
       <div class="static-words">
         <p>FELLOWSHIP</p>
+        <input
+          v-if="mode !== 'scene'"
+          v-model="backgroundColorInput"
+          type="color"
+          class="background-color-input"
+          aria-label="Set fellowship background color"
+          title="Set fellowship background color"
+        >
         <button
           type="button"
           class="copy-button"

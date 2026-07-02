@@ -137,6 +137,7 @@ export type HeroData = {
   uuid: string
   characterName: string
   playerName: string
+  backgroundColor: string
   relationships: Y.Array<TagShard>
   promise: number
   quintessences: Y.Array<string>
@@ -147,11 +148,14 @@ export type HeroData = {
 }
 export type HeroShard = Y.Map<any>
 
+export const DEFAULT_HERO_BACKGROUND_COLOR = '#210'
+
 export type BackpackData = Array<TagShard>
 export type BackpackShard = Y.Array<TagShard>
 
 export type FellowshipData = {
   fellowshipName: string
+  backgroundColor: string
   looseTags: Y.Array<TagShard | StatusTagShard>
   quest: string
   abandon: number
@@ -161,8 +165,13 @@ export type FellowshipData = {
 }
 export type FellowshipShard = Y.Map<any>
 
+export const DEFAULT_FELLOWSHIP_BACKGROUND_COLOR = '#012'
+
 export type SituationData = {
   situationName: string
+  backgroundColor: string
   looseTags: Y.Array<TagShard | StatusTagShard>
 }
 export type SituationShard = Y.Map<any>
+
+export const DEFAULT_SITUATION_BACKGROUND_COLOR = '#020'

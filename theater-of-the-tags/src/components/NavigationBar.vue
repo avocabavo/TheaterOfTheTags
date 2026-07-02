@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import * as Y from 'yjs'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useMode, type AppMode } from '../lib/modeStore'
+import {
+  DEFAULT_FELLOWSHIP_BACKGROUND_COLOR,
+  DEFAULT_HERO_BACKGROUND_COLOR,
+  DEFAULT_SITUATION_BACKGROUND_COLOR,
+} from '../lib/schema'
+import { normalizeCssColor } from '../lib/colors'
+
+type NavigationShardEntry = {
+  shard: Y.Map<any>
+}
 
 const props = defineProps<{
-  situations: {
+  situations: NavigationShardEntry & {
     situationName?: string
   }[]
-  fellowships: {
+  fellowships: NavigationShardEntry & {
     fellowshipName?: string
   }[]
-  heroes: {
+  heroes: NavigationShardEntry & {
     characterName?: string
   }[]
 }>()
@@ -21,19 +32,54 @@ const emit = defineEmits<{
 const { mode, setMode } = useMode()
 
 const modes: AppMode[] = ['creation', 'scene', 'narrator']
+const colorVersion = ref(0)
+const observedShards = new Set<Y.Map<any>>()
+
+function backgroundObserver(event: Y.YMapEvent<any>) {
+  if (event.keysChanged.has('backgroundColor')) {
+    colorVersion.value += 1
+  }
+}
+
+function syncObservedShards() {
+  observedShards.forEach(shard=> shard.unobserve(backgroundObserver))
+  observedShards.clear()
+
+  const shards = [
+    ...props.situations.map(entry=> entry.shard),
+    ...props.fellowships.map(entry=> entry.shard),
+    ...props.heroes.map(entry=> entry.shard),
+  ]
+
+  shards.forEach(shard=> {
+    shard.observe(backgroundObserver)
+    observedShards.add(shard)
+  })
+}
+
+watch(
+  ()=> [props.situations, props.fellowships, props.heroes],
+  syncObservedShards,
+  { immediate: true }
+)
+
+onUnmounted(()=> {
+  observedShards.forEach(shard=> shard.unobserve(backgroundObserver))
+  observedShards.clear()
+})
 
 const navigableSituations = computed(()=> props.situations.filter(
-  (situation): situation is { situationName: string }=>
+  (situation): situation is NavigationShardEntry & { situationName: string }=>
     typeof situation.situationName === 'string' && situation.situationName.trim().length > 0
 ))
 
 const navigableFellowships = computed(()=> props.fellowships.filter(
-  (fellowship): fellowship is { fellowshipName: string }=>
+  (fellowship): fellowship is NavigationShardEntry & { fellowshipName: string }=>
     typeof fellowship.fellowshipName === 'string' && fellowship.fellowshipName.trim().length > 0
 ))
 
 const navigableHeroes = computed(()=> props.heroes.filter(
-  (hero): hero is { characterName: string }=>
+  (hero): hero is NavigationShardEntry & { characterName: string }=>
     typeof hero.characterName === 'string' && hero.characterName.trim().length > 0
 ))
 
@@ -51,6 +97,15 @@ function heroId(characterName: string) {
 
 function navLabel(name: string) {
   return name.slice(0, 5)
+}
+
+function navItemStyle(entry: NavigationShardEntry, fallback: string) {
+  colorVersion.value
+  const backgroundColor = normalizeCssColor(entry.shard.get('backgroundColor'), fallback)
+
+  return {
+    backgroundColor,
+  }
 }
 
 function scrollToRoom() {
@@ -89,39 +144,54 @@ function scrollToHero(characterName: string) {
     </button>
 
     <nav class="hero-navigation" aria-label="Hero navigation">
-      <button
+      <div
         v-for="situation in navigableSituations"
         :key="situation.situationName"
-        type="button"
-        class="nav-button situation-button"
-        :title="situation.situationName"
-        :aria-label="`Scroll to ${situation.situationName}`"
-        @click="scrollToSituation(situation.situationName)"
+        class="nav-item"
+        :style="navItemStyle(situation, DEFAULT_SITUATION_BACKGROUND_COLOR)"
       >
-        {{ navLabel(situation.situationName) }}
-      </button>
-      <button
+        <button
+          type="button"
+          class="nav-button situation-button"
+          :title="situation.situationName"
+          :aria-label="`Scroll to ${situation.situationName}`"
+          @click="scrollToSituation(situation.situationName)"
+        >
+          {{ navLabel(situation.situationName) }}
+        </button>
+      </div>
+      <div
         v-for="fellowship in navigableFellowships"
         :key="fellowship.fellowshipName"
-        type="button"
-        class="nav-button fellowship-button"
-        :title="fellowship.fellowshipName"
-        :aria-label="`Scroll to ${fellowship.fellowshipName}`"
-        @click="scrollToFellowship(fellowship.fellowshipName)"
+        class="nav-item"
+        :style="navItemStyle(fellowship, DEFAULT_FELLOWSHIP_BACKGROUND_COLOR)"
       >
-        {{ navLabel(fellowship.fellowshipName) }}
-      </button>
-      <button
+        <button
+          type="button"
+          class="nav-button fellowship-button"
+          :title="fellowship.fellowshipName"
+          :aria-label="`Scroll to ${fellowship.fellowshipName}`"
+          @click="scrollToFellowship(fellowship.fellowshipName)"
+        >
+          {{ navLabel(fellowship.fellowshipName) }}
+        </button>
+      </div>
+      <div
         v-for="hero in navigableHeroes"
         :key="hero.characterName"
-        type="button"
-        class="nav-button hero-button"
-        :title="hero.characterName"
-        :aria-label="`Scroll to ${hero.characterName}`"
-        @click="scrollToHero(hero.characterName)"
+        class="nav-item"
+        :style="navItemStyle(hero, DEFAULT_HERO_BACKGROUND_COLOR)"
       >
-        {{ navLabel(hero.characterName) }}
-      </button>
+        <button
+          type="button"
+          class="nav-button hero-button"
+          :title="hero.characterName"
+          :aria-label="`Scroll to ${hero.characterName}`"
+          @click="scrollToHero(hero.characterName)"
+        >
+          {{ navLabel(hero.characterName) }}
+        </button>
+      </div>
     </nav>
 
     <div class="mode-switcher">
@@ -152,10 +222,10 @@ function scrollToHero(characterName: string) {
   z-index: 100;
 
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
 
-  padding: 0.75rem 1.5rem;
+  padding: 0 1.5rem;
 
   background: linear-gradient(135deg, #1e1e2f, #2a2a40);
   color: white;
@@ -177,6 +247,7 @@ function scrollToHero(characterName: string) {
   letter-spacing: 0.05em;
   white-space: nowrap;
   cursor: pointer;
+  align-self: center;
 }
 
 .title:hover,
@@ -189,14 +260,20 @@ function scrollToHero(characterName: string) {
   min-width: 0;
 
   display: flex;
-  gap: 0.5rem;
+  align-items: stretch;
+  gap: 0;
   overflow-x: auto;
-  padding: 0.25rem 0;
+  padding: 0;
+}
+
+.nav-item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
 }
 
 .nav-button {
-  flex: 0 0 auto;
-
   min-width: 3.25rem;
   padding: 0.4rem 0.65rem;
   border-radius: 0.5rem;
@@ -248,6 +325,8 @@ function scrollToHero(characterName: string) {
   display: flex;
   gap: 0.5rem;
 
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
   padding: 0.75rem;
   border-radius: 999px;

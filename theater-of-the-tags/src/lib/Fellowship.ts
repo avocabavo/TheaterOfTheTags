@@ -1,11 +1,21 @@
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import type { FellowshipShard, StatusTagShard, TagShard } from './schema'
+import {
+  DEFAULT_FELLOWSHIP_BACKGROUND_COLOR,
+  type FellowshipShard,
+  type StatusTagShard,
+  type TagShard,
+} from './schema'
 import { createStatusTagShardFromData } from './StatusTag'
 import { createTagShardFromData } from './Tag'
 
 export type FellowshipCreationProps = {
   fellowshipName: string
+}
+
+function normalizeBackgroundColor(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return DEFAULT_FELLOWSHIP_BACKGROUND_COLOR
+  return value.trim()
 }
 
 export function getFellowshipNameFromData(data: any) {
@@ -41,6 +51,7 @@ export function createFellowshipShard({
 
   fellowshipShard.set('uuid', crypto.randomUUID())
   fellowshipShard.set('fellowshipName', fellowshipName)
+  fellowshipShard.set('backgroundColor', DEFAULT_FELLOWSHIP_BACKGROUND_COLOR)
   fellowshipShard.set('looseTags', new Y.Array<TagShard | StatusTagShard>())
   fellowshipShard.set('quest', '')
   fellowshipShard.set('abandon', 0)
@@ -66,6 +77,7 @@ export function createFellowshipShardFromData(data: any): FellowshipShard {
 
   fellowshipShard.set('uuid', crypto.randomUUID())
   fellowshipShard.set('fellowshipName', fellowshipName)
+  fellowshipShard.set('backgroundColor', normalizeBackgroundColor(data.backgroundColor))
 
   const looseTags = new Y.Array<TagShard | StatusTagShard>()
   looseTags.push(

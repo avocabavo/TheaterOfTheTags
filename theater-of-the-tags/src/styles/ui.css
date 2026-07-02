@@ -172,6 +172,16 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
+.background-color-input {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: transparent;
+  cursor: pointer;
+}
+
 .copy-icon {
   width: 1rem;
   height: 1rem;

@@ -13,16 +13,22 @@ type NavigationShardEntry = {
   shard: Y.Map<any>
 }
 
+type SituationNavigationEntry = NavigationShardEntry & {
+  situationName?: string
+}
+
+type FellowshipNavigationEntry = NavigationShardEntry & {
+  fellowshipName?: string
+}
+
+type HeroNavigationEntry = NavigationShardEntry & {
+  characterName?: string
+}
+
 const props = defineProps<{
-  situations: NavigationShardEntry & {
-    situationName?: string
-  }[]
-  fellowships: NavigationShardEntry & {
-    fellowshipName?: string
-  }[]
-  heroes: NavigationShardEntry & {
-    characterName?: string
-  }[]
+  situations: SituationNavigationEntry[]
+  fellowships: FellowshipNavigationEntry[]
+  heroes: HeroNavigationEntry[]
 }>()
 
 const emit = defineEmits<{
@@ -69,17 +75,17 @@ onUnmounted(()=> {
 })
 
 const navigableSituations = computed(()=> props.situations.filter(
-  (situation): situation is NavigationShardEntry & { situationName: string }=>
+  (situation): situation is SituationNavigationEntry & { situationName: string }=>
     typeof situation.situationName === 'string' && situation.situationName.trim().length > 0
 ))
 
 const navigableFellowships = computed(()=> props.fellowships.filter(
-  (fellowship): fellowship is NavigationShardEntry & { fellowshipName: string }=>
+  (fellowship): fellowship is FellowshipNavigationEntry & { fellowshipName: string }=>
     typeof fellowship.fellowshipName === 'string' && fellowship.fellowshipName.trim().length > 0
 ))
 
 const navigableHeroes = computed(()=> props.heroes.filter(
-  (hero): hero is NavigationShardEntry & { characterName: string }=>
+  (hero): hero is HeroNavigationEntry & { characterName: string }=>
     typeof hero.characterName === 'string' && hero.characterName.trim().length > 0
 ))
 

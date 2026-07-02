@@ -206,7 +206,7 @@ const randomHeroLastNameParts = [
   'sound', 'xeno', 'weaver', 'balloon', 'loon', 'sphere', 'tesseract', 'orb', 'pixie', 'faun', 'nexus', 'azure',
   'altar', 'half', 'quarter', 'vortex', 'elven', 'beard', 'bouquet', 'cornucopia', 'spice', 'falcon',
   'triarch', 'hegemon', 'haunt', 'ghost', 'sweet', 'sour', 'loud', 'silent', 'sharp', 'soft', 'floral',
-  'volcano', 'caldera', 'axel', 'sheppard', 'moebius',
+  'volcano', 'caldera', 'axel', 'sheppard', 'moebius', 'beaver', 'otter', 'rabbit', 'velvet',
 ]
 function randomLastNamePart() {
   return randomHeroLastNameParts[Math.floor(Math.random() * randomHeroLastNameParts.length)]

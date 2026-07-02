@@ -184,6 +184,10 @@ const tableStyle = computed(()=> ({
   color: var(--roll-table-color);
 }
 
+.roll-table:not(.history-table) {
+  border: 0.25rem solid black;
+}
+
 .roll-table th,
 .roll-table td {
   padding: 0.4rem 0.35rem;

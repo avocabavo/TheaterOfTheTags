@@ -312,10 +312,6 @@ onUnmounted(()=> {
     />
 
     <div class="roll-history-content">
-      <div class="roll-history-heading">
-        <p class="label">ROLL HISTORY</p>
-      </div>
-
       <div ref="historyListRef" class="history-list">
         <RollTable
           v-for="(entry, index) in rollHistoryEntries"
@@ -412,7 +408,7 @@ onUnmounted(()=> {
 .roll-history-content {
   box-sizing: border-box;
   height: 100%;
-  padding: 0.75rem;
+  padding: 0;
 
   display: flex;
   flex-direction: column;
@@ -434,7 +430,8 @@ onUnmounted(()=> {
   flex: 1 1 auto;
   min-height: 2rem;
   overflow-y: scroll;
-  margin-right: -0.75rem;
+
+  padding: 0.5rem;
 
   display: flex;
   flex-direction: column;
@@ -442,7 +439,8 @@ onUnmounted(()=> {
 }
 
 .roll-button {
-  width: 100%;
+  margin: 0.5rem;
+  width: auto;
   padding: 0.5rem 0.75rem;
   border: 0.15rem solid #1e1e2f;
   border-radius: 0.35rem;

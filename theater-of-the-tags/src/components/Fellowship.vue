@@ -171,7 +171,7 @@ defineExpose({
       <div class="static-words">
         <p>FELLOWSHIP</p>
         <input
-          v-if="mode !== 'scene'"
+          v-if="mode == 'creation'"
           v-model="backgroundColorInput"
           type="color"
           class="background-color-input"

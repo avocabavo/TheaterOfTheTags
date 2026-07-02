@@ -229,7 +229,7 @@ async function copyToClipboard() {
       <div class="static-words">
         <p>HERO CARD</p>
         <input
-          v-if="mode !== 'scene'"
+          v-if="mode == 'creation'"
           v-model="backgroundColorInput"
           type="color"
           class="background-color-input"

@@ -29,7 +29,8 @@ const widthRem = ref(15)
 const invokedTags = ref<InvokedTagSummary[]>([])
 const rollHistoryEntries = ref<HistoryEntry[]>([])
 const historyListRef = ref<HTMLElement | null>(null)
-const currentRollName = ref('ROLL')
+const DEFAULT_ROLL_NAME = 'ROLL NAME'
+const currentRollName = ref(DEFAULT_ROLL_NAME)
 const { mode } = useMode()
 
 const rollColors = [
@@ -185,7 +186,7 @@ function syncRollHistory() {
     .filter(isHistoryEntry)
     .map(entry=> ({
       ...entry,
-      rollName: entry.rollName || 'ROLL',
+      rollName: entry.rollName || DEFAULT_ROLL_NAME,
     }))
 
   if (shouldStickToBottom) {
@@ -205,14 +206,14 @@ function createRollRow(first = rollD6(), second = rollD6()): RollTableRow {
 
 function commitRoll(rollRow: RollTableRow) {
   const rows = [...invokedRows.value, rollRow]
-  const rollName = currentRollName.value.trim() || 'ROLL'
+  const rollName = currentRollName.value.trim() || DEFAULT_ROLL_NAME
 
   yRollHistory.push([{
     id: rollRow.id,
     rollName,
     rows,
   }])
-  currentRollName.value = 'ROLL'
+  currentRollName.value = DEFAULT_ROLL_NAME
   rollInvokedTags()
 }
 

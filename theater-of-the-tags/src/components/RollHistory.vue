@@ -12,6 +12,7 @@ import RollTable, {
   type RollTableRow,
   type RollTableRowData,
 } from './RollTable.vue'
+import { tagElementId } from '../lib/domIds'
 
 declare global {
   interface Window {
@@ -222,6 +223,12 @@ function handleRoll() {
   commitRoll(createRollRow())
 }
 
+function scrollToTag(tagId: string) {
+  document
+    .getElementById(tagElementId(tagId))
+    ?.scrollIntoView({ behavior: 'instant', block: 'center' })
+}
+
 function testRoll(a: number, b: number) {
   if (
     !Number.isInteger(a)
@@ -339,6 +346,8 @@ onUnmounted(()=> {
         v-model:roll-name="currentRollName"
         :rows="currentRows"
         empty-text="No invoked tags"
+        navigable-tags
+        @navigate-tag="scrollToTag"
         @submit="handleRoll"
       />
 

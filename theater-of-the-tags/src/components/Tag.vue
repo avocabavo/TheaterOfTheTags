@@ -7,6 +7,7 @@ import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import EditableText from './EditableText.vue';
 import scratchBlack from '../assets/scratch-black.svg'
+import { tagElementId } from '../lib/domIds'
 
 const { mode } = useMode()
 
@@ -20,6 +21,10 @@ const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as
 const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
 const usage = useYMapField<TagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
 const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
+const elementId = computed(()=> {
+  const uuid = props.shard.get('uuid')
+  return typeof uuid === 'string' ? tagElementId(uuid) : undefined
+})
 
 function toggleScratched() {
   scratched.value = !scratched.value
@@ -58,7 +63,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="tag" :class="nature" @click="copyToClipboard">
+  <div :id="elementId" class="tag" :class="nature" @click="copyToClipboard">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
     <button
       v-if="mode !== 'creation'"

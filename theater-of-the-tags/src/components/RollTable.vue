@@ -33,11 +33,13 @@ const props = defineProps<{
   color?: string
   emptyText?: string
   history?: boolean
+  navigableTags?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'update:rollName', value: string): void
   (e: 'submit'): void
+  (e: 'navigateTag', id: string): void
 }>()
 
 const dieImages = [
@@ -145,7 +147,15 @@ const tableStyle = computed(()=> ({
       >
         <td class="tag-name-cell">
           <span class="tag-name-with-marker">
-            <span>{{ row.name }}</span>
+            <button
+              v-if="navigableTags"
+              type="button"
+              class="tag-name-button"
+              @click="emit('navigateTag', row.id)"
+            >
+              {{ row.name }}
+            </button>
+            <span v-else>{{ row.name }}</span>
             <img
               v-if="row.scratched"
               :src="scratchIcon(row)"
@@ -262,6 +272,23 @@ const tableStyle = computed(()=> ({
   align-items: center;
   gap: 0.25rem;
   max-width: 100%;
+}
+
+.tag-name-button {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.tag-name-button:hover,
+.tag-name-button:focus-visible {
+  text-decoration: underline;
 }
 
 .scratch-icon {

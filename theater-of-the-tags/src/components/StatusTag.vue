@@ -7,6 +7,7 @@ import type { StatusTagData, Usage } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import EditableText from './EditableText.vue';
+import { tagElementId } from '../lib/domIds'
 
 const { mode } = useMode()
 
@@ -20,6 +21,10 @@ const nature = useYMapField<StatusTagData, 'nature'>(props.shard, 'nature', 'hel
 const tiers = useYArray<boolean>(props.shard, 'tiers')
 const usage = useYMapField<StatusTagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
 const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
+const elementId = computed(()=> {
+  const uuid = props.shard.get('uuid')
+  return typeof uuid === 'string' ? tagElementId(uuid) : undefined
+})
 
 function toggleUsage() {
   if (usage.value === 'tapped') return
@@ -81,7 +86,7 @@ defineExpose({toJson})
 </script>
 
 <template>
-  <div :class="['status-tag', nature]">
+  <div :id="elementId" :class="['status-tag', nature]">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
     <div class="upper-half">

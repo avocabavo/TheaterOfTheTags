@@ -94,6 +94,22 @@ function visitTopLevelLooseTags(
   collection.forEach(shard=> visitTagArray(shard, 'looseTags', visitor))
 }
 
+function visitFellowshipLooseTags(visitor: (tag: Y.Map<any>, context: TagContext)=> void) {
+  fellowships.forEach(fellowship=> {
+    const fellowshipName = fellowship.get('fellowshipName')
+    const improvementInstruction = typeof fellowshipName === 'string' && fellowshipName.trim()
+      ? `Improve ${fellowshipName.trim()}`
+      : ''
+
+    visitTagArray(
+      fellowship,
+      'looseTags',
+      visitor,
+      improvementInstruction ? { improvementInstruction } : {}
+    )
+  })
+}
+
 function updateMatchingUsage(from: Usage, to: Usage) {
   doc.transact(()=> {
     const visitor = (tag: Y.Map<any>)=> {
@@ -103,7 +119,7 @@ function updateMatchingUsage(from: Usage, to: Usage) {
     }
 
     visitTopLevelLooseTags(situations, visitor)
-    visitTopLevelLooseTags(fellowships, visitor)
+    visitFellowshipLooseTags(visitor)
     heroes.forEach(hero=> visitHeroTags(hero, visitor))
   })
 }
@@ -163,7 +179,7 @@ export function getInvokedTagSummaries(): InvokedTagSummary[] {
   }
 
   visitTopLevelLooseTags(situations, visitor)
-  visitTopLevelLooseTags(fellowships, visitor)
+  visitFellowshipLooseTags(visitor)
   heroes.forEach(hero=> visitHeroTags(hero, visitor))
 
   return summaries

@@ -133,6 +133,19 @@ function scrollToHero(characterName: string) {
     .getElementById(heroId(characterName))
     ?.scrollIntoView({ behavior: 'instant', block: 'start' })
 }
+
+function scrollNavigationHorizontally(event: WheelEvent) {
+  if (!(event.currentTarget instanceof HTMLElement)) return
+
+  const horizontalAmount = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+    ? event.deltaX
+    : event.deltaY
+
+  if (horizontalAmount === 0) return
+
+  event.preventDefault()
+  event.currentTarget.scrollLeft += horizontalAmount
+}
 </script>
 
 <template>
@@ -145,7 +158,11 @@ function scrollToHero(characterName: string) {
       Theater of the Tags
     </button>
 
-    <nav class="hero-navigation" aria-label="Hero navigation">
+    <nav
+      class="hero-navigation"
+      aria-label="Hero navigation"
+      @wheel="scrollNavigationHorizontally"
+    >
       <div
         v-for="situation in navigableSituations"
         :key="situation.situationName"

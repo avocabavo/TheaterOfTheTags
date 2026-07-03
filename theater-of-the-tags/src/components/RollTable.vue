@@ -372,7 +372,8 @@ const tableStyle = computed(()=> ({
 }
 
 .history-table {
-  background: rgba(255, 255, 255, 0.58);
+  border-radius: 1.2rem;
+  background: white;
 }
 
 .warning-row td {

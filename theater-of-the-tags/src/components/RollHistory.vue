@@ -471,9 +471,11 @@ onUnmounted(()=> {
 
   padding: 0.5rem;
 
+  background-color: black;
+
   display: flex;
   flex-direction: column;
-  gap: 2.4rem;
+  gap: 0.125rem;
 }
 
 .roll-button {

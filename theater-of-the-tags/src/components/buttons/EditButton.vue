@@ -10,7 +10,7 @@ const emit = defineEmits<{
   <button
     class="edit-button"
     @click.stop="emit('edit')"
-    aria-label="Edit Character Name"
+    aria-label="Edit"
   >
     <img :src="quillWhite" alt="edit" class="icon" />
   </button>

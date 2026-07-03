@@ -3,20 +3,21 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import Tag from './Tag.vue'
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
-import { mightOptions } from '../lib/schema';
+import { mightOptions, themeTypeOptions } from '../lib/schema';
 import { useYMapField, useYArray, useYChildMap } from '../lib/yjsComposables';
 import type { TagShard, ThemeData } from '../lib/schema';
 import DeleteButton from './/buttons/DeleteButton.vue';
+import EditButton from './buttons/EditButton.vue';
 import { useMode } from '../lib/modeStore';
 import NewTag from './NewTag.vue';
 import Quest from './Quest.vue';
 import Bubbles from './Bubbles.vue';
-import { onBeforeUpdate, ref } from 'vue';
+import { computed, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import { mightIcon } from '../lib/mightIcons'
 
-const { mode } = useMode()
+const { mode, enableNameEditing } = useMode()
 
 const props = defineProps<{
   shard: Y.Map<any>
@@ -24,6 +25,38 @@ const props = defineProps<{
 
 const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
+const isEditingThemeDetails = ref(false)
+const canEditThemeDetails = computed(()=> enableNameEditing.value && mode.value === 'creation')
+const themeDetailsRef = ref<HTMLElement | null>(null)
+let pointerDownInsideThemeDetails = false
+
+watch(canEditThemeDetails, canEdit=> {
+  if (!canEdit) isEditingThemeDetails.value = false
+})
+
+function handleThemeDetailsFocusOut(event: FocusEvent) {
+  if (pointerDownInsideThemeDetails) return
+
+  const nextTarget = event.relatedTarget
+  if (nextTarget instanceof Node && themeDetailsRef.value?.contains(nextTarget)) return
+
+  isEditingThemeDetails.value = false
+}
+
+function handleThemeDetailsPointerDown() {
+  pointerDownInsideThemeDetails = true
+  window.setTimeout(()=> {
+    pointerDownInsideThemeDetails = false
+  }, 0)
+}
+
+function handleDocumentPointerDown(event: PointerEvent) {
+  if (!isEditingThemeDetails.value) return
+  const target = event.target
+  if (target instanceof Node && themeDetailsRef.value?.contains(target)) return
+
+  isEditingThemeDetails.value = false
+}
 
 const { items: powerTags, push: addPowerTag, remove: removePowerTag, move:movePowerTag } =
   useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'))
@@ -83,6 +116,14 @@ onBeforeUpdate(()=> {
   weaknessTagRefs.value = []
 })
 
+onMounted(()=> {
+  document.addEventListener('pointerdown', handleDocumentPointerDown)
+})
+
+onUnmounted(()=> {
+  document.removeEventListener('pointerdown', handleDocumentPointerDown)
+})
+
 const {
   onDrag: onPowerDragStart,
   onDrop: onPowerDrop,
@@ -136,32 +177,61 @@ defineExpose({
         <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
       </button>
     </div>
-    <div class="might">
-      <label
-        v-for="option in mightOptions"
-        :key="option"
-        class="might-option"
-        :title="option"
-      >
-        <input
-          type="radio"
-          :name="`might-${shard.get('uuid')}`"
-          :value="option"
-          :checked="might === option"
-          @change="might = option"
-          :aria-label="option"
-        />
+    <div
+      ref="themeDetailsRef"
+      class="theme-details"
+      @pointerdown.capture="handleThemeDetailsPointerDown"
+      @focusout="handleThemeDetailsFocusOut"
+    >
+      <template v-if="!isEditingThemeDetails">
         <img
-          :src="mightIcon(option)"
-          :alt="option"
+          :src="mightIcon(might)"
+          :alt="might"
           class="might-icon"
         >
-      </label>
+        <span class="theme-type">{{ themeType }}</span>
+      </template>
+
+      <template v-else>
+        <div class="might">
+          <label
+            v-for="option in mightOptions"
+            :key="option"
+            class="might-option"
+            :title="option"
+          >
+            <input
+              type="radio"
+              :name="`might-${shard.get('uuid')}`"
+              :value="option"
+              :checked="might === option"
+              @change="might = option"
+              :aria-label="option"
+            />
+            <img
+              :src="mightIcon(option)"
+              :alt="option"
+              class="might-icon"
+            >
+          </label>
+        </div>
+
+        <select v-model="themeType" class="theme-type-select">
+          <option
+            v-for="option in themeTypeOptions"
+            :key="option"
+            :value="option"
+          >
+            {{ option }}
+          </option>
+        </select>
+      </template>
+
+      <EditButton
+        v-if="canEditThemeDetails"
+        @edit="isEditingThemeDetails = !isEditingThemeDetails"
+      />
     </div>
-    <p class="theme-type">
-      <span class="tiny-static-words">type</span>
-      {{ themeType }}
-    </p>
 
     <div class="tag-section">
       <Tag
@@ -267,6 +337,15 @@ defineExpose({
   background: rgba(255, 255, 255, 0.25);
 }
 
+.theme-details {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+}
+
 .might {
   display: flex;
   gap: 0.75rem;
@@ -290,12 +369,15 @@ defineExpose({
   margin-bottom: 0.2rem;
   display: flex;
   align-items: baseline;
+  color: black;
 }
 
-.tiny-static-words {
-  font-size: smaller;
-  color: gray;
-  margin-right: 0.25rem;
+.theme-type-select {
+  min-width: 0;
+  max-width: 13rem;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.75);
+  color: black;
 }
 
 .tag-section {

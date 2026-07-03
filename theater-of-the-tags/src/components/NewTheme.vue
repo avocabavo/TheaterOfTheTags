@@ -11,6 +11,7 @@ import {
 import { createThemeShardFromYaml, type ThemeCreationProps } from '../lib/Theme';
 import type { ThemeShard } from '../lib/schema';
 import newTagBlack from '../assets/new-tag-black.svg'
+import { mightIcon } from '../lib/mightIcons'
 
 const emit = defineEmits<{
   (e: 'create', payload: ThemeCreationProps): void
@@ -68,6 +69,7 @@ const readyToImport = computed(()=> yamlText.value.trim().length > 0)
         v-for="option in mightOptions"
         :key="option"
         class="might-option"
+        :title="option"
       >
         <input
           type="radio"
@@ -75,8 +77,13 @@ const readyToImport = computed(()=> yamlText.value.trim().length > 0)
           :value="option"
           :checked="might === option"
           @change="might = option"
+          :aria-label="option"
         />
-        {{ option }}
+        <img
+          :src="mightIcon(option)"
+          :alt="option"
+          class="might-icon"
+        >
       </label>
     </div>
 
@@ -156,6 +163,24 @@ const readyToImport = computed(()=> yamlText.value.trim().length > 0)
   gap: 0.5rem;
 
   padding: 0.75rem;
+}
+
+.might {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.might-option {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.might-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: block;
 }
 
 .tag {

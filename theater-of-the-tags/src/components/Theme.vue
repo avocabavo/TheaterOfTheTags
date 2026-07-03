@@ -14,6 +14,7 @@ import Bubbles from './Bubbles.vue';
 import { onBeforeUpdate, ref } from 'vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
 import toYamlBlack from '../assets/to-yaml-black.svg'
+import { mightIcon } from '../lib/mightIcons'
 
 const { mode } = useMode()
 
@@ -140,6 +141,7 @@ defineExpose({
         v-for="option in mightOptions"
         :key="option"
         class="might-option"
+        :title="option"
       >
         <input
           type="radio"
@@ -147,8 +149,13 @@ defineExpose({
           :value="option"
           :checked="might === option"
           @change="might = option"
+          :aria-label="option"
         />
-        {{ option }}
+        <img
+          :src="mightIcon(option)"
+          :alt="option"
+          class="might-icon"
+        >
       </label>
     </div>
     <p class="theme-type">
@@ -270,6 +277,12 @@ defineExpose({
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
+}
+
+.might-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: block;
 }
 
 .theme-type {

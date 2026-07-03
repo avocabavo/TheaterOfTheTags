@@ -233,6 +233,7 @@ function scrollToTag(tagId: string) {
     ?.scrollIntoView({ behavior: 'instant', block: 'center' })
 }
 
+// @ts-ignore
 function testRoll(a: number, b: number) {
   if (
     !Number.isInteger(a)

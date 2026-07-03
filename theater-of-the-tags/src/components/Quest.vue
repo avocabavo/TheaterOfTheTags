@@ -59,14 +59,16 @@ defineExpose({
 <template>
   <div class="quest-container">
     <p class="static-words" @click="print">QUEST</p>
-    <textarea
-      ref="textareaRef"
-      v-model="localValue"
-      class="quest-input"
-      :disabled="mode === 'scene'"
-      placeholder="Enter quest..."
-      @input="autoResize"
-    />
+    <div class="quest-input-container">
+      <textarea
+        ref="textareaRef"
+        v-model="localValue"
+        class="quest-input"
+        :disabled="mode === 'scene'"
+        placeholder="Enter quest..."
+        @input="autoResize"
+      />
+    </div>
   </div>
 </template>
 
@@ -74,7 +76,7 @@ defineExpose({
 .quest-container {
   width: 100%;
   position: relative;
-  padding: 0.75rem;
+  padding: 0;
 }
 
 .static-words {
@@ -153,5 +155,9 @@ defineExpose({
 
 .quest-container::after {
   bottom: 0;
+}
+
+.quest-input-container {
+  padding: 0 0.5rem;
 }
 </style>

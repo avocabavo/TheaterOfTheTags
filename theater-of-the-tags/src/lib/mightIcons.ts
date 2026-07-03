@@ -9,6 +9,16 @@ const mightIcons: Record<Might, string> = {
   greatness: greatnessBlack,
 }
 
+const mightColors: Record<Might, string> = {
+  origin: '#88c29e',
+  adventure: '#c29188',
+  greatness: '#8f80bd',
+}
+
 export function mightIcon(might: Might) {
   return mightIcons[might]
+}
+
+export function mightColor(might: Might) {
+  return mightColors[might]
 }

@@ -15,7 +15,7 @@ import Bubbles from './Bubbles.vue';
 import { computed, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
 import toYamlBlack from '../assets/to-yaml-black.svg'
-import { mightIcon } from '../lib/mightIcons'
+import { mightColor, mightIcon } from '../lib/mightIcons'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -27,6 +27,9 @@ const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
 const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
 const isEditingThemeDetails = ref(false)
 const canEditThemeDetails = computed(()=> enableNameEditing.value && mode.value === 'creation')
+const themeStyle = computed(()=> ({
+  backgroundColor: mightColor(might.value),
+}))
 const themeDetailsRef = ref<HTMLElement | null>(null)
 let pointerDownInsideThemeDetails = false
 
@@ -162,7 +165,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="theme">
+  <div class="theme" :style="themeStyle">
     <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
 
     <div class="static-words">
@@ -177,6 +180,22 @@ defineExpose({
         <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
       </button>
     </div>
+
+    <div class="tag-section">
+      <Tag
+        v-if="primaryTag"
+        :ref="setPrimaryTagRef"
+        :shard="primaryTag"
+        @delete="clearPrimaryTag"
+        @resized="emit('resized')"
+      />
+      <NewTag
+        v-else-if="mode !== 'scene'"
+        nature="primary"
+        @create="handleCreateTag"
+      />
+    </div>
+
     <div
       ref="themeDetailsRef"
       class="theme-details"
@@ -235,21 +254,6 @@ defineExpose({
 
     <div class="tag-section">
       <Tag
-        v-if="primaryTag"
-        :ref="setPrimaryTagRef"
-        :shard="primaryTag"
-        @delete="clearPrimaryTag"
-        @resized="emit('resized')"
-      />
-      <NewTag
-        v-else-if="mode !== 'scene'"
-        nature="primary"
-        @create="handleCreateTag"
-      />
-    </div>
-
-    <div class="tag-section">
-      <Tag
         v-for="(tag, index) in powerTags"
         :key="tag.get('uuid')"
         :ref="setPowerTagRef"
@@ -288,8 +292,9 @@ defineExpose({
       />
     </div>
 
-    <div class="tag-section">
+    <div class="quest-section">
       <Quest
+        class="theme-quest"
         :shard="shard"
         :ref="setFieldRef"
         @resized="emit('resized')"
@@ -314,22 +319,31 @@ defineExpose({
 
 <style scoped>
 .theme {
+  --theme-banner-bg: #764;
+  --theme-banner-fg: #f6ecd8;
+
   position: relative;
   box-sizing: border-box;
-  border: 0.25rem solid #764;
-  background-color: #dca;
+  border: 0.25rem solid var(--theme-banner-bg);
 
   width: 25rem;
-  padding: 0.5rem;
+  padding: 0;
 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .static-words {
-  color: gray;
+  width: 100%;
+  margin-top: 0;
+  background: var(--theme-banner-bg);
+  color: var(--theme-banner-fg);
+}
+
+.static-words p {
+  color: inherit;
 }
 
 .copy-button:hover,
@@ -381,11 +395,39 @@ defineExpose({
 }
 
 .tag-section {
+  box-sizing: border-box;
   width: 100%;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.2rem;
   align-items: center;
+}
+
+.quest-section {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+}
+
+.theme-quest {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.theme-quest :deep(.static-words) {
+  box-sizing: border-box;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  padding: 0.2rem 0;
+  background: var(--theme-banner-bg);
+  color: var(--theme-banner-fg);
+  font-size: large;
 }
 
 .quest-aim {

@@ -404,7 +404,7 @@ async function copyToClipboard() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 
   background: #fca;
 }
@@ -424,7 +424,7 @@ async function copyToClipboard() {
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.2rem;
   align-items: center;
 }
 

@@ -108,6 +108,7 @@ const invokedRows = computed<RollTableRowData[]>(()=> {
       id: tag.uuid,
       name: tag.name,
       impact: formatImpact(impact),
+      might: tag.might,
       scratched: tag.kind === 'tag'
         && tag.scratched
         && (tag.nature === 'power' || tag.nature === 'primary'),
@@ -153,6 +154,7 @@ function isRollTableRowData(row: any): row is RollTableRowData {
     return typeof row.name === 'string'
       && (row.scratched == null || typeof row.scratched === 'boolean')
       && (row.warning == null || typeof row.warning === 'boolean')
+      && (row.might == null || typeof row.might === 'string')
       && (row.improvementInstruction == null || typeof row.improvementInstruction === 'string')
   }
 
@@ -468,6 +470,7 @@ onUnmounted(()=> {
   flex: 1 1 auto;
   min-height: 2rem;
   overflow-y: scroll;
+  overflow-x: hidden;
 
   padding: 0.5rem;
 

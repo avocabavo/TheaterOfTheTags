@@ -1,10 +1,11 @@
 import * as Y from 'yjs'
 import { doc, fellowships, heroes, situations } from './yjs'
-import type { StatusNature, TagNature, Usage } from './schema'
+import type { Might, StatusNature, TagNature, Usage } from './schema'
 import { getThemeName } from './Theme'
 
 type TagContext = {
   improvementInstruction?: string
+  might?: Might
 }
 
 export type InvokedTagSummary = {
@@ -15,6 +16,7 @@ export type InvokedTagSummary = {
   nature: TagNature | StatusNature
   scratched: boolean
   tier: number
+  might?: Might
   improvementInstruction?: string
 }
 
@@ -51,14 +53,21 @@ function visitThemeTags(theme: unknown, visitor: (tag: Y.Map<any>, context: TagC
 
   const themeName = getThemeName(theme)
   const themeImprovementInstruction = themeName ? `Improve ${themeName}` : ''
+  const themeMight = theme.get('might')
+  const mightContext = typeof themeMight === 'string'
+    ? { might: themeMight as Might }
+    : {}
 
-  visitTag(theme.get('primaryTag'), visitor)
-  visitTagArray(theme, 'powerTags', visitor)
+  visitTag(theme.get('primaryTag'), visitor, mightContext)
+  visitTagArray(theme, 'powerTags', visitor, mightContext)
   visitTagArray(
     theme,
     'weaknessTags',
     visitor,
-    themeImprovementInstruction ? { improvementInstruction: themeImprovementInstruction } : {}
+    {
+      ...mightContext,
+      ...(themeImprovementInstruction ? { improvementInstruction: themeImprovementInstruction } : {}),
+    }
   )
 }
 
@@ -91,7 +100,14 @@ function visitTopLevelLooseTags(
   collection: Y.Map<Y.Map<any>>,
   visitor: (tag: Y.Map<any>, context: TagContext)=> void,
 ) {
-  collection.forEach(shard=> visitTagArray(shard, 'looseTags', visitor))
+  collection.forEach(shard=> {
+    const baseMight = shard.get('baseMight')
+    const context = typeof baseMight === 'string'
+      ? { might: baseMight as Might }
+      : {}
+
+    visitTagArray(shard, 'looseTags', visitor, context)
+  })
 }
 
 function visitFellowshipLooseTags(visitor: (tag: Y.Map<any>, context: TagContext)=> void) {
@@ -174,6 +190,7 @@ export function getInvokedTagSummaries(): InvokedTagSummary[] {
       nature,
       scratched: Boolean(tag.get('scratched')),
       tier: tag.has('tiers') ? highestTier(tag) : 0,
+      ...(context.might ? { might: context.might } : {}),
       ...(improvementInstruction ? { improvementInstruction } : {}),
     })
   }

@@ -8,12 +8,15 @@ import d6Five from '../assets/d6-5pip.svg'
 import d6Six from '../assets/d6-6pip.svg'
 import scratchBlack from '../assets/scratch-black.svg'
 import scratchWhite from '../assets/scratch-white.svg'
+import type { Might } from '../lib/schema'
+import { mightIcon, whiteMightIcon } from '../lib/mightIcons'
 
 export type TagTableRow = {
   kind: 'tag'
   id: string
   name: string
   impact: string
+  might?: Might
   scratched?: boolean
   warning?: boolean
   improvementInstruction?: string
@@ -58,6 +61,11 @@ function dieImage(value: number) {
 
 function scratchIcon(row: TagTableRow) {
   return row.warning ? scratchWhite : scratchBlack
+}
+
+function rowMightIcon(row: TagTableRow) {
+  if (!row.might) return ''
+  return row.warning ? whiteMightIcon(row.might) : mightIcon(row.might)
 }
 
 function updateRollName(event: Event) {
@@ -137,6 +145,10 @@ const tableStyle = computed(()=> ({
     :class="['roll-table', { 'history-table': history }]"
     :style="tableStyle"
   >
+    <colgroup>
+      <col class="tag-name-column">
+      <col class="impact-column">
+    </colgroup>
     <thead>
       <tr>
         <th colspan="2">
@@ -157,6 +169,13 @@ const tableStyle = computed(()=> ({
       >
         <td class="tag-name-cell">
           <span class="tag-name-with-marker">
+            <img
+              v-if="row.might"
+              :src="rowMightIcon(row)"
+              :alt="row.might"
+              class="might-icon"
+              :title="`${row.might} might`"
+            >
             <button
               v-if="navigableTags"
               type="button"
@@ -285,9 +304,16 @@ const tableStyle = computed(()=> ({
   text-align: left;
 }
 
+.tag-name-column {
+  width: 70%;
+}
+
+.impact-column {
+  width: 30%;
+}
+
 .roll-table th:last-child,
 .roll-table td:last-child {
-  width: 4rem;
   text-align: right;
 }
 
@@ -297,6 +323,7 @@ const tableStyle = computed(()=> ({
 
 .tag-name-cell {
   min-width: 0;
+  text-align: right;
 }
 
 .tag-name-with-marker {
@@ -304,6 +331,7 @@ const tableStyle = computed(()=> ({
   align-items: center;
   gap: 0.25rem;
   max-width: 100%;
+  justify-content: flex-end;
 }
 
 .tag-name-button {
@@ -313,7 +341,7 @@ const tableStyle = computed(()=> ({
   background: transparent;
   color: inherit;
   font: inherit;
-  text-align: left;
+  text-align: right;
   overflow-wrap: anywhere;
   cursor: pointer;
 }
@@ -324,6 +352,13 @@ const tableStyle = computed(()=> ({
 }
 
 .scratch-icon {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  display: inline-block;
+}
+
+.might-icon {
   flex: 0 0 auto;
   width: 1.1rem;
   height: 1.1rem;

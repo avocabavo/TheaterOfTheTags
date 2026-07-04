@@ -353,15 +353,15 @@ const tableStyle = computed(()=> ({
 
 .scratch-icon {
   flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.5rem;
+  height: 1.5rem;
   display: inline-block;
 }
 
 .might-icon {
   flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   display: inline-block;
 }
 

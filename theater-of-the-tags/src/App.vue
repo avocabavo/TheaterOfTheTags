@@ -35,6 +35,8 @@ import {
   parseSituationDataFromYaml,
 } from './lib/Situation'
 import { useDragDrop } from './lib/util'
+import { mightOptions, type Might } from './lib/schema'
+import { mightIcon } from './lib/mightIcons'
 
 type HeroEntry = {
   name: string
@@ -55,6 +57,7 @@ type SituationEntry = {
 }
 
 const newSituationName = ref('')
+const newSituationBaseMight = ref<Might | ''>('')
 const situationNames = ref<string[]>([])
 const showSituationForm = ref(false)
 const showSituationImportForm = ref(false)
@@ -433,11 +436,13 @@ function fellowshipId(fellowshipName: string) {
 
 function addSituation() {
   const situationName = newSituationName.value.trim()
-  if (!situationName || situations.has(situationName)) return
+  const baseMight = newSituationBaseMight.value
+  if (!situationName || !baseMight || situations.has(situationName)) return
 
-  situations.set(situationName, createSituationShard({ situationName }))
+  situations.set(situationName, createSituationShard({ situationName, baseMight }))
   appendOrderedName(situationOrder, situationName)
   newSituationName.value = ''
+  newSituationBaseMight.value = ''
 }
 
 function openSituationForm() {
@@ -460,7 +465,7 @@ function closeSituationImportForm() {
 
 function createSituationFromForm() {
   const situationName = newSituationName.value.trim()
-  if (!situationName || situations.has(situationName)) return
+  if (!situationName || !newSituationBaseMight.value || situations.has(situationName)) return
 
   addSituation()
   closeSituationForm()
@@ -738,11 +743,34 @@ function deleteHero(name: string) {
           />
         </label>
 
+        <fieldset class="form-field might-field">
+          <legend>Base Might</legend>
+          <label
+            v-for="option in mightOptions"
+            :key="option"
+            class="might-choice"
+            :title="option"
+          >
+            <input
+              v-model="newSituationBaseMight"
+              type="radio"
+              name="new-situation-base-might"
+              :value="option"
+              required
+              :aria-label="option"
+            >
+            <img :src="mightIcon(option)" :alt="option" class="might-choice-icon">
+          </label>
+        </fieldset>
+
         <div class="modal-actions">
           <button type="button" class="secondary-button" @click="closeSituationForm">
             Cancel
           </button>
-          <button type="submit">Create Situation</button>
+          <button
+            type="submit"
+            :disabled="!newSituationName.trim() || !newSituationBaseMight"
+          >Create Situation</button>
         </div>
       </form>
     </div>

@@ -1,25 +1,33 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
 import YAML from 'yaml'
-import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue'
 import DeleteButton from './buttons/DeleteButton.vue'
+import EditButton from './buttons/EditButton.vue'
 import EditableText from './EditableText.vue'
 import LooseTag from './LooseTag.vue'
+import MightAspect from './MightAspect.vue'
+import NewMightAspect from './NewMightAspect.vue'
 import NewLooseTags from './NewLooseTags.vue'
 import { useMode } from '../lib/modeStore'
 import {
   DEFAULT_SITUATION_BACKGROUND_COLOR,
+  mightOptions,
+  type Might,
+  type MightAspectShard,
   type SituationData,
   type StatusTagShard,
   type TagShard,
 } from '../lib/schema'
 import { createStatusTagShard, type StatusCreationProps } from '../lib/StatusTag'
 import { createTagShard, type TagCreationProps } from '../lib/Tag'
+import { createMightAspectShard } from '../lib/Situation'
 import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
+import { mightIcon } from '../lib/mightIcons'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -39,6 +47,11 @@ const situationName = useYMapField<SituationData, 'situationName'>(
   'situationName',
   ''
 )
+const baseMight = useYMapField<SituationData, 'baseMight'>(
+  props.shard,
+  'baseMight',
+  'origin'
+)
 const backgroundColor = useYMapField<SituationData, 'backgroundColor'>(
   props.shard,
   'backgroundColor',
@@ -53,6 +66,50 @@ const backgroundColorInput = computed({
     backgroundColor.value = value
   },
 })
+const canEditBaseMight = computed(()=> enableNameEditing.value && mode.value === 'narrator')
+const isEditingBaseMight = ref(false)
+const baseMightRef = ref<HTMLElement | null>(null)
+let pointerDownInsideBaseMight = false
+
+watch(canEditBaseMight, canEdit=> {
+  if (!canEdit) isEditingBaseMight.value = false
+})
+
+function handleBaseMightFocusOut(event: FocusEvent) {
+  if (pointerDownInsideBaseMight) return
+
+  const nextTarget = event.relatedTarget
+  if (nextTarget instanceof Node && baseMightRef.value?.contains(nextTarget)) return
+
+  isEditingBaseMight.value = false
+}
+
+function handleBaseMightPointerDown() {
+  pointerDownInsideBaseMight = true
+  window.setTimeout(()=> {
+    pointerDownInsideBaseMight = false
+  }, 0)
+}
+
+function handleDocumentPointerDown(event: PointerEvent) {
+  if (!isEditingBaseMight.value) return
+  const target = event.target
+  if (target instanceof Node && baseMightRef.value?.contains(target)) return
+
+  isEditingBaseMight.value = false
+}
+
+const {
+  items: mightAspects,
+  push: addMightAspect,
+  remove: removeMightAspect,
+  move: moveMightAspect,
+} = useYArray<MightAspectShard>(props.shard, 'mightAspects', reflowMasonry)
+
+const {
+  onDrag: onMightAspectDrag,
+  onDrop: onMightAspectDrop,
+} = useDragDrop(moveMightAspect, reflowMasonry)
 
 const {
   items: looseTags,
@@ -66,19 +123,26 @@ const {
   onDrop: onLooseTagDrop,
 } = useDragDrop(moveLooseTag, reflowMasonry)
 
+const mightAspectRefs = ref<any[]>([])
 const looseTagRefs = ref<any[]>([])
+
+function setMightAspectRef(el: any) {
+  if (el) mightAspectRefs.value.push(el)
+}
 
 function setLooseTagRef(el: any) {
   if (el) looseTagRefs.value.push(el)
 }
 
 onBeforeUpdate(()=> {
+  mightAspectRefs.value = []
   looseTagRefs.value = []
 })
 
 let masonry: Masonry | null = null
 
 onMounted(async ()=> {
+  document.addEventListener('pointerdown', handleDocumentPointerDown)
   await nextTick()
   if (!grid.value) return
   masonry = new Masonry(grid.value, {
@@ -87,6 +151,10 @@ onMounted(async ()=> {
     gutter: 16,
   })
   reflowMasonry()
+})
+
+onUnmounted(()=> {
+  document.removeEventListener('pointerdown', handleDocumentPointerDown)
 })
 
 async function reflowMasonry() {
@@ -108,10 +176,16 @@ function handleCreateLooseStatus(data: StatusCreationProps) {
   addLooseTag(createStatusTagShard(data))
 }
 
+function handleCreateMightAspect(data: { might: Might, name: string }) {
+  addMightAspect(createMightAspectShard(data))
+}
+
 function toJson() {
   return {
     situationName: situationName.value,
     backgroundColor: backgroundColor.value,
+    baseMight: baseMight.value,
+    mightAspects: mightAspectRefs.value.map(aspect=> aspect.toJson()),
     looseTags: looseTagRefs.value.map(lt=> lt.toJson()),
   }
 }
@@ -164,7 +238,65 @@ defineExpose({
           @resized="reflowMasonry"
         />
       </div>
+
+      <div
+        ref="baseMightRef"
+        class="base-might"
+        @pointerdown.capture="handleBaseMightPointerDown"
+        @focusout="handleBaseMightFocusOut"
+      >
+        <template v-if="isEditingBaseMight">
+          <label
+            v-for="option in mightOptions"
+            :key="option"
+            class="might-option"
+            :title="option"
+          >
+            <input
+              type="radio"
+              :name="`situation-base-might-${shard.get('uuid')}`"
+              :value="option"
+              :checked="baseMight === option"
+              :aria-label="option"
+              @change="baseMight = option"
+            >
+            <img :src="mightIcon(option)" :alt="option" class="might-icon">
+          </label>
+        </template>
+
+        <img
+          v-else
+          :src="mightIcon(baseMight)"
+          :alt="baseMight"
+          class="might-icon"
+        >
+
+        <EditButton
+          v-if="canEditBaseMight"
+          @edit="isEditingBaseMight = !isEditingBaseMight"
+        />
+      </div>
     </div>
+
+    <MightAspect
+      v-for="(mightAspect, index) in mightAspects"
+      :key="mightAspect.get('uuid')"
+      :ref="setMightAspectRef"
+      :shard="mightAspect"
+      class="grid-item"
+      draggable="true"
+      @dragstart="onMightAspectDrag(index)"
+      @dragover.prevent
+      @drop="onMightAspectDrop(index)"
+      @delete="removeMightAspect(index)"
+      @resized="reflowMasonry"
+    />
+
+    <NewMightAspect
+      v-if="mode !== 'scene'"
+      class="grid-item"
+      @create="handleCreateMightAspect"
+    />
 
     <LooseTag
       v-for="(looseTag, index) in looseTags"
@@ -225,6 +357,27 @@ defineExpose({
   display: flex;
   justify-content: center;
   color: #222;
+}
+
+.base-might {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  min-height: 2.5rem;
+}
+
+.might-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.might-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: block;
 }
 
 .static-words {

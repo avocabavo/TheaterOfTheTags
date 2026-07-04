@@ -9,6 +9,13 @@ export type Usage = 'ready' | 'invoked' | 'tapped'
 export type Might = 'origin' | 'adventure' | 'greatness'
 export const mightOptions: Array<Might> = ['origin', 'adventure', 'greatness']
 
+export type MightAspectData = {
+  uuid: string
+  might: Might
+  name: string
+}
+export type MightAspectShard = Y.Map<any>
+
 export type OriginThemeType =
   'circumstance' |
   'devotion' |
@@ -170,6 +177,8 @@ export const DEFAULT_FELLOWSHIP_BACKGROUND_COLOR = '#012'
 export type SituationData = {
   situationName: string
   backgroundColor: string
+  baseMight: Might
+  mightAspects: Y.Array<MightAspectShard>
   looseTags: Y.Array<TagShard | StatusTagShard>
 }
 export type SituationShard = Y.Map<any>

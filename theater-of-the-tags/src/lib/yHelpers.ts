@@ -23,7 +23,7 @@ export function getYArray<T>(
   let arr = ymap.get(key)
 
   if (!(arr instanceof Y.Array)) {
-    const arr = new Y.Array<T>()
+    arr = new Y.Array<T>()
     ymap.set(key, arr)
   }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { doc, rollHistory as yRollHistory } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
 import {
@@ -9,6 +9,7 @@ import {
   type InvokedTagSummary,
 } from '../lib/usage'
 import RollTable, {
+  type MightComparison,
   type RollTableRow,
   type RollTableRowData,
 } from './RollTable.vue'
@@ -32,6 +33,7 @@ const rollHistoryEntries = ref<HistoryEntry[]>([])
 const historyListRef = ref<HTMLElement | null>(null)
 const DEFAULT_ROLL_NAME = 'ROLL NAME'
 const currentRollName = ref(DEFAULT_ROLL_NAME)
+const mightComparison = ref<MightComparison>('uncompared')
 const { mode } = useMode()
 
 const rollColors = [
@@ -44,6 +46,16 @@ const rollColors = [
   '#005000',
   '#000000',
 ]
+
+const mightComparisonImpacts: Record<Exclude<MightComparison, 'uncompared'>, number> = {
+  'extremely imperiled': -6,
+  imperiled: -3,
+  even: 0,
+  favored: 3,
+  'extremely favored': 6,
+}
+
+const mightComparisonOptions = Object.keys(mightComparisonImpacts) as Array<Exclude<MightComparison, 'uncompared'>>
 
 let startingX = 0
 let startingWidthPx = 0
@@ -120,12 +132,27 @@ const invokedRows = computed<RollTableRowData[]>(()=> {
   })
 })
 
-const currentRows = computed(()=> invokedRows.value)
+const mightComparisonRow = computed<RollTableRowData | null>(()=> {
+  if (mightComparison.value === 'uncompared') return null
+
+  return {
+    kind: 'might-comparison',
+    id: 'might-comparison',
+    comparison: mightComparison.value,
+    impact: formatImpact(mightComparisonImpacts[mightComparison.value]),
+  }
+})
+
+const currentRows = computed(()=> [
+  ...invokedRows.value,
+  ...(mightComparisonRow.value ? [mightComparisonRow.value] : []),
+])
 const warningCount = computed(()=> invokedRows.value.filter(
   row=> row.kind === 'tag' && row.warning
 ).length)
 const hasWarnings = computed(()=> warningCount.value > 0)
 const canRoll = computed(()=> mode.value === 'scene')
+const canRollCurrentTable = computed(()=> canRoll.value && mightComparison.value !== 'uncompared')
 
 function rollD6() {
   return Math.floor(Math.random() * 6) + 1
@@ -145,6 +172,19 @@ function syncInvokedTags() {
   }
 }
 
+function invokedRowsResetSignature() {
+  return invokedTags.value
+    .map(tag=> [
+      tag.uuid,
+      tag.kind,
+      tag.nature,
+      tag.scratched ? 'scratched' : 'unscratched',
+      tag.tierSignature ?? '',
+      tag.impact,
+    ].join(':'))
+    .join('|')
+}
+
 function isRollTableRowData(row: any): row is RollTableRowData {
   if (!row || typeof row !== 'object') return false
   if (typeof row.id !== 'string') return false
@@ -156,6 +196,11 @@ function isRollTableRowData(row: any): row is RollTableRowData {
       && (row.warning == null || typeof row.warning === 'boolean')
       && (row.might == null || typeof row.might === 'string')
       && (row.improvementInstruction == null || typeof row.improvementInstruction === 'string')
+  }
+
+  if (row.kind === 'might-comparison') {
+    return typeof row.comparison === 'string'
+      && row.comparison !== 'uncompared'
   }
 
   if (row.kind === 'roll') {
@@ -215,7 +260,7 @@ function createRollRow(first = rollD6(), second = rollD6()): RollTableRow {
 }
 
 function commitRoll(rollRow: RollTableRow) {
-  const rows = [...invokedRows.value, rollRow]
+  const rows = [...currentRows.value, rollRow]
   const rollName = currentRollName.value.trim() || DEFAULT_ROLL_NAME
 
   yRollHistory.push([{
@@ -228,7 +273,7 @@ function commitRoll(rollRow: RollTableRow) {
 }
 
 function handleRoll() {
-  if (!canRoll.value) return
+  if (!canRollCurrentTable.value) return
   commitRoll(createRollRow())
 }
 
@@ -314,6 +359,13 @@ onMounted(()=> {
   // window.testRoll = testRoll
 })
 
+watch(invokedRowsResetSignature, (nextSignature, previousSignature)=> {
+  if (previousSignature == null) return
+  if (nextSignature === previousSignature) return
+
+  mightComparison.value = 'uncompared'
+})
+
 onUnmounted(()=> {
   doc.off('update', syncInvokedTags)
   yRollHistory.unobserve(syncRollHistory)
@@ -361,6 +413,19 @@ onUnmounted(()=> {
         @submit="handleRoll"
       />
 
+      <div v-if="mode === 'narrator'" class="might-comparison-controls">
+        <button
+          v-for="option in mightComparisonOptions"
+          :key="option"
+          type="button"
+          :class="['might-comparison-button', { selected: mightComparison === option }]"
+          @click="mightComparison = option"
+        >
+          {{ option }}
+          <span class="comparison-impact">{{ formatImpact(mightComparisonImpacts[option]) }}</span>
+        </button>
+      </div>
+
       <button
         v-if="mode === 'narrator'"
         type="button"
@@ -374,6 +439,8 @@ onUnmounted(()=> {
         v-if="mode === 'scene'"
         type="button"
         :class="['roll-button', { 'has-warnings': hasWarnings }]"
+        :disabled="!canRollCurrentTable"
+        :title="mightComparison === 'uncompared' ? 'Choose a might comparison before rolling' : 'Roll 2d6'"
         @click="handleRoll"
       >
         <span
@@ -494,6 +561,40 @@ onUnmounted(()=> {
   cursor: pointer;
 }
 
+.might-comparison-controls {
+  margin: 0.5rem 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.might-comparison-button {
+  width: 100%;
+  padding: 0.35rem 0.45rem;
+  border: 0.12rem solid #1e1e2f;
+  border-radius: 0.25rem;
+  background: white;
+  color: #1e1e2f;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.might-comparison-button.selected {
+  background: #1e1e2f;
+  color: white;
+}
+
+.comparison-impact {
+  font-variant-numeric: tabular-nums;
+}
+
 .refresh-button {
   margin: 0.5rem;
   width: auto;
@@ -515,6 +616,11 @@ onUnmounted(()=> {
 .roll-button:hover,
 .roll-button:focus-visible {
   background: #2f2f4a;
+}
+
+.roll-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .roll-button.has-warnings {

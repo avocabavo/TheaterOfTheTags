@@ -16,6 +16,7 @@ export type InvokedTagSummary = {
   nature: TagNature | StatusNature
   scratched: boolean
   tier: number
+  tierSignature?: string
   might?: Might
   improvementInstruction?: string
 }
@@ -156,6 +157,13 @@ function highestTier(tag: Y.Map<any>) {
   return 0
 }
 
+function tierSignature(tag: Y.Map<any>) {
+  const tiers = tag.get('tiers')
+  if (!(tiers instanceof Y.Array)) return ''
+
+  return tiers.toArray().map(Boolean).map(value=> value ? '1' : '0').join('')
+}
+
 function tagImpact(tag: Y.Map<any>) {
   if (tag.has('tiers')) {
     const nature = tag.get('nature') as StatusNature
@@ -190,6 +198,7 @@ export function getInvokedTagSummaries(): InvokedTagSummary[] {
       nature,
       scratched: Boolean(tag.get('scratched')),
       tier: tag.has('tiers') ? highestTier(tag) : 0,
+      ...(kind === 'status' ? { tierSignature: tierSignature(tag) } : {}),
       ...(context.might ? { might: context.might } : {}),
       ...(improvementInstruction ? { improvementInstruction } : {}),
     })

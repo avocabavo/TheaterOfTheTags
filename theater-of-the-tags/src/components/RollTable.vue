@@ -29,7 +29,22 @@ export type RollTableRow = {
   impact: string
 }
 
-export type RollTableRowData = TagTableRow | RollTableRow
+export type MightComparison =
+  'uncompared' |
+  'extremely imperiled' |
+  'imperiled' |
+  'even' |
+  'favored' |
+  'extremely favored'
+
+export type MightComparisonTableRow = {
+  kind: 'might-comparison'
+  id: string
+  comparison: Exclude<MightComparison, 'uncompared'>
+  impact: string
+}
+
+export type RollTableRowData = TagTableRow | RollTableRow | MightComparisonTableRow
 
 const props = defineProps<{
   rows: RollTableRowData[]
@@ -86,14 +101,22 @@ const tagRows = computed(()=> props.rows.filter(
   (row): row is TagTableRow => row.kind === 'tag'
 ))
 
+const mightComparisonRow = computed(()=> props.rows.find(
+  (row): row is MightComparisonTableRow => row.kind === 'might-comparison'
+) ?? null)
+
 const rollRow = computed(()=> props.rows.find(
   (row): row is RollTableRow => row.kind === 'roll'
 ) ?? null)
 
-const modifier = computed(()=> tagRows.value.reduce(
-  (total, row)=> total + parseImpact(row.impact),
-  0
-))
+const modifier = computed(()=> {
+  const tagImpact = tagRows.value.reduce(
+    (total, row)=> total + parseImpact(row.impact),
+    0
+  )
+
+  return tagImpact + parseImpact(mightComparisonRow.value?.impact ?? '0')
+})
 
 const result = computed(()=> (
   rollRow.value ? modifier.value + parseImpact(rollRow.value.impact) : null
@@ -198,6 +221,14 @@ const tableStyle = computed(()=> ({
       </tr>
       <tr v-if="rows.length === 0">
         <td colspan="2" class="empty-cell">{{ emptyText ?? 'No rows' }}</td>
+      </tr>
+      <tr v-if="mightComparisonRow" class="might-comparison-row">
+        <td class="tag-name-cell">
+          <span class="tag-name-with-marker">
+            {{ mightComparisonRow.comparison }}
+          </span>
+        </td>
+        <td class="impact-cell">{{ mightComparisonRow.impact }}</td>
       </tr>
       <tr class="summary-row">
         <th scope="row">Modifier</th>
@@ -414,6 +445,10 @@ const tableStyle = computed(()=> ({
 .warning-row td {
   background: var(--roll-table-color);
   color: white;
+}
+
+.might-comparison-row td {
+  font-weight: 800;
 }
 
 .dice-row {

@@ -139,8 +139,8 @@ defineExpose({
 }
 
 /* Optional: subtle scroll edges effect */
-.quest-container::before,
-.quest-container::after {
+.quest-input-container::before,
+.quest-input-container::after {
   content: "";
   position: absolute;
   left: 8px;

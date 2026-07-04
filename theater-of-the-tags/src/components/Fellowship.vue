@@ -199,8 +199,9 @@ defineExpose({
         />
       </div>
 
-      <div class="tag-section">
+      <div class="quest-section">
         <Quest
+          class="fellowship-quest"
           :shard="shard"
           :ref="setFieldRef"
           @resized="reflowMasonry"
@@ -303,6 +304,9 @@ defineExpose({
 }
 
 .fellowship-card {
+  --fellowship-banner-bg: #62b7dc;
+  --fellowship-banner-fg: #12384a;
+
   box-sizing: border-box;
   border: 0.25rem solid #2c7ea0;
 
@@ -339,8 +343,34 @@ defineExpose({
 }
 
 .fellowship-card .static-words {
-  background-color: #62b7dc;
-  color: #12384a;
+  background-color: var(--fellowship-banner-bg);
+  color: var(--fellowship-banner-fg);
+}
+
+.quest-section {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+}
+
+.fellowship-quest {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.fellowship-quest :deep(.static-words) {
+  box-sizing: border-box;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  padding: 0.2rem 0;
+  background: var(--fellowship-banner-bg);
+  color: var(--fellowship-banner-fg);
+  font-size: large;
 }
 
 .special-improvements {

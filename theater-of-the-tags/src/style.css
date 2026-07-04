@@ -52,3 +52,8 @@ body {
   margin: 0;
   font-weight: bold;
 }
+
+h1,
+h2 {
+  line-height: 1.18;
+}

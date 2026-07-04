@@ -121,4 +121,8 @@ function onKeydown(e: KeyboardEvent) {
 .editable-component {
   position: relative;
 }
+
+.editable-component:is(h1, h2) {
+  line-height: 1.18;
+}
 </style>

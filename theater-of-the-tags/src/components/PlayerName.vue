@@ -55,6 +55,10 @@ const emit = defineEmits<{
   color: black;
 }
 
+.player-name :deep(.editable-component) {
+  text-align: center;
+}
+
 .static-words {
   width: 100%;
   display: flex;

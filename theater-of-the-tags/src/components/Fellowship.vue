@@ -325,6 +325,10 @@ defineExpose({
   color: #12384a;
 }
 
+.fellowship-name :deep(.editable-component) {
+  text-align: center;
+}
+
 .tag-section {
   box-sizing: border-box;
   width: 100%;

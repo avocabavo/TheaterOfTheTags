@@ -51,4 +51,8 @@ const emit = defineEmits<{
 
   color: black;
 }
+
+.character-name :deep(.editable-component) {
+  text-align: center;
+}
 </style>

@@ -359,6 +359,10 @@ defineExpose({
   color: #222;
 }
 
+.situation-name :deep(.editable-component) {
+  text-align: center;
+}
+
 .base-might {
   position: relative;
   display: flex;

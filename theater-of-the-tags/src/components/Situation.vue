@@ -293,7 +293,7 @@ defineExpose({
     />
 
     <NewMightAspect
-      v-if="mode !== 'scene'"
+      v-if="mode == 'narrator'"
       class="grid-item"
       @create="handleCreateMightAspect"
     />

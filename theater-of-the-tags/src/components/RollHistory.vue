@@ -420,9 +420,9 @@ onUnmounted(()=> {
           type="button"
           :class="['might-comparison-button', { selected: mightComparison === option }]"
           @click="mightComparison = option"
+          :title="option"
         >
-          {{ option }}
-          <span class="comparison-impact">{{ formatImpact(mightComparisonImpacts[option]) }}</span>
+          {{ formatImpact(mightComparisonImpacts[option]) }}
         </button>
       </div>
 
@@ -564,7 +564,7 @@ onUnmounted(()=> {
 .might-comparison-controls {
   margin: 0.5rem 0.5rem 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.25rem;
 }
 
@@ -576,23 +576,14 @@ onUnmounted(()=> {
   background: white;
   color: #1e1e2f;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.2rem;
   font-weight: 800;
   cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
 }
 
 .might-comparison-button.selected {
   background: #1e1e2f;
   color: white;
-}
-
-.comparison-impact {
-  font-variant-numeric: tabular-nums;
 }
 
 .refresh-button {

@@ -327,13 +327,6 @@ async function copyToClipboard() {
       </div>
     </div>
 
-    <Backpack
-      class="grid-item"
-      :shard="shard"
-      ref="backpackRef"
-      @resized="reflowMasonry"
-    />
-
     <Theme
       class="grid-item"
       v-for="(theme, index) in themes"
@@ -353,6 +346,13 @@ async function copyToClipboard() {
       v-if="mode !== 'scene'"
       @create="handleCreateTheme"
       @import="handleImportTheme"
+    />
+
+    <Backpack
+      class="grid-item"
+      :shard="shard"
+      ref="backpackRef"
+      @resized="reflowMasonry"
     />
 
     <LooseTag

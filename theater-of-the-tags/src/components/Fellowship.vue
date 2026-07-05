@@ -276,7 +276,7 @@ defineExpose({
     />
 
     <NewLooseTags
-      v-if="mode !== 'scene'"
+      v-if="mode == 'narrator'"
       class="grid-item"
       @create-tag="handleCreateLooseTag"
       @create-status="handleCreateLooseStatus"

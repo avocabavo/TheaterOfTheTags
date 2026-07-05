@@ -41,6 +41,7 @@ defineExpose({toJson})
         ref="statusRef"
         :shard="shard"
         name-editable-mode="narrator"
+        deletable-mode="narrator"
         @delete="emit('delete')"
         @resized="emit('resized')"
       />
@@ -49,6 +50,7 @@ defineExpose({toJson})
         ref="tagRef"
         :shard="shard"
         name-editable-mode="narrator"
+        deletable-mode="narrator"
         @delete="emit('delete')"
         @resized="emit('resized')"
       />

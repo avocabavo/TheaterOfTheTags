@@ -20,6 +20,7 @@ const { mode, enableNameEditing } = useMode()
 const props = defineProps<{
   shard: TagShard
   nameEditableMode?: 'creation' | 'narrator'
+  deletableMode?: 'any-editable' | 'narrator'
 }>()
 
 const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
@@ -27,6 +28,11 @@ const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as
 const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
 const usage = useYMapField<TagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
 const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
+const deletableMode = computed(()=> props.deletableMode ?? 'any-editable')
+const canDelete = computed(()=> deletableMode.value === 'narrator'
+  ? mode.value === 'narrator'
+  : mode.value !== 'scene'
+)
 const elementId = computed(()=> {
   const uuid = props.shard.get('uuid')
   return typeof uuid === 'string' ? tagElementId(uuid) : undefined
@@ -84,7 +90,7 @@ defineExpose({
 
 <template>
   <div :id="elementId" class="tag" :class="nature" @click="copyToClipboard">
-    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+    <DeleteButton v-if="canDelete" @delete="emit('delete')" />
     <button
       v-if="mode !== 'creation'"
       type="button"

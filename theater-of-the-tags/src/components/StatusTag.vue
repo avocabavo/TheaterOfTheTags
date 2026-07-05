@@ -20,6 +20,7 @@ const { mode, enableNameEditing } = useMode()
 const props = defineProps<{
   shard: Y.Map<any>
   nameEditableMode?: 'creation' | 'narrator'
+  deletableMode?: 'any-editable' | 'narrator'
 }>()
 
 const name = useYMapField<StatusTagData, 'name'>(props.shard, 'name', '')
@@ -27,6 +28,11 @@ const nature = useYMapField<StatusTagData, 'nature'>(props.shard, 'nature', 'hel
 const tiers = useYArray<boolean>(props.shard, 'tiers')
 const usage = useYMapField<StatusTagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
 const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
+const deletableMode = computed(()=> props.deletableMode ?? 'any-editable')
+const canDelete = computed(()=> deletableMode.value === 'narrator'
+  ? mode.value === 'narrator'
+  : mode.value !== 'scene'
+)
 const elementId = computed(()=> {
   const uuid = props.shard.get('uuid')
   return typeof uuid === 'string' ? tagElementId(uuid) : undefined
@@ -107,7 +113,7 @@ defineExpose({toJson})
 
 <template>
   <div :id="elementId" :class="['status-tag', nature]">
-    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+    <DeleteButton v-if="canDelete" @delete="emit('delete')" />
 
     <div class="upper-half">
       <button

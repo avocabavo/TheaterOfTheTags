@@ -7,6 +7,12 @@ import type { StatusTagData, Usage } from '../lib/schema';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useMode } from '../lib/modeStore';
 import EditableText from './EditableText.vue';
+import invokedBlack from '../assets/invoked-black.svg'
+import invokedWhite from '../assets/invoked-white.svg'
+import readyBlack from '../assets/ready-black.svg'
+import readyWhite from '../assets/ready-white.svg'
+import tappedBlack from '../assets/tapped-black.svg'
+import tappedWhite from '../assets/tapped-white.svg'
 import { tagElementId } from '../lib/domIds'
 
 const { mode, enableNameEditing } = useMode()
@@ -29,6 +35,20 @@ const elementId = computed(()=> {
 function toggleUsage() {
   if (usage.value === 'tapped') return
   usage.value = usage.value === 'ready' ? 'invoked' : 'ready'
+}
+
+function usageIcon() {
+  const useWhiteIcon = nature.value === 'hindering'
+
+  switch (usage.value) {
+    case 'invoked':
+      return useWhiteIcon ? invokedWhite : invokedBlack
+    case 'tapped':
+      return useWhiteIcon ? tappedWhite : tappedBlack
+    case 'ready':
+    default:
+      return useWhiteIcon ? readyWhite : readyBlack
+  }
 }
 
 function advanceTier(startIndex: number) {
@@ -99,8 +119,7 @@ defineExpose({toJson})
         :title="`Usage: ${usage}`"
         @click.stop="toggleUsage"
       >
-        <span v-if="usage === 'tapped'">🮮</span>
-        <span v-else>{{ usage === 'invoked' ? '☑' : '☐' }}</span>
+        <img :src="usageIcon()" :alt="usage" class="usage-icon">
       </button>
       <span class="tiny-static-words">TAG</span>
       <!-- <span class="status-tag-name">{{ name }}</span> -->
@@ -183,6 +202,13 @@ defineExpose({toJson})
   line-height: 1;
   cursor: pointer;
   padding: 0;
+}
+
+.usage-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
 }
 
 .usage-indicator.tapped {

@@ -33,8 +33,6 @@ const readyToCreate = computed(()=> name.value.trim())
 
 <template>
   <div class="tag new-tag" :class="nature">
-    <div v-if="nature === 'weakness'" class="weakness-indicator">🮮</div>
-
     <input
       v-model="name"
       class="tag-name-input"
@@ -165,6 +163,8 @@ const readyToCreate = computed(()=> name.value.trim())
 
 .weakness-indicator {
   flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
 }

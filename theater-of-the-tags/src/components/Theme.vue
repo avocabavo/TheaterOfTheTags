@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import YAML from 'yaml'
 import Tag from './Tag.vue'
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { mightOptions, themeTypeOptions } from '../lib/schema';
@@ -16,6 +15,7 @@ import { computed, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vu
 import { useDragDrop, useFieldCollector } from '../lib/util';
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import { mightColor, mightIcon } from '../lib/mightIcons'
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -152,7 +152,7 @@ function toJson() {
 }
 
 function toYaml() {
-  return YAML.stringify(toJson(), null, 2)
+  return stringifyYaml(toJson())
 }
 
 async function copyToClipboard() {

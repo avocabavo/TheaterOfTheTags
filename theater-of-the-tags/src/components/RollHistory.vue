@@ -17,6 +17,7 @@ import {
   rollHistoryEntriesToYamlData,
   type RollHistoryEntry,
 } from '../lib/RollHistory'
+import { stringifyYaml } from '../lib/yaml'
 import RollTable, {
   type MightComparison,
   type RollTableRow,
@@ -223,7 +224,7 @@ function rollHistoryToJson() {
 }
 
 function rollHistoryToYaml() {
-  return YAML.stringify(rollHistoryToJson(), null, 2)
+  return stringifyYaml(rollHistoryToJson())
 }
 
 async function copyRollHistoryToClipboard() {

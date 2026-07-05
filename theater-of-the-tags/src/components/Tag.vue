@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import YAML from 'yaml'
 import { computed } from 'vue'
 import type { TagData, TagNature, TagShard, Usage } from '../lib/schema'
 import { useYMapField } from '../lib/yjsComposables';
@@ -14,6 +13,7 @@ import scratchBlack from '../assets/scratch-black.svg'
 import tappedBlack from '../assets/tapped-black.svg'
 import tappedWhite from '../assets/tapped-white.svg'
 import { tagElementId } from '../lib/domIds'
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -67,7 +67,7 @@ function toJson() {
     scratched: scratched.value,
   }
 }
-function toYaml() { return YAML.stringify(toJson(), null, 2) }
+function toYaml() { return stringifyYaml(toJson()) }
 
 function print() {
   console.log(toYaml())

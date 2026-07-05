@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import YAML from 'yaml'
 import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue'
 import DeleteButton from './buttons/DeleteButton.vue'
 import EditButton from './buttons/EditButton.vue'
@@ -28,6 +27,7 @@ import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 import { mightIcon } from '../lib/mightIcons'
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -191,7 +191,7 @@ function toJson() {
 }
 
 function toYaml() {
-  return YAML.stringify(toJson(), null, 2)
+  return stringifyYaml(toJson())
 }
 
 async function copyToClipboard() {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import YAML from 'yaml'
 import Tag from './Tag.vue'
 import NewTag from './NewTag.vue';
 import { useMode } from '../lib/modeStore';
@@ -9,6 +8,7 @@ import type { TagShard } from '../lib/schema';
 import { createTagShard, type TagCreationProps } from '../lib/Tag';
 import { onBeforeUpdate, ref } from 'vue';
 import { useDragDrop } from '../lib/util';
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode } = useMode()
 
@@ -56,7 +56,7 @@ function toJson() {
 }
 
 function print() {
-  console.log(YAML.stringify(toJson(), null, 2))
+  console.log(stringifyYaml(toJson()))
 }
 
 defineExpose({

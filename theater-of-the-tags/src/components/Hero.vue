@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import YAML from 'yaml'
 import { useMode } from '../lib/modeStore';
 import DeleteButton from './buttons/DeleteButton.vue';
 import { useYArray, useYMapField } from '../lib/yjsComposables';
@@ -30,6 +29,7 @@ import Tag from './Tag.vue'
 import NewTag from './NewTag.vue';
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode } = useMode()
 
@@ -213,7 +213,7 @@ function toJson() {
 }
 
 function toYaml() {
-  return YAML.stringify(toJson(), null, 2)
+  return stringifyYaml(toJson())
 }
 
 async function copyToClipboard() {

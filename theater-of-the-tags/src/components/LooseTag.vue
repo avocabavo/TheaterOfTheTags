@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import YAML from 'yaml'
 import type { StatusTagShard, TagShard } from '../lib/schema';
 import Tag from './Tag.vue';
 import { ref } from 'vue';
 import StatusTag from './StatusTag.vue';
+import { stringifyYaml } from '../lib/yaml'
 
 const props = defineProps<{
   shard: TagShard | StatusTagShard
@@ -26,7 +26,7 @@ function toJson() {
 }
 
 function print() {
-  console.log(YAML.stringify(toJson(), null, 2))
+  console.log(stringifyYaml(toJson()))
 }
 
 defineExpose({toJson})

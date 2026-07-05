@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import YAML from 'yaml'
 import { computed } from 'vue'
 import { useYArray, useYMapField } from '../lib/yjsComposables';
 import type { StatusTagData, Usage } from '../lib/schema';
@@ -14,6 +13,7 @@ import readyWhite from '../assets/ready-white.svg'
 import tappedBlack from '../assets/tapped-black.svg'
 import tappedWhite from '../assets/tapped-white.svg'
 import { tagElementId } from '../lib/domIds'
+import { stringifyYaml } from '../lib/yaml'
 
 const { mode, enableNameEditing } = useMode()
 
@@ -92,7 +92,7 @@ function toJson() {
     tiers: tiers.items.value
   }
 }
-function toYaml() { return YAML.stringify(toJson(), null, 2)}
+function toYaml() { return stringifyYaml(toJson())}
 
 function print() {
   console.log(toYaml())

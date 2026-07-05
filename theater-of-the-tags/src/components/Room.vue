@@ -33,6 +33,7 @@ import {
   rollHistoryEntriesToYamlData,
   type RollHistoryEntry,
 } from '../lib/RollHistory'
+import { stringifyYaml } from '../lib/yaml'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 
 type SituationEntry = {
@@ -143,7 +144,7 @@ function toJson() {
 }
 
 function toYaml() {
-  return YAML.stringify(toJson(), null, 2)
+  return stringifyYaml(toJson())
 }
 
 async function copyToClipboard() {

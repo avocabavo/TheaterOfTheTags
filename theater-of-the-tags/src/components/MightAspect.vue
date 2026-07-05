@@ -94,7 +94,7 @@ defineExpose({
     @pointerdown.capture="handlePointerDown"
     @focusout="handleFocusOut"
   >
-    <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+    <DeleteButton v-if="mode == 'narrator'" @delete="emit('delete')" />
 
     <div class="might-aspect-details">
       <div class="might-aspect-might">

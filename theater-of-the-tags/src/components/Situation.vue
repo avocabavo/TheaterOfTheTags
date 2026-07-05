@@ -206,7 +206,7 @@ defineExpose({
 <template>
   <div ref="grid" class="situation" :style="situationStyle">
     <div class="situation-card grid-item grid-sizer">
-      <DeleteButton v-if="mode !== 'scene'" @delete="emit('delete')" />
+      <DeleteButton v-if="mode == 'narrator'" @delete="emit('delete')" />
 
       <div class="static-words">
         <p>SITUATION</p>

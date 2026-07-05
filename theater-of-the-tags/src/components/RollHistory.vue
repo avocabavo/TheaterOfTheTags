@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import YAML from 'yaml'
 import { doc, rollHistory as yRollHistory } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
 import {
@@ -8,12 +9,21 @@ import {
   rollInvokedTags,
   type InvokedTagSummary,
 } from '../lib/usage'
+import {
+  createRollHistoryEntryFromData,
+  getRollHistoryListFromData,
+  isRollHistoryEntry,
+  normalizeRollHistoryEntry,
+  rollHistoryEntriesToYamlData,
+  type RollHistoryEntry,
+} from '../lib/RollHistory'
 import RollTable, {
   type MightComparison,
   type RollTableRow,
   type RollTableRowData,
 } from './RollTable.vue'
 import { tagElementId } from '../lib/domIds'
+import toYamlBlack from '../assets/to-yaml-black.svg'
 
 declare global {
   interface Window {
@@ -21,19 +31,17 @@ declare global {
   }
 }
 
-type HistoryEntry = {
-  id: string
-  rollName: string
-  rows: RollTableRowData[]
-}
-
 const widthRem = ref(15)
 const invokedTags = ref<InvokedTagSummary[]>([])
-const rollHistoryEntries = ref<HistoryEntry[]>([])
+const rollHistoryEntries = ref<RollHistoryEntry[]>([])
 const historyListRef = ref<HTMLElement | null>(null)
 const DEFAULT_ROLL_NAME = 'ROLL NAME'
 const currentRollName = ref(DEFAULT_ROLL_NAME)
 const mightComparison = ref<MightComparison>('uncompared')
+const showHistoryImportForm = ref(false)
+const historyYamlText = ref('')
+const historyImportMessage = ref('')
+const historyImportError = ref('')
 const { mode } = useMode()
 
 const rollColors = [
@@ -185,42 +193,6 @@ function invokedRowsResetSignature() {
     .join('|')
 }
 
-function isRollTableRowData(row: any): row is RollTableRowData {
-  if (!row || typeof row !== 'object') return false
-  if (typeof row.id !== 'string') return false
-  if (typeof row.impact !== 'string') return false
-
-  if (row.kind === 'tag') {
-    return typeof row.name === 'string'
-      && (row.scratched == null || typeof row.scratched === 'boolean')
-      && (row.warning == null || typeof row.warning === 'boolean')
-      && (row.might == null || typeof row.might === 'string')
-      && (row.improvementInstruction == null || typeof row.improvementInstruction === 'string')
-  }
-
-  if (row.kind === 'might-comparison') {
-    return typeof row.comparison === 'string'
-      && row.comparison !== 'uncompared'
-  }
-
-  if (row.kind === 'roll') {
-    return Array.isArray(row.dice)
-      && row.dice.length === 2
-      && row.dice.every((die: unknown)=> Number.isInteger(die))
-  }
-
-  return false
-}
-
-function isHistoryEntry(entry: any): entry is HistoryEntry {
-  return entry
-    && typeof entry === 'object'
-    && typeof entry.id === 'string'
-    && (entry.rollName == null || typeof entry.rollName === 'string')
-    && Array.isArray(entry.rows)
-    && entry.rows.every(isRollTableRowData)
-}
-
 function historyIsScrolledToBottom() {
   const el = historyListRef.value
   if (!el) return true
@@ -238,14 +210,76 @@ function scrollHistoryToBottom() {
 function syncRollHistory() {
   const shouldStickToBottom = historyIsScrolledToBottom()
   rollHistoryEntries.value = yRollHistory.toArray()
-    .filter(isHistoryEntry)
-    .map(entry=> ({
-      ...entry,
-      rollName: entry.rollName || DEFAULT_ROLL_NAME,
-    }))
+    .filter(isRollHistoryEntry)
+    .map(entry=> normalizeRollHistoryEntry(entry, DEFAULT_ROLL_NAME))
 
   if (shouldStickToBottom) {
     nextTick(scrollHistoryToBottom)
+  }
+}
+
+function rollHistoryToJson() {
+  return rollHistoryEntriesToYamlData(rollHistoryEntries.value)
+}
+
+function rollHistoryToYaml() {
+  return YAML.stringify(rollHistoryToJson(), null, 2)
+}
+
+async function copyRollHistoryToClipboard() {
+  await navigator.clipboard.writeText(rollHistoryToYaml())
+  historyImportMessage.value = 'Roll history YAML copied.'
+  historyImportError.value = ''
+}
+
+function openHistoryImportForm() {
+  showHistoryImportForm.value = true
+  historyImportMessage.value = ''
+  historyImportError.value = ''
+}
+
+function closeHistoryImportForm() {
+  showHistoryImportForm.value = false
+  historyImportError.value = ''
+}
+
+function importRollHistoryFromYaml() {
+  historyImportMessage.value = ''
+  historyImportError.value = ''
+
+  let data: any
+
+  try {
+    data = YAML.parse(historyYamlText.value)
+  } catch (e) {
+    historyImportError.value = 'Invalid YAML'
+    return
+  }
+
+  const list = getRollHistoryListFromData(data)
+
+  if (!Array.isArray(list)) {
+    historyImportError.value = 'Roll history YAML must contain a rollHistory list'
+    return
+  }
+
+  const importedEntries = list
+    .map(entry=> createRollHistoryEntryFromData(entry, DEFAULT_ROLL_NAME))
+    .filter((entry): entry is RollHistoryEntry => entry != null)
+  const rejectedCount = list.length - importedEntries.length
+
+  if (importedEntries.length) {
+    yRollHistory.push(importedEntries)
+  }
+
+  historyImportMessage.value = [
+    importedEntries.length ? `Imported ${importedEntries.length} roll history entries.` : 'No valid roll history entries found.',
+    rejectedCount ? `Skipped ${rejectedCount} invalid entries.` : '',
+  ].filter(Boolean).join(' ')
+
+  if (importedEntries.length && rejectedCount === 0) {
+    historyYamlText.value = ''
+    closeHistoryImportForm()
   }
 }
 
@@ -305,9 +339,9 @@ function updateHistoryRollName(entryId: string, rollName: string) {
   if (index < 0) return
 
   const entry = yRollHistory.get(index)
-  if (!isHistoryEntry(entry)) return
+  if (!isRollHistoryEntry(entry)) return
 
-  const updatedEntry: HistoryEntry = {
+  const updatedEntry: RollHistoryEntry = {
     ...entry,
     rollName,
   }
@@ -392,6 +426,52 @@ onUnmounted(()=> {
 
     <div class="roll-history-content">
       <div ref="historyListRef" class="history-list">
+        <div class="roll-history-yaml-controls">
+          <button
+            type="button"
+            class="history-yaml-button icon-history-yaml-button"
+            aria-label="Copy roll history YAML"
+            title="Copy roll history YAML"
+            @click="copyRollHistoryToClipboard"
+          >
+            <img :src="toYamlBlack" alt="" class="history-yaml-icon" aria-hidden="true">
+          </button>
+          <button
+            type="button"
+            class="history-yaml-button"
+            @click="openHistoryImportForm"
+          >
+            Import
+          </button>
+        </div>
+
+        <form
+          v-if="showHistoryImportForm"
+          class="history-import-form"
+          @submit.prevent="importRollHistoryFromYaml"
+        >
+          <textarea
+            v-model="historyYamlText"
+            placeholder="Paste roll history YAML"
+            @input="historyImportError = ''"
+          />
+          <p v-if="historyImportMessage" class="history-import-message">{{ historyImportMessage }}</p>
+          <p v-if="historyImportError" class="history-import-error">{{ historyImportError }}</p>
+          <div class="history-import-actions">
+            <button type="button" class="history-yaml-button" @click="closeHistoryImportForm">
+              Cancel
+            </button>
+            <button type="submit" class="history-yaml-button" :disabled="!historyYamlText.trim()">
+              Import
+            </button>
+          </div>
+        </form>
+
+        <p
+          v-else-if="historyImportMessage"
+          class="history-import-message"
+        >{{ historyImportMessage }}</p>
+
         <RollTable
           v-for="(entry, index) in rollHistoryEntries"
           :key="entry.id"
@@ -546,6 +626,82 @@ onUnmounted(()=> {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
+}
+
+.roll-history-yaml-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.history-yaml-button {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  border: 0.12rem solid white;
+  border-radius: 0.25rem;
+  background: #f7f7f9;
+  color: #1e1e2f;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.history-yaml-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.icon-history-yaml-button {
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0.35rem;
+}
+
+.history-yaml-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.history-import-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  padding: 0.35rem;
+  border: 0.12rem solid white;
+  background: #f7f7f9;
+  color: #1e1e2f;
+}
+
+.history-import-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  font: inherit;
+}
+
+.history-import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.history-import-message,
+.history-import-error {
+  margin: 0 0 0.35rem;
+  padding: 0.25rem 0.35rem;
+  background: #f7f7f9;
+  color: #1e1e2f;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.history-import-error {
+  color: #8b1e1e;
 }
 
 .roll-button {

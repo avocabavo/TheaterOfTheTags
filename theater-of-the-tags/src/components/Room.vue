@@ -7,6 +7,7 @@ import {
   heroes as heroMap,
   room,
   roomName,
+  rollHistory as yRollHistory,
   situations as situationMap,
 } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
@@ -24,6 +25,14 @@ import {
   createSituationShardFromData,
   getSituationNameFromData,
 } from '../lib/Situation'
+import {
+  createRollHistoryEntryFromData,
+  getRollHistoryListFromData,
+  isRollHistoryEntry,
+  normalizeRollHistoryEntry,
+  rollHistoryEntriesToYamlData,
+  type RollHistoryEntry,
+} from '../lib/RollHistory'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 
 type SituationEntry = {
@@ -125,6 +134,11 @@ function toJson() {
     situations: props.situations.map(entry=> mapToJson(entry.shard)),
     fellowships: props.fellowships.map(entry=> mapToJson(entry.shard)),
     heroes: props.heroes.map(entry=> mapToJson(entry.shard)),
+    ...rollHistoryEntriesToYamlData(
+      yRollHistory.toArray()
+        .filter(isRollHistoryEntry)
+        .map(entry=> normalizeRollHistoryEntry(entry))
+    ),
   }
 }
 
@@ -216,6 +230,38 @@ function formatImportMessage(results: ImportResult[]) {
   return parts.join(' ')
 }
 
+function importRollHistory(data: unknown): ImportResult {
+  const result: ImportResult = {
+    label: 'Roll history',
+    successes: [],
+    failures: [],
+  }
+
+  const list = getRollHistoryListFromData(data)
+  if (list == null) return result
+
+  if (!Array.isArray(list)) {
+    result.failures.push('must be a list')
+    return result
+  }
+
+  const importedEntries = list
+    .map(entry=> createRollHistoryEntryFromData(entry))
+    .filter((entry): entry is RollHistoryEntry => entry != null)
+  const rejectedCount = list.length - importedEntries.length
+
+  if (importedEntries.length) {
+    yRollHistory.push(importedEntries)
+    result.successes.push(`${importedEntries.length} entries`)
+  }
+
+  if (rejectedCount) {
+    result.failures.push(`${rejectedCount} invalid entries`)
+  }
+
+  return result
+}
+
 function importRoom() {
   importMessage.value = ''
   importError.value = ''
@@ -260,10 +306,11 @@ function importRoom() {
       name=> heroMap.has(name),
       (name, item)=> heroMap.set(name, createHeroShardFromData(item)),
     ),
+    importRollHistory(data),
   ]
 
   const message = formatImportMessage(results)
-  importMessage.value = message || 'No situations, fellowships, or heroes found to import.'
+  importMessage.value = message || 'No situations, fellowships, heroes, or roll history found to import.'
 
   if (results.every(result=> result.failures.length === 0)) {
     roomYamlText.value = ''

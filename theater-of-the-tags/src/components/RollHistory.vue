@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import YAML from 'yaml'
 import { currentRoll as yCurrentRoll, doc, rollHistory as yRollHistory } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
@@ -35,7 +35,6 @@ declare global {
 const widthRem = ref(15)
 const invokedTags = ref<InvokedTagSummary[]>([])
 const rollHistoryEntries = ref<RollHistoryEntry[]>([])
-const historyListRef = ref<HTMLElement | null>(null)
 const DEFAULT_ROLL_NAME = 'ROLL NAME'
 const currentRollName = ref(DEFAULT_ROLL_NAME)
 const mightComparison = ref<MightComparison>('uncompared')
@@ -178,6 +177,7 @@ const currentRows = computed(()=> [
   ...invokedRows.value,
   ...(mightComparisonRow.value ? [mightComparisonRow.value] : []),
 ])
+const displayedRollHistoryEntries = computed(()=> [...rollHistoryEntries.value].reverse())
 const warningCount = computed(()=> invokedRows.value.filter(
   row=> row.kind === 'tag' && row.warning
 ).length)
@@ -195,12 +195,7 @@ function rootFontSize() {
 }
 
 function syncInvokedTags() {
-  const shouldStickToBottom = historyIsScrolledToBottom()
   invokedTags.value = getInvokedTagSummaries()
-
-  if (shouldStickToBottom) {
-    nextTick(scrollHistoryToBottom)
-  }
 }
 
 function invokedRowsResetSignature() {
@@ -216,29 +211,10 @@ function invokedRowsResetSignature() {
     .join('|')
 }
 
-function historyIsScrolledToBottom() {
-  const el = historyListRef.value
-  if (!el) return true
-
-  return el.scrollHeight - el.scrollTop - el.clientHeight <= 4
-}
-
-function scrollHistoryToBottom() {
-  const el = historyListRef.value
-  if (!el) return
-
-  el.scrollTop = el.scrollHeight
-}
-
 function syncRollHistory() {
-  const shouldStickToBottom = historyIsScrolledToBottom()
   rollHistoryEntries.value = yRollHistory.toArray()
     .filter(isRollHistoryEntry)
     .map(entry=> normalizeRollHistoryEntry(entry, DEFAULT_ROLL_NAME))
-
-  if (shouldStickToBottom) {
-    nextTick(scrollHistoryToBottom)
-  }
 }
 
 function rollHistoryToJson() {
@@ -454,64 +430,6 @@ onUnmounted(()=> {
     />
 
     <div class="roll-history-content">
-      <div ref="historyListRef" class="history-list">
-        <div class="roll-history-yaml-controls">
-          <button
-            type="button"
-            class="history-yaml-button icon-history-yaml-button"
-            aria-label="Copy roll history YAML"
-            title="Copy roll history YAML"
-            @click="copyRollHistoryToClipboard"
-          >
-            <img :src="toYamlBlack" alt="" class="history-yaml-icon" aria-hidden="true">
-          </button>
-          <button
-            type="button"
-            class="history-yaml-button"
-            @click="openHistoryImportForm"
-          >
-            Import
-          </button>
-        </div>
-
-        <form
-          v-if="showHistoryImportForm"
-          class="history-import-form"
-          @submit.prevent="importRollHistoryFromYaml"
-        >
-          <textarea
-            v-model="historyYamlText"
-            placeholder="Paste roll history YAML"
-            @input="historyImportError = ''"
-          />
-          <p v-if="historyImportMessage" class="history-import-message">{{ historyImportMessage }}</p>
-          <p v-if="historyImportError" class="history-import-error">{{ historyImportError }}</p>
-          <div class="history-import-actions">
-            <button type="button" class="history-yaml-button" @click="closeHistoryImportForm">
-              Cancel
-            </button>
-            <button type="submit" class="history-yaml-button" :disabled="!historyYamlText.trim()">
-              Import
-            </button>
-          </div>
-        </form>
-
-        <p
-          v-else-if="historyImportMessage"
-          class="history-import-message"
-        >{{ historyImportMessage }}</p>
-
-        <RollTable
-          v-for="(entry, index) in rollHistoryEntries"
-          :key="entry.id"
-          :color="rollColors[index % rollColors.length]"
-          :roll-name="entry.rollName"
-          :rows="entry.rows"
-          history
-          @update:roll-name="value => updateHistoryRollName(entry.id, value)"
-        />
-      </div>
-
       <RollTable
         v-if="mode !== 'creation'"
         v-model:roll-name="currentRollName"
@@ -566,6 +484,64 @@ onUnmounted(()=> {
           title="Some invoked tag impacts were reduced by roll edge-case rules"
         >!</span>
       </button>
+
+      <div class="history-list">
+        <div class="roll-history-yaml-controls">
+          <button
+            type="button"
+            class="history-yaml-button icon-history-yaml-button"
+            aria-label="Copy roll history YAML"
+            title="Copy roll history YAML"
+            @click="copyRollHistoryToClipboard"
+          >
+            <img :src="toYamlBlack" alt="" class="history-yaml-icon" aria-hidden="true">
+          </button>
+          <button
+            type="button"
+            class="history-yaml-button"
+            @click="openHistoryImportForm"
+          >
+            Import
+          </button>
+        </div>
+
+        <form
+          v-if="showHistoryImportForm"
+          class="history-import-form"
+          @submit.prevent="importRollHistoryFromYaml"
+        >
+          <textarea
+            v-model="historyYamlText"
+            placeholder="Paste roll history YAML"
+            @input="historyImportError = ''"
+          />
+          <p v-if="historyImportMessage" class="history-import-message">{{ historyImportMessage }}</p>
+          <p v-if="historyImportError" class="history-import-error">{{ historyImportError }}</p>
+          <div class="history-import-actions">
+            <button type="button" class="history-yaml-button" @click="closeHistoryImportForm">
+              Cancel
+            </button>
+            <button type="submit" class="history-yaml-button" :disabled="!historyYamlText.trim()">
+              Import
+            </button>
+          </div>
+        </form>
+
+        <p
+          v-else-if="historyImportMessage"
+          class="history-import-message"
+        >{{ historyImportMessage }}</p>
+
+        <RollTable
+          v-for="(entry, index) in displayedRollHistoryEntries"
+          :key="entry.id"
+          :color="rollColors[index % rollColors.length]"
+          :roll-name="entry.rollName"
+          :rows="entry.rows"
+          history
+          @update:roll-name="value => updateHistoryRollName(entry.id, value)"
+        />
+      </div>
     </div>
   </aside>
 </template>

@@ -37,6 +37,7 @@ import {
 import { useDragDrop } from './lib/util'
 import { mightOptions, type Might } from './lib/schema'
 import { mightIcon } from './lib/mightIcons'
+import { useOutdatedClient } from './lib/buildVersion'
 
 type HeroEntry = {
   name: string
@@ -54,6 +55,12 @@ type SituationEntry = {
   name: string
   situationName: string
   shard: Y.Map<any>
+}
+
+const outdatedClient = useOutdatedClient()
+
+function reloadForUpdate() {
+  window.location.reload()
 }
 
 const newSituationName = ref('')
@@ -707,6 +714,14 @@ function deleteHero(name: string) {
 
 <template>
   <main>
+    <aside
+      v-if="outdatedClient"
+      class="update-warning"
+      role="alert"
+    >
+      <span>A newer version of Theater of the Tags is available. Reload before continuing.</span>
+      <button type="button" @click="reloadForUpdate">Reload now</button>
+    </aside>
     <NavigationBar
       :situations="situationEntries"
       :fellowships="fellowshipEntries"
@@ -977,6 +992,31 @@ main {
 
   display: flex;
   flex-direction: column;
+}
+
+.update-warning {
+  z-index: 110;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: #7a2300;
+  color: white;
+  text-align: center;
+}
+
+.update-warning button {
+  flex: 0 0 auto;
+  border: 2px solid white;
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: white;
+  color: #4d1600;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .app-body {

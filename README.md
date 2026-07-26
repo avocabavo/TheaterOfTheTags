@@ -123,6 +123,11 @@ server {
         add_header Cache-Control "no-cache" always;
     }
 
+    # Clients poll this file to detect a deployment made while the app is open.
+    location = /build-id.json {
+        add_header Cache-Control "no-store" always;
+    }
+
     # Vite gives built assets content-hashed filenames, so they can be cached
     # indefinitely. A changed asset will have a different URL.
     location /assets/ {

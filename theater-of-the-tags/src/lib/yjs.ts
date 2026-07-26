@@ -10,6 +10,11 @@ export const provider = new WebsocketProvider(
   import.meta.env.VITE_YJS_WS_URL,
   roomName,
   doc,
+  {
+    params: {
+      buildId: __BUILD_ID__,
+    },
+  },
 )
 
 export const powerTags = doc.getMap<number>('powerTags')

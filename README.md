@@ -44,11 +44,11 @@ server {
     server_name tags.avomath.com/;
 
     location /.well-known/acme-challenge/ {
-            root /var/www/html;
+        root /var/www/html;
     }
 
     location / {
-      return 301 https://$host$request_uri ;
+        return 301 https://$host$request_uri ;
     }
 }
 ```
@@ -116,6 +116,19 @@ server {
 
     root /var/www/theater-of-the-tags;
     index index.html;
+
+    # Always revalidate the SPA entry point so room URLs do not keep loading
+    # JavaScript from an older deployment.
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # Vite gives built assets content-hashed filenames, so they can be cached
+    # indefinitely. A changed asset will have a different URL.
+    location /assets/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
 
     location / {
         try_files $uri $uri/ /index.html;

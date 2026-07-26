@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import YAML from 'yaml'
-import { doc, rollHistory as yRollHistory } from '../lib/yjs'
+import { currentRoll as yCurrentRoll, doc, rollHistory as yRollHistory } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
 import {
   getInvokedTagSummaries,
@@ -65,6 +65,28 @@ const mightComparisonImpacts: Record<Exclude<MightComparison, 'uncompared'>, num
 }
 
 const mightComparisonOptions = Object.keys(mightComparisonImpacts) as Array<Exclude<MightComparison, 'uncompared'>>
+
+function isMightComparison(value: unknown): value is MightComparison {
+  return value === 'uncompared' || mightComparisonOptions.includes(
+    value as Exclude<MightComparison, 'uncompared'>,
+  )
+}
+
+function syncMightComparison() {
+  const sharedComparison = yCurrentRoll.get('mightComparison')
+  mightComparison.value = isMightComparison(sharedComparison)
+    ? sharedComparison
+    : 'uncompared'
+}
+
+function selectMightComparison(comparison: Exclude<MightComparison, 'uncompared'>) {
+  if (mode.value !== 'narrator') return
+  yCurrentRoll.set('mightComparison', comparison)
+}
+
+function resetMightComparison() {
+  yCurrentRoll.delete('mightComparison')
+}
 
 let startingX = 0
 let startingWidthPx = 0
@@ -298,11 +320,14 @@ function commitRoll(rollRow: RollTableRow) {
   const rows = [...currentRows.value, rollRow]
   const rollName = currentRollName.value.trim() || DEFAULT_ROLL_NAME
 
-  yRollHistory.push([{
-    id: rollRow.id,
-    rollName,
-    rows,
-  }])
+  doc.transact(()=> {
+    yRollHistory.push([{
+      id: rollRow.id,
+      rollName,
+      rows,
+    }])
+    resetMightComparison()
+  })
   currentRollName.value = DEFAULT_ROLL_NAME
   rollInvokedTags()
 }
@@ -387,8 +412,10 @@ function startResize(event: PointerEvent) {
 onMounted(()=> {
   syncInvokedTags()
   syncRollHistory()
+  syncMightComparison()
   doc.on('update', syncInvokedTags)
   yRollHistory.observe(syncRollHistory)
+  yCurrentRoll.observe(syncMightComparison)
   // Debug helper disabled. To re-enable manual dice testing from the browser
   // console, uncomment this line and the matching cleanup in onUnmounted:
   // window.testRoll = testRoll
@@ -398,12 +425,13 @@ watch(invokedRowsResetSignature, (nextSignature, previousSignature)=> {
   if (previousSignature == null) return
   if (nextSignature === previousSignature) return
 
-  mightComparison.value = 'uncompared'
+  resetMightComparison()
 })
 
 onUnmounted(()=> {
   doc.off('update', syncInvokedTags)
   yRollHistory.unobserve(syncRollHistory)
+  yCurrentRoll.unobserve(syncMightComparison)
   // if (window.testRoll === testRoll) {
   //   delete window.testRoll
   // }
@@ -500,7 +528,7 @@ onUnmounted(()=> {
           :key="option"
           type="button"
           :class="['might-comparison-button', { selected: mightComparison === option }]"
-          @click="mightComparison = option"
+          @click="selectMightComparison(option)"
           :title="option"
         >
           {{ formatImpact(mightComparisonImpacts[option]) }}

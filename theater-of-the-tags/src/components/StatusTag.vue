@@ -266,6 +266,8 @@ defineExpose({toJson})
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
 
   background: rgba(255, 255, 255, 0.75);
 }
@@ -278,10 +280,12 @@ defineExpose({toJson})
   font-size: large;
   font-weight: bold;
   color: darkgray;
+  line-height: 1;
 }
 
 .tier-marked {
   font-size: xx-large;
   margin-top: -0.25rem;
+  line-height: 1.2;
 }
 </style>

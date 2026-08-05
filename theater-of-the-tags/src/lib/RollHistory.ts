@@ -163,7 +163,7 @@ export function createRollHistoryEntryFromData(entry: any, defaultRollName = 'RO
   if (!Array.isArray(entry.rows)) return null
 
   const rows = entry.rows.map(createRollTableRowFromData)
-  if (rows.some(row=> row == null)) return null
+  if (rows.some((row: any)=> row == null)) return null
 
   return {
     id: `roll-history-${crypto.randomUUID()}`,

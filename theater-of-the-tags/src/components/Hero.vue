@@ -197,6 +197,8 @@ watch(mode, ()=> {
 
 onUnmounted(()=> {
   cancelMasonryLayout()
+  masonry?.destroy?.()
+  masonry = null
 })
 
 const readyToCreateQuintessence = computed(()=> newQuintessence.value.trim())

@@ -122,6 +122,8 @@ watch(mode, ()=> {
 
 onUnmounted(()=> {
   cancelMasonryLayout()
+  masonry?.destroy?.()
+  masonry = null
 })
 
 function createSpecialImprovement() {

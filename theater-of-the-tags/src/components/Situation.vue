@@ -160,6 +160,8 @@ onMounted(async ()=> {
 onUnmounted(()=> {
   document.removeEventListener('pointerdown', handleDocumentPointerDown)
   cancelMasonryLayout()
+  masonry?.destroy?.()
+  masonry = null
 })
 
 function reflowMasonry() {

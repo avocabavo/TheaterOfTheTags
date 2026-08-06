@@ -207,7 +207,7 @@ function toJson() {
   return {
     ...Object.assign(
       {},
-      ...fieldRefs.value.map(b=> b.toJson())
+      ...Array.from(fieldRefs.values(), field=> field.toJson())
     ),
     playerName: playerName.value,
     backgroundColor: backgroundColor.value,
@@ -253,8 +253,8 @@ async function copyToClipboard() {
           <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
         </button>
       </div>
-      <CharacterName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
-      <PlayerName :shard="shard" :ref="setFieldRef" @resized="reflowMasonry"/>
+      <CharacterName :shard="shard" :ref="el => setFieldRef('characterName', el)" @resized="reflowMasonry"/>
+      <PlayerName :shard="shard" :ref="el => setFieldRef('playerName', el)" @resized="reflowMasonry"/>
 
       <div class="small static-words">
         <p>FELLOWSHIP RELATIONSHIP</p>
@@ -288,7 +288,7 @@ async function copyToClipboard() {
         <div class="promise-holder">
           <Bubbles
             :shard="shard"
-            :ref="setFieldRef"
+            :ref="el => setFieldRef('promise', el)"
             field="promise"
             :max="5"
             name="PROMISE"

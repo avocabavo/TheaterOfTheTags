@@ -151,7 +151,7 @@ function toJson() {
     looseTags: looseTagRefs.value.map(lt=> lt.toJson()),
     ...Object.assign(
       {},
-      ...fieldRefs.value.map(b=> b.toJson())
+      ...Array.from(fieldRefs.values(), field=> field.toJson())
     ),
     specialImprovements: specialImprovements.value,
   }
@@ -210,7 +210,7 @@ defineExpose({
         <Quest
           class="fellowship-quest"
           :shard="shard"
-          :ref="setFieldRef"
+          :ref="el => setFieldRef('quest', el)"
           @resized="reflowMasonry"
         />
       </div>
@@ -220,7 +220,7 @@ defineExpose({
           <Bubbles
             v-for="field in ['abandon', 'improve', 'milestone']"
             :key="field"
-            :ref="setFieldRef"
+            :ref="el => setFieldRef(field, el)"
             :shard="shard"
             :field="field"
             :max="3"

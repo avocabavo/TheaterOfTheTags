@@ -141,7 +141,7 @@ function toJson() {
   return {
     ...Object.assign(
       {},
-      ...fieldRefs.value.map(b=> b.toJson())
+      ...Array.from(fieldRefs.values(), field=> field.toJson())
     ),
     might: might.value,
     themeType: themeType.value,
@@ -296,7 +296,7 @@ defineExpose({
       <Quest
         class="theme-quest"
         :shard="shard"
-        :ref="setFieldRef"
+        :ref="el => setFieldRef('quest', el)"
         @resized="emit('resized')"
       />
     </div>
@@ -306,7 +306,7 @@ defineExpose({
         <Bubbles
           v-for="field in ['abandon', 'improve', 'milestone']"
           :key="field"
-          :ref="setFieldRef"
+          :ref="el => setFieldRef(field, el)"
           :shard="shard"
           :field="field"
           :max="3"

@@ -1,4 +1,4 @@
-import { nextTick, ref, watch, type Ref } from "vue";
+import { nextTick, ref, shallowReactive, watch, type Ref } from "vue";
 
 export function useWatchWithDebounce(
   usedField: Ref<string, string>,
@@ -27,11 +27,20 @@ export function useWatchWithDebounce(
   })
 }
 
-export function useFieldCollector(): { fieldRefs: Ref<any[]>, setFieldRef: (el: any)=>void } {
-  const fieldRefs = ref<any[]>([])
-  function setFieldRef(el: any) {
-    if (el) fieldRefs.value.push(el)
+export function useFieldCollector<T = any>(): {
+  fieldRefs: Map<string, T>,
+  setFieldRef: (key: string, el: T | null)=> void,
+} {
+  const fieldRefs = shallowReactive(new Map<string, T>())
+
+  function setFieldRef(key: string, el: T | null) {
+    if (el == null) {
+      fieldRefs.delete(key)
+    } else {
+      fieldRefs.set(key, el)
+    }
   }
+
   return { fieldRefs, setFieldRef }
 }
 

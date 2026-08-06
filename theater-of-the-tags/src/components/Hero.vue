@@ -31,6 +31,7 @@ import NewTag from './NewTag.vue';
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 import { stringifyYaml } from '../lib/yaml'
+import { doc } from '../lib/yjs'
 
 const { mode } = useMode()
 
@@ -129,7 +130,9 @@ function handleCreateTheme(data: ThemeCreationProps) {
 }
 
 function handleImportTheme(themeShard: ThemeShard) {
-  addTheme(themeShard)
+  doc.transact(()=> {
+    addTheme(themeShard)
+  }, 'theme-import')
 }
 
 const {

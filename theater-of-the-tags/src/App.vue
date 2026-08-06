@@ -6,6 +6,7 @@ import NavigationBar from './components/NavigationBar.vue'
 import Room from './components/Room.vue'
 import RollHistory from './components/RollHistory.vue'
 import {
+  doc,
   fellowshipOrder,
   fellowships,
   heroOrder,
@@ -496,8 +497,10 @@ function importSituationFromYaml() {
     }
 
     const situationShard = createSituationShardFromData(situationData)
-    situations.set(situationName, situationShard)
-    appendOrderedName(situationOrder, situationName)
+    doc.transact(()=> {
+      situations.set(situationName, situationShard)
+      appendOrderedName(situationOrder, situationName)
+    }, 'situation-import')
     situationYamlText.value = ''
     closeSituationImportForm()
   } catch (e) {
@@ -558,8 +561,10 @@ function importFellowshipFromYaml() {
     }
 
     const fellowshipShard = createFellowshipShardFromData(fellowshipData)
-    fellowships.set(fellowshipName, fellowshipShard)
-    appendOrderedName(fellowshipOrder, fellowshipName)
+    doc.transact(()=> {
+      fellowships.set(fellowshipName, fellowshipShard)
+      appendOrderedName(fellowshipOrder, fellowshipName)
+    }, 'fellowship-import')
     fellowshipYamlText.value = ''
     closeFellowshipImportForm()
   } catch (e) {
@@ -626,8 +631,10 @@ function importHeroFromYaml() {
     }
 
     const heroShard = createHeroShardFromData(heroData)
-    heroes.set(characterName, heroShard)
-    appendOrderedName(heroOrder, characterName)
+    doc.transact(()=> {
+      heroes.set(characterName, heroShard)
+      appendOrderedName(heroOrder, characterName)
+    }, 'hero-import')
     heroYamlText.value = ''
     closeHeroImportForm()
   } catch (e) {

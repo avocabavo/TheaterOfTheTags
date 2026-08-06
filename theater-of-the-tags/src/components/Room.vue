@@ -3,11 +3,15 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import {
+  doc,
+  fellowshipOrder,
   fellowships as fellowshipMap,
+  heroOrder,
   heroes as heroMap,
   room,
   roomName,
   rollHistory as yRollHistory,
+  situationOrder,
   situations as situationMap,
 } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
@@ -281,34 +285,46 @@ function importRoom() {
     return
   }
 
-  if (typeof data.roomDescription === 'string') {
-    roomDescription.value = data.roomDescription
-  }
+  let results: ImportResult[] = []
+  doc.transact(()=> {
+    if (typeof data.roomDescription === 'string') {
+      roomDescription.value = data.roomDescription
+    }
 
-  const results = [
-    importCollection(
-      'Situation',
-      data.situations,
-      getSituationNameFromData,
-      name=> situationMap.has(name),
-      (name, item)=> situationMap.set(name, createSituationShardFromData(item)),
-    ),
-    importCollection(
-      'Fellowship',
-      data.fellowships,
-      getFellowshipNameFromData,
-      name=> fellowshipMap.has(name),
-      (name, item)=> fellowshipMap.set(name, createFellowshipShardFromData(item)),
-    ),
-    importCollection(
-      'Hero',
-      data.heroes,
-      getHeroCharacterNameFromData,
-      name=> heroMap.has(name),
-      (name, item)=> heroMap.set(name, createHeroShardFromData(item)),
-    ),
-    importRollHistory(data),
-  ]
+    results = [
+      importCollection(
+        'Situation',
+        data.situations,
+        getSituationNameFromData,
+        name=> situationMap.has(name),
+        (name, item)=> {
+          situationMap.set(name, createSituationShardFromData(item))
+          if (!situationOrder.toArray().includes(name)) situationOrder.push([name])
+        },
+      ),
+      importCollection(
+        'Fellowship',
+        data.fellowships,
+        getFellowshipNameFromData,
+        name=> fellowshipMap.has(name),
+        (name, item)=> {
+          fellowshipMap.set(name, createFellowshipShardFromData(item))
+          if (!fellowshipOrder.toArray().includes(name)) fellowshipOrder.push([name])
+        },
+      ),
+      importCollection(
+        'Hero',
+        data.heroes,
+        getHeroCharacterNameFromData,
+        name=> heroMap.has(name),
+        (name, item)=> {
+          heroMap.set(name, createHeroShardFromData(item))
+          if (!heroOrder.toArray().includes(name)) heroOrder.push([name])
+        },
+      ),
+      importRollHistory(data),
+    ]
+  }, 'room-import')
 
   const message = formatImportMessage(results)
   importMessage.value = message || 'No situations, fellowships, heroes, or roll history found to import.'

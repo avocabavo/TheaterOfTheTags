@@ -278,7 +278,9 @@ function importRollHistoryFromYaml() {
   const rejectedCount = list.length - importedEntries.length
 
   if (importedEntries.length) {
-    yRollHistory.push(importedEntries)
+    doc.transact(()=> {
+      yRollHistory.push(importedEntries)
+    }, 'roll-history-import')
   }
 
   historyImportMessage.value = [

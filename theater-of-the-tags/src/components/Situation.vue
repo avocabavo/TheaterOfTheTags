@@ -25,6 +25,7 @@ import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
+import { createMasonryLayoutScheduler } from '../lib/masonryScheduler'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 import { mightIcon } from '../lib/mightIcons'
 import { stringifyYaml } from '../lib/yaml'
@@ -41,6 +42,11 @@ const emit = defineEmits<{
 }>()
 
 const grid = ref(null)
+let masonry: Masonry | null = null
+const {
+  schedule: scheduleMasonryLayout,
+  cancel: cancelMasonryLayout,
+} = createMasonryLayoutScheduler(()=> masonry)
 
 const situationName = useYMapField<SituationData, 'situationName'>(
   props.shard,
@@ -104,24 +110,24 @@ const {
   push: addMightAspect,
   remove: removeMightAspect,
   move: moveMightAspect,
-} = useYArray<MightAspectShard>(props.shard, 'mightAspects', reflowMasonry)
+} = useYArray<MightAspectShard>(props.shard, 'mightAspects', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onMightAspectDrag,
   onDrop: onMightAspectDrop,
-} = useDragDrop(moveMightAspect, reflowMasonry)
+} = useDragDrop(moveMightAspect)
 
 const {
   items: looseTags,
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry)
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,
   onDrop: onLooseTagDrop,
-} = useDragDrop(moveLooseTag, reflowMasonry)
+} = useDragDrop(moveLooseTag)
 
 const mightAspectRefs = ref<any[]>([])
 const looseTagRefs = ref<any[]>([])
@@ -139,8 +145,6 @@ onBeforeUpdate(()=> {
   looseTagRefs.value = []
 })
 
-let masonry: Masonry | null = null
-
 onMounted(async ()=> {
   document.addEventListener('pointerdown', handleDocumentPointerDown)
   await nextTick()
@@ -150,22 +154,20 @@ onMounted(async ()=> {
     columnWidth: '.grid-sizer',
     gutter: 16,
   })
-  reflowMasonry()
+  scheduleMasonryLayout()
 })
 
 onUnmounted(()=> {
   document.removeEventListener('pointerdown', handleDocumentPointerDown)
+  cancelMasonryLayout()
 })
 
-async function reflowMasonry() {
-  await nextTick()
-  masonry?.reloadItems?.()
-  masonry?.layout?.()
+function reflowMasonry() {
+  scheduleMasonryLayout()
 }
 
-watch(mode, async ()=> {
-  await nextTick()
-  reflowMasonry()
+watch(mode, ()=> {
+  scheduleMasonryLayout(true)
 })
 
 function handleCreateLooseTag(data: TagCreationProps) {

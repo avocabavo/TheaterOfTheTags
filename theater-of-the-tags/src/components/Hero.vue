@@ -11,7 +11,7 @@ import {
   type ThemeShard,
 } from '../lib/schema';
 import Bubbles from './Bubbles.vue';
-import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue';
 import Theme from './Theme.vue';
 import { createThemeShard, type ThemeCreationProps } from '../lib/Theme';
 import NewTheme from './NewTheme.vue';
@@ -19,6 +19,7 @@ import CharacterName from './CharacterName.vue';
 import { useDragDrop, useFieldCollector } from '../lib/util';
 import PlayerName from './PlayerName.vue';
 import Masonry from 'masonry-layout'
+import { createMasonryLayoutScheduler } from '../lib/masonryScheduler'
 import Backpack from './Backpack.vue';
 import LooseTag from './LooseTag.vue';
 import NewLooseTags from './NewLooseTags.vue';
@@ -38,6 +39,11 @@ const props = defineProps<{
 }>()
 
 const grid = ref(null)
+let masonry: Masonry | null = null
+const {
+  schedule: scheduleMasonryLayout,
+  cancel: cancelMasonryLayout,
+} = createMasonryLayoutScheduler(()=> masonry)
 
 const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
 const backgroundColor = useYMapField<HeroData, 'backgroundColor'>(
@@ -60,12 +66,12 @@ const {
   push: pushRelationship,
   remove: removeRelationship,
   move: moveRelationship,
-} = useYArray<TagShard>(props.shard, 'relationships', reflowMasonry)
+} = useYArray<TagShard>(props.shard, 'relationships', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onRelationshipDrag,
   onDrop: onRelationshipDrop,
-} = useDragDrop(moveRelationship, reflowMasonry)
+} = useDragDrop(moveRelationship)
 
 function handleCreateRelationship(data: TagCreationProps) {
   const newShard = createTagShard(data)
@@ -84,26 +90,26 @@ const {
   remove: removeQuintessence,
   move: moveQuintessence,
   set: setQuintessence,
-} = useYArray<string>(props.shard, 'quintessences', reflowMasonry)
+} = useYArray<string>(props.shard, 'quintessences', ()=> scheduleMasonryLayout(true))
 
 const newQuintessence = ref('')
 
 const {
   onDrag: onQuintessenceDrag,
   onDrop: onQuintessenceDrop,
-} = useDragDrop(moveQuintessence, reflowMasonry)
+} = useDragDrop(moveQuintessence)
 
 const {
   items: themes,
   push: addTheme,
   remove: removeTheme,
   move: moveTheme,
-} = useYArray<ThemeShard>(props.shard, 'themes', reflowMasonry)
+} = useYArray<ThemeShard>(props.shard, 'themes', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onThemeDragStart,
   onDrop: onThemeDrop,
-} = useDragDrop(moveTheme, reflowMasonry)
+} = useDragDrop(moveTheme)
 
 const emit = defineEmits<{
   (e: 'delete'): void
@@ -131,12 +137,12 @@ const {
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry)
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,
   onDrop: onLooseTagDrop,
-} = useDragDrop(moveLooseTag, reflowMasonry)
+} = useDragDrop(moveLooseTag)
 
 function handleCreateLooseTag(data: TagCreationProps) {
   const newShard = createTagShard(data)
@@ -170,8 +176,6 @@ onBeforeUpdate(()=> {
   looseTagRefs.value = []
 })
 
-let masonry: Masonry | null = null
-
 onMounted(async ()=> {
   await nextTick()
   if (!grid.value) return
@@ -180,18 +184,19 @@ onMounted(async ()=> {
     columnWidth: '.grid-sizer',
     gutter: 16,
   })
-  reflowMasonry()
+  scheduleMasonryLayout()
 })
 
-async function reflowMasonry() {
-  await nextTick()
-  masonry?.reloadItems?.()
-  masonry?.layout?.()
+function reflowMasonry() {
+  scheduleMasonryLayout()
 }
 
-watch(mode, async ()=> {
-  await nextTick()
-  reflowMasonry()
+watch(mode, ()=> {
+  scheduleMasonryLayout(true)
+})
+
+onUnmounted(()=> {
+  cancelMasonryLayout()
 })
 
 const readyToCreateQuintessence = computed(()=> newQuintessence.value.trim())

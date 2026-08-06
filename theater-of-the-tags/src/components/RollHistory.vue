@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import YAML from 'yaml'
-import { currentRoll as yCurrentRoll, doc, rollHistory as yRollHistory } from '../lib/yjs'
+import {
+  currentRoll as yCurrentRoll,
+  doc,
+  fellowships,
+  heroes,
+  rollHistory as yRollHistory,
+  situations,
+} from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
 import {
-  getInvokedTagSummaries,
   refreshTappedTags,
   rollInvokedTags,
   type InvokedTagSummary,
 } from '../lib/usage'
+import { createInvokedTagTracker } from '../lib/invokedTagTracker'
 import {
   createRollHistoryEntryFromData,
   getRollHistoryListFromData,
@@ -194,9 +201,12 @@ function rootFontSize() {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 18
 }
 
-function syncInvokedTags() {
-  invokedTags.value = getInvokedTagSummaries()
-}
+const invokedTagTracker = createInvokedTagTracker(
+  { situations, fellowships, heroes },
+  summaries=> {
+    invokedTags.value = summaries
+  },
+)
 
 function invokedRowsResetSignature() {
   return invokedTags.value
@@ -386,10 +396,9 @@ function startResize(event: PointerEvent) {
 }
 
 onMounted(()=> {
-  syncInvokedTags()
+  invokedTagTracker.start()
   syncRollHistory()
   syncMightComparison()
-  doc.on('update', syncInvokedTags)
   yRollHistory.observe(syncRollHistory)
   yCurrentRoll.observe(syncMightComparison)
   // Debug helper disabled. To re-enable manual dice testing from the browser
@@ -405,7 +414,7 @@ watch(invokedRowsResetSignature, (nextSignature, previousSignature)=> {
 })
 
 onUnmounted(()=> {
-  doc.off('update', syncInvokedTags)
+  invokedTagTracker.stop()
   yRollHistory.unobserve(syncRollHistory)
   yCurrentRoll.unobserve(syncMightComparison)
   // if (window.testRoll === testRoll) {

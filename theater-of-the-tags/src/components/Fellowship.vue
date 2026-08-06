@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as Y from 'yjs'
-import { computed, nextTick, onBeforeUpdate, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUpdate, onMounted, onUnmounted, ref, watch } from 'vue'
 import Bubbles from './Bubbles.vue'
 import DeleteButton from './buttons/DeleteButton.vue'
 import EditableText from './EditableText.vue'
@@ -20,6 +20,7 @@ import { useYArray, useYMapField } from '../lib/yjsComposables'
 import { useDragDrop, useFieldCollector } from '../lib/util'
 import toYamlBlack from '../assets/to-yaml-black.svg'
 import Masonry from 'masonry-layout'
+import { createMasonryLayoutScheduler } from '../lib/masonryScheduler'
 import { normalizeCssColor, toColorInputValue } from '../lib/colors'
 import { stringifyYaml } from '../lib/yaml'
 
@@ -35,6 +36,11 @@ const emit = defineEmits<{
 }>()
 
 const grid = ref(null)
+let masonry: Masonry | null = null
+const {
+  schedule: scheduleMasonryLayout,
+  cancel: cancelMasonryLayout,
+} = createMasonryLayoutScheduler(()=> masonry)
 
 const fellowshipName = useYMapField<FellowshipData, 'fellowshipName'>(
   props.shard,
@@ -62,26 +68,26 @@ const {
   remove: removeSpecialImprovement,
   move: moveSpecialImprovement,
   set: setSpecialImprovement,
-} = useYArray<string>(props.shard, 'specialImprovements', reflowMasonry)
+} = useYArray<string>(props.shard, 'specialImprovements', ()=> scheduleMasonryLayout(true))
 
 const newSpecialImprovement = ref('')
 
 const {
   onDrag: onSpecialImprovementDrag,
   onDrop: onSpecialImprovementDrop,
-} = useDragDrop(moveSpecialImprovement, reflowMasonry)
+} = useDragDrop(moveSpecialImprovement)
 
 const {
   items: looseTags,
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', reflowMasonry)
+} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,
   onDrop: onLooseTagDrop,
-} = useDragDrop(moveLooseTag, reflowMasonry)
+} = useDragDrop(moveLooseTag)
 
 const { fieldRefs, setFieldRef } = useFieldCollector()
 
@@ -95,8 +101,6 @@ onBeforeUpdate(()=> {
   looseTagRefs.value = []
 })
 
-let masonry: Masonry | null = null
-
 onMounted(async ()=> {
   await nextTick()
   if (!grid.value) return
@@ -105,18 +109,19 @@ onMounted(async ()=> {
     columnWidth: '.grid-sizer',
     gutter: 16,
   })
-  reflowMasonry()
+  scheduleMasonryLayout()
 })
 
-async function reflowMasonry() {
-  await nextTick()
-  masonry?.reloadItems?.()
-  masonry?.layout?.()
+function reflowMasonry() {
+  scheduleMasonryLayout()
 }
 
-watch(mode, async ()=> {
-  await nextTick()
-  reflowMasonry()
+watch(mode, ()=> {
+  scheduleMasonryLayout(true)
+})
+
+onUnmounted(()=> {
+  cancelMasonryLayout()
 })
 
 function createSpecialImprovement() {

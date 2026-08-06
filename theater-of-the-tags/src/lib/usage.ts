@@ -3,7 +3,7 @@ import { doc, fellowships, heroes, situations } from './yjs'
 import type { Might, StatusNature, TagNature, Usage } from './schema'
 import { getThemeName } from './Theme'
 
-type TagContext = {
+export type TagContext = {
   improvementInstruction?: string
   might?: Might
 }
@@ -21,7 +21,7 @@ export type InvokedTagSummary = {
   improvementInstruction?: string
 }
 
-function isTagShard(value: unknown): value is Y.Map<any> {
+export function isTagShard(value: unknown): value is Y.Map<any> {
   return value instanceof Y.Map && value.has('name') && (
     value.has('scratched') || value.has('tiers')
   )
@@ -178,30 +178,39 @@ function tagImpact(tag: Y.Map<any>) {
   return tag.get('scratched') ? 3 : 1
 }
 
+export function getInvokedTagSummary(
+  tag: Y.Map<any>,
+  context: TagContext = {},
+  fallbackId = 'invoked-unknown',
+): InvokedTagSummary | null {
+  if (tag.get('usage') !== 'invoked') return null
+
+  const nature = tag.get('nature') as TagNature | StatusNature
+  const kind = tag.has('tiers') ? 'status' : 'tag'
+  const improvementInstruction = kind === 'tag' && nature === 'weakness'
+    ? context.improvementInstruction
+    : undefined
+
+  return {
+    uuid: typeof tag.get('uuid') === 'string' ? tag.get('uuid') : fallbackId,
+    name: typeof tag.get('name') === 'string' ? tag.get('name') : '',
+    impact: formatImpact(tagImpact(tag)),
+    kind,
+    nature,
+    scratched: Boolean(tag.get('scratched')),
+    tier: tag.has('tiers') ? highestTier(tag) : 0,
+    ...(kind === 'status' ? { tierSignature: tierSignature(tag) } : {}),
+    ...(context.might ? { might: context.might } : {}),
+    ...(improvementInstruction ? { improvementInstruction } : {}),
+  }
+}
+
 export function getInvokedTagSummaries(): InvokedTagSummary[] {
   const summaries: InvokedTagSummary[] = []
 
   const visitor = (tag: Y.Map<any>, context: TagContext)=> {
-    if (tag.get('usage') !== 'invoked') return
-    const fallbackId = `invoked-${summaries.length}`
-    const nature = tag.get('nature') as TagNature | StatusNature
-    const kind = tag.has('tiers') ? 'status' : 'tag'
-    const improvementInstruction = kind === 'tag' && nature === 'weakness'
-      ? context.improvementInstruction
-      : undefined
-
-    summaries.push({
-      uuid: typeof tag.get('uuid') === 'string' ? tag.get('uuid') : fallbackId,
-      name: typeof tag.get('name') === 'string' ? tag.get('name') : '',
-      impact: formatImpact(tagImpact(tag)),
-      kind,
-      nature,
-      scratched: Boolean(tag.get('scratched')),
-      tier: tag.has('tiers') ? highestTier(tag) : 0,
-      ...(kind === 'status' ? { tierSignature: tierSignature(tag) } : {}),
-      ...(context.might ? { might: context.might } : {}),
-      ...(improvementInstruction ? { improvementInstruction } : {}),
-    })
+    const summary = getInvokedTagSummary(tag, context, `invoked-${summaries.length}`)
+    if (summary) summaries.push(summary)
   }
 
   visitTopLevelLooseTags(situations, visitor)

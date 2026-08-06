@@ -62,39 +62,44 @@ export function useYArray<T>(
     const arr = getYArray<T>(ymap, key)
 
     if (yarray !== arr) {
-      yarray?.unobserve(observer)
-      arr.observe(observer)
+      yarray?.unobserve(arrayObserver)
+      arr.observe(arrayObserver)
       yarray = arr
     }
 
     items.value = arr.toArray()
   }
 
-  function observer() {
+  function arrayObserver() {
     sync()
+    callbackOnChange?.()
+  }
+
+  function mapObserver(event: Y.YMapEvent<any>) {
+    if (!event.keysChanged.has(key)) return
+    sync()
+    callbackOnChange?.()
   }
 
   sync()
 
   onMounted(() => {
-    ymap.observe(observer)
-    yarray?.observe(observer)
+    ymap.observe(mapObserver)
+    yarray?.observe(arrayObserver)
   })
 
   onUnmounted(() => {
-    ymap.unobserve(observer)
-    yarray?.unobserve(observer)
+    ymap.unobserve(mapObserver)
+    yarray?.unobserve(arrayObserver)
   })
 
   function push(item: T) {
     if (!yarray) throw new Error("Y.Array not initialized yet")
     yarray.push([item])
-    if (callbackOnChange) callbackOnChange()
   }
 
   function remove(index: number) {
     yarray?.delete(index, 1)
-    if (callbackOnChange) callbackOnChange()
   }
 
   function move(from: number, to: number) {
@@ -122,7 +127,6 @@ export function useYArray<T>(
         yarray.insert(to, [item])
       }
     })
-    if (callbackOnChange) callbackOnChange()
   }
 
   function set(index: number, value: T) {
@@ -135,7 +139,6 @@ export function useYArray<T>(
       yarray?.delete(index, 1)
       yarray?.insert(index, [value])
     })
-    if (callbackOnChange) callbackOnChange()
   }
 
   return {

@@ -220,8 +220,8 @@ export function getInvokedTagSummaries(): InvokedTagSummary[] {
   return summaries
 }
 
-export function rollInvokedTags() {
-  updateMatchingUsage('invoked', 'tapped')
+export function rollInvokedTags(autoRefresh = false) {
+  updateMatchingUsage('invoked', autoRefresh ? 'ready' : 'tapped')
 }
 
 export function refreshTappedTags() {

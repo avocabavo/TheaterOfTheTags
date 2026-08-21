@@ -3,6 +3,7 @@ import * as Y from 'yjs'
 import YAML from 'yaml'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import {
+  currentRoll,
   doc,
   fellowshipOrder,
   fellowships as fellowshipMap,
@@ -10,6 +11,7 @@ import {
   heroes as heroMap,
   room,
   roomName,
+  roomSettings,
   rollHistory as yRollHistory,
   situationOrder,
   situations as situationMap,
@@ -39,6 +41,8 @@ import {
 } from '../lib/RollHistory'
 import { stringifyYaml } from '../lib/yaml'
 import toYamlBlack from '../assets/to-yaml-black.svg'
+import type { RoomSettingsData } from '../lib/schema'
+import { refreshTappedTags } from '../lib/usage'
 
 type SituationEntry = {
   situationName: string
@@ -83,6 +87,7 @@ const emit = defineEmits<{
 }>()
 
 const showImportForm = ref(false)
+const showSettingsForm = ref(false)
 const roomYamlText = ref('')
 const importMessage = ref('')
 const importError = ref('')
@@ -95,6 +100,18 @@ const roomDescription = useYMapField<RoomData, 'roomDescription'>(
   room,
   'roomDescription',
   ''
+)
+const autoRefresh = useYMapField<RoomSettingsData, 'AutoRefresh'>(
+  roomSettings,
+  'AutoRefresh',
+  false,
+  false,
+)
+const autoMightZero = useYMapField<RoomSettingsData, 'AutoMightZero'>(
+  roomSettings,
+  'AutoMightZero',
+  false,
+  false,
 )
 const localRoomDescription = ref(roomDescription.value)
 const descriptionRef = ref<HTMLTextAreaElement | null>(null)
@@ -112,6 +129,34 @@ function autoResizeDescription() {
 onMounted(()=> {
   nextTick(autoResizeDescription)
 })
+
+function setAutoRefresh(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked
+  const enabling = checked && roomSettings.get('AutoRefresh') !== true
+
+  doc.transact(()=> {
+    roomSettings.set('AutoRefresh', checked)
+    if (enabling) refreshTappedTags()
+  }, 'room-settings')
+}
+
+function setAutoMightZero(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked
+  const enabling = checked && roomSettings.get('AutoMightZero') !== true
+
+  doc.transact(()=> {
+    roomSettings.set('AutoMightZero', checked)
+    if (
+      enabling
+      && (
+        !currentRoll.has('mightComparison')
+        || currentRoll.get('mightComparison') === 'uncompared'
+      )
+    ) {
+      currentRoll.set('mightComparison', 'even')
+    }
+  }, 'room-settings')
+}
 
 function valueToJson(value: any): any {
   if (value instanceof Y.Map) {
@@ -357,6 +402,11 @@ function importRoom() {
               <img :src="toYamlBlack" alt="" class="copy-icon" aria-hidden="true">
             </button>
             <button type="button" @click="openImportForm">Import Room</button>
+            <button
+              v-if="mode === 'narrator'"
+              type="button"
+              @click="showSettingsForm = true"
+            >Room Settings</button>
           </div>
         </div>
 
@@ -438,6 +488,44 @@ function importRoom() {
           <button type="submit" :disabled="!roomYamlText.trim()">Import</button>
         </div>
       </form>
+    </div>
+
+    <div
+      v-if="showSettingsForm"
+      class="modal-backdrop"
+      @click.self="showSettingsForm = false"
+    >
+      <section class="room-import-modal room-settings-modal" role="dialog" aria-modal="true" aria-labelledby="room-settings-title">
+        <h2 id="room-settings-title">Room Settings</h2>
+
+        <label class="setting-field">
+          <input
+            type="checkbox"
+            :checked="autoRefresh"
+            @change="setAutoRefresh"
+          >
+          <span>
+            <strong>Auto Refresh</strong>
+            <small>Return invoked tags to ready after each roll.</small>
+          </span>
+        </label>
+
+        <label class="setting-field">
+          <input
+            type="checkbox"
+            :checked="autoMightZero"
+            @change="setAutoMightZero"
+          >
+          <span>
+            <strong>Auto Might Zero</strong>
+            <small>Start each roll with an even might comparison.</small>
+          </span>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" @click="showSettingsForm = false">Done</button>
+        </div>
+      </section>
     </div>
   </section>
 </template>
@@ -686,6 +774,31 @@ function importRoom() {
 
 .room-import-modal .secondary-button {
   background: white;
+}
+
+.room-settings-modal {
+  width: min(100%, 26rem);
+}
+
+.setting-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  cursor: pointer;
+}
+
+.setting-field input {
+  margin-top: 0.2rem;
+}
+
+.setting-field span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.setting-field small {
+  color: #5f5548;
 }
 
 .room button:disabled {

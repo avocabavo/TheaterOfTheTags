@@ -6,13 +6,19 @@ import { getYArray } from './yHelpers'
 export function useYMapField<T, K extends keyof T>(
   ymap: Y.Map<any>,
   key: K,
-  defaultValue: T[K]
+  defaultValue: T[K],
+  initializeDefault = true,
 ): Ref<T[K]> {
   const state = ref<T[K]>(defaultValue) as Ref<T[K]>
 
   function sync() {
     if (!ymap.has(key as string)) {
-      ymap.set(key as string, defaultValue)
+      if (initializeDefault) {
+        ymap.set(key as string, defaultValue)
+      } else {
+        state.value = defaultValue
+        return
+      }
     }
     state.value = ymap.get(key as string) as T[K]
   }

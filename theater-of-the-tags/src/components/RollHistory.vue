@@ -7,6 +7,7 @@ import {
   fellowships,
   heroes,
   rollHistory as yRollHistory,
+  roomSettings,
   situations,
 } from '../lib/yjs'
 import { useMode } from '../lib/modeStore'
@@ -25,6 +26,8 @@ import {
   type RollHistoryEntry,
 } from '../lib/RollHistory'
 import { stringifyYaml } from '../lib/yaml'
+import { useYMapField } from '../lib/yjsComposables'
+import type { RoomSettingsData } from '../lib/schema'
 import RollTable, {
   type MightComparison,
   type RollTableRow,
@@ -50,6 +53,18 @@ const historyYamlText = ref('')
 const historyImportMessage = ref('')
 const historyImportError = ref('')
 const { mode } = useMode()
+const autoRefresh = useYMapField<RoomSettingsData, 'AutoRefresh'>(
+  roomSettings,
+  'AutoRefresh',
+  false,
+  false,
+)
+const autoMightZero = useYMapField<RoomSettingsData, 'AutoMightZero'>(
+  roomSettings,
+  'AutoMightZero',
+  false,
+  false,
+)
 
 const rollColors = [
   '#500000',
@@ -91,7 +106,11 @@ function selectMightComparison(comparison: Exclude<MightComparison, 'uncompared'
 }
 
 function resetMightComparison() {
-  yCurrentRoll.delete('mightComparison')
+  if (autoMightZero.value) {
+    yCurrentRoll.set('mightComparison', 'even')
+  } else {
+    yCurrentRoll.delete('mightComparison')
+  }
 }
 
 let startingX = 0
@@ -317,7 +336,7 @@ function commitRoll(rollRow: RollTableRow) {
     resetMightComparison()
   })
   currentRollName.value = DEFAULT_ROLL_NAME
-  rollInvokedTags()
+  rollInvokedTags(autoRefresh.value)
 }
 
 function handleRoll() {
@@ -412,7 +431,7 @@ watch(invokedRowsResetSignature, (nextSignature, previousSignature)=> {
   if (previousSignature == null) return
   if (nextSignature === previousSignature) return
 
-  resetMightComparison()
+  if (!autoMightZero.value) resetMightComparison()
 })
 
 onUnmounted(()=> {
@@ -465,7 +484,7 @@ onUnmounted(()=> {
       </div>
 
       <button
-        v-if="mode === 'narrator'"
+        v-if="mode === 'narrator' && !autoRefresh"
         type="button"
         class="refresh-button"
         @click="refreshTappedTags"

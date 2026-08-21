@@ -5,6 +5,7 @@ export const doc = new Y.Doc()
 
 export const roomName = window.location.pathname ?? '/'
 export const room = doc.getMap<any>('room')
+export const roomSettings = doc.getMap<any>('roomSettings')
 export const currentRoll = doc.getMap<any>('currentRoll')
 
 export const provider = new WebsocketProvider(

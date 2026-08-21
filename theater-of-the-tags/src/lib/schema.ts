@@ -6,6 +6,11 @@ export type StatusNature = 'helpful' | 'hindering'
 
 export type Usage = 'ready' | 'invoked' | 'tapped'
 
+export type RoomSettingsData = {
+  AutoRefresh: boolean
+  AutoMightZero: boolean
+}
+
 export type Might = 'origin' | 'adventure' | 'greatness'
 export const mightOptions: Array<Might> = ['origin', 'adventure', 'greatness']
 

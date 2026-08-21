@@ -424,7 +424,7 @@ onMounted(()=> {
   yCurrentRoll.observe(syncMightComparison)
   // Debug helper disabled. To re-enable manual dice testing from the browser
   // console, uncomment this line and the matching cleanup in onUnmounted:
-  // window.testRoll = testRoll
+  window.testRoll = testRoll
 })
 
 watch(invokedRowsResetSignature, (nextSignature, previousSignature)=> {
@@ -438,9 +438,9 @@ onUnmounted(()=> {
   invokedTagTracker.stop()
   yRollHistory.unobserve(syncRollHistory)
   yCurrentRoll.unobserve(syncMightComparison)
-  // if (window.testRoll === testRoll) {
-  //   delete window.testRoll
-  // }
+  if (window.testRoll === testRoll) {
+    delete window.testRoll
+  }
   stopResize()
 })
 </script>

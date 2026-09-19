@@ -4,6 +4,15 @@ Shared management of tag-based data
 
 
 
+# Dev
+
+The y service and vite development page can be started with just:
+
+```sh
+cd theater-of-the-tags
+npm run dev
+```
+
 # WS service
 
 Requires installation outside of node:

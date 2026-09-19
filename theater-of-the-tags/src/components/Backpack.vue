@@ -22,7 +22,7 @@ const {
   remove: removeBackpackTag,
   move: moveBackpackTag,
 } = useYArray<TagShard>(
-  props.shard,
+  () => props.shard,
   'backpack',
   ()=> emit('resized'),
 )

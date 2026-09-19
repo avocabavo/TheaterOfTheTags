@@ -43,12 +43,12 @@ const {
 } = createMasonryLayoutScheduler(()=> masonry)
 
 const fellowshipName = useYMapField<FellowshipData, 'fellowshipName'>(
-  props.shard,
+  () => props.shard,
   'fellowshipName',
   ''
 )
 const backgroundColor = useYMapField<FellowshipData, 'backgroundColor'>(
-  props.shard,
+  () => props.shard,
   'backgroundColor',
   DEFAULT_FELLOWSHIP_BACKGROUND_COLOR
 )
@@ -68,7 +68,7 @@ const {
   remove: removeSpecialImprovement,
   move: moveSpecialImprovement,
   set: setSpecialImprovement,
-} = useYArray<string>(props.shard, 'specialImprovements', ()=> scheduleMasonryLayout(true))
+} = useYArray<string>(() => props.shard, 'specialImprovements', ()=> scheduleMasonryLayout(true))
 
 const newSpecialImprovement = ref('')
 
@@ -82,7 +82,7 @@ const {
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
+} = useYArray<TagShard | StatusTagShard>(() => props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,

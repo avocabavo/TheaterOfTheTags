@@ -11,7 +11,7 @@ const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
+const playerName = useYMapField<HeroData, 'playerName'>(() => props.shard, 'playerName', '')
 
 function toJson() {
   return { playerName: playerName.value }

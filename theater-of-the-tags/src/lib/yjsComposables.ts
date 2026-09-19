@@ -1,14 +1,17 @@
 import * as Y from 'yjs'
-import { ref, onMounted, onUnmounted, type Ref, shallowRef } from 'vue'
+import { ref, watch, toValue, type MaybeRefOrGetter, type Ref, shallowRef } from 'vue'
 import { getYArray } from './yHelpers'
 
 
+// Pass a getter or ref for replaceable shards: reordering clones Y.Map objects.
+// Watcher cleanup detaches observers both on replacement and on scope disposal.
 export function useYMapField<T, K extends keyof T>(
-  ymap: Y.Map<any>,
+  source: MaybeRefOrGetter<Y.Map<any>>,
   key: K,
   defaultValue: T[K],
   initializeDefault = true,
 ): Ref<T[K]> {
+  let ymap = toValue(source)
   const state = ref<T[K]>(defaultValue) as Ref<T[K]>
 
   function sync() {
@@ -29,14 +32,12 @@ export function useYMapField<T, K extends keyof T>(
     }
   }
 
-  onMounted(() => {
+  watch(() => toValue(source), (map, _previous, onCleanup) => {
+    ymap = map
     sync()
-    ymap.observe(observer)
-  })
-
-  onUnmounted(() => {
-    ymap.unobserve(observer)
-  })
+    map.observe(observer)
+    onCleanup(() => map.unobserve(observer))
+  }, { immediate: true, flush: 'sync' })
 
   return new Proxy(state, {
     set(target, prop, value) {
@@ -50,7 +51,7 @@ export function useYMapField<T, K extends keyof T>(
 }
 
 export function useYArray<T>(
-  ymap: Y.Map<any>,
+  source: MaybeRefOrGetter<Y.Map<any>>,
   key: string,
   callbackOnChange?: (()=> any) | null,
 ): {
@@ -61,7 +62,9 @@ export function useYArray<T>(
   set: (index: number, value: T)=> void
   yarray: ()=> Y.Array<any> | null
 } {
-  const items = ref<T[]>([]) as Ref<T[]>
+  let ymap = toValue(source)
+  // Keep Yjs objects raw; only the array snapshot needs Vue reactivity.
+  const items = shallowRef<T[]>([]) as Ref<T[]>
   let yarray: Y.Array<any> | null = null
 
   function sync() {
@@ -87,17 +90,17 @@ export function useYArray<T>(
     callbackOnChange?.()
   }
 
-  sync()
-
-  onMounted(() => {
-    ymap.observe(mapObserver)
-    yarray?.observe(arrayObserver)
-  })
-
-  onUnmounted(() => {
-    ymap.unobserve(mapObserver)
-    yarray?.unobserve(arrayObserver)
-  })
+  watch(() => toValue(source), (map, previous, onCleanup) => {
+    ymap = map
+    sync()
+    map.observe(mapObserver)
+    onCleanup(() => {
+      map.unobserve(mapObserver)
+      yarray?.unobserve(arrayObserver)
+      yarray = null
+    })
+    if (previous) callbackOnChange?.()
+  }, { immediate: true, flush: 'sync' })
 
   function push(item: T) {
     if (!yarray) throw new Error("Y.Array not initialized yet")
@@ -158,7 +161,7 @@ export function useYArray<T>(
 }
 
 export function useYChildMap(
-  ymap: Y.Map<any>,
+  source: MaybeRefOrGetter<Y.Map<any>>,
   key: string,
   callbackOnChange?: (()=> any) | null,
 ): {
@@ -166,6 +169,7 @@ export function useYChildMap(
   clear: ()=>void,
   set: (newMap?: Y.Map<any>)=>void
 } {
+  let ymap = toValue(source)
   const child = shallowRef<Y.Map<any> | null>(null)
 
   function sync() {
@@ -215,15 +219,13 @@ export function useYChildMap(
     throw new Error(`Invalid Y.Map attempted to be set to key ${key}`)
   }
 
-  sync()
-
-  onMounted(() => {
-    ymap.observe(observer)
-  })
-
-  onUnmounted(() => {
-    ymap.unobserve(observer)
-  })
+  watch(() => toValue(source), (map, previous, onCleanup) => {
+    ymap = map
+    sync()
+    map.observe(observer)
+    onCleanup(() => map.unobserve(observer))
+    if (previous) callbackOnChange?.()
+  }, { immediate: true, flush: 'sync' })
 
   return {
     child,

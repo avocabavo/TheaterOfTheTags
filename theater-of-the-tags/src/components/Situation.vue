@@ -49,17 +49,17 @@ const {
 } = createMasonryLayoutScheduler(()=> masonry)
 
 const situationName = useYMapField<SituationData, 'situationName'>(
-  props.shard,
+  () => props.shard,
   'situationName',
   ''
 )
 const baseMight = useYMapField<SituationData, 'baseMight'>(
-  props.shard,
+  () => props.shard,
   'baseMight',
   'origin'
 )
 const backgroundColor = useYMapField<SituationData, 'backgroundColor'>(
-  props.shard,
+  () => props.shard,
   'backgroundColor',
   DEFAULT_SITUATION_BACKGROUND_COLOR
 )
@@ -110,7 +110,7 @@ const {
   push: addMightAspect,
   remove: removeMightAspect,
   move: moveMightAspect,
-} = useYArray<MightAspectShard>(props.shard, 'mightAspects', ()=> scheduleMasonryLayout(true))
+} = useYArray<MightAspectShard>(() => props.shard, 'mightAspects', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onMightAspectDrag,
@@ -122,7 +122,7 @@ const {
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
+} = useYArray<TagShard | StatusTagShard>(() => props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,

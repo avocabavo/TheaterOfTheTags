@@ -46,9 +46,9 @@ const {
   cancel: cancelMasonryLayout,
 } = createMasonryLayoutScheduler(()=> masonry)
 
-const playerName = useYMapField<HeroData, 'playerName'>(props.shard, 'playerName', '')
+const playerName = useYMapField<HeroData, 'playerName'>(() => props.shard, 'playerName', '')
 const backgroundColor = useYMapField<HeroData, 'backgroundColor'>(
-  props.shard,
+  () => props.shard,
   'backgroundColor',
   DEFAULT_HERO_BACKGROUND_COLOR
 )
@@ -67,7 +67,7 @@ const {
   push: pushRelationship,
   remove: removeRelationship,
   move: moveRelationship,
-} = useYArray<TagShard>(props.shard, 'relationships', ()=> scheduleMasonryLayout(true))
+} = useYArray<TagShard>(() => props.shard, 'relationships', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onRelationshipDrag,
@@ -91,7 +91,7 @@ const {
   remove: removeQuintessence,
   move: moveQuintessence,
   set: setQuintessence,
-} = useYArray<string>(props.shard, 'quintessences', ()=> scheduleMasonryLayout(true))
+} = useYArray<string>(() => props.shard, 'quintessences', ()=> scheduleMasonryLayout(true))
 
 const newQuintessence = ref('')
 
@@ -105,7 +105,7 @@ const {
   push: addTheme,
   remove: removeTheme,
   move: moveTheme,
-} = useYArray<ThemeShard>(props.shard, 'themes', ()=> scheduleMasonryLayout(true))
+} = useYArray<ThemeShard>(() => props.shard, 'themes', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onThemeDragStart,
@@ -140,7 +140,7 @@ const {
   push: addLooseTag,
   remove: removeLooseTag,
   move: moveLooseTag,
-} = useYArray<TagShard | StatusTagShard>(props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
+} = useYArray<TagShard | StatusTagShard>(() => props.shard, 'looseTags', ()=> scheduleMasonryLayout(true))
 
 const {
   onDrag: onLooseTagDrag,

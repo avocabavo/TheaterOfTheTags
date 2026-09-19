@@ -14,8 +14,8 @@ const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const might = useYMapField<MightAspectData, 'might'>(props.shard, 'might', 'origin')
-const name = useYMapField<MightAspectData, 'name'>(props.shard, 'name', '')
+const might = useYMapField<MightAspectData, 'might'>(() => props.shard, 'might', 'origin')
+const name = useYMapField<MightAspectData, 'name'>(() => props.shard, 'name', '')
 const canEdit = computed(()=> enableNameEditing.value && mode.value === 'narrator')
 const isEditing = ref(false)
 const aspectStyle = computed(()=> ({

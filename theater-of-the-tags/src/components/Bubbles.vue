@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 // Yjs binding
-const value = useYMapField<any, any>(props.shard, props.field, 0)
+const value = useYMapField<any, any>(() => props.shard, props.field, 0)
 
 function setValue(n: number) {
   if (mode.value !== 'narrator') return

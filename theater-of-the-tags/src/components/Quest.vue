@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 // Yjs binding
-const quest = useYMapField<ThemeData, 'quest'>(props.shard, 'quest', '')
+const quest = useYMapField<ThemeData, 'quest'>(() => props.shard, 'quest', '')
 
 // Local input state (for debouncing)
 const localValue = ref(quest.value)

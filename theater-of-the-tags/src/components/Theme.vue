@@ -23,8 +23,8 @@ const props = defineProps<{
   shard: Y.Map<any>
 }>()
 
-const might = useYMapField<ThemeData, 'might'>(props.shard, 'might', 'origin')
-const themeType = useYMapField<ThemeData, 'themeType'>(props.shard, 'themeType', 'circumstance')
+const might = useYMapField<ThemeData, 'might'>(() => props.shard, 'might', 'origin')
+const themeType = useYMapField<ThemeData, 'themeType'>(() => props.shard, 'themeType', 'circumstance')
 const isEditingThemeDetails = ref(false)
 const canEditThemeDetails = computed(()=> enableNameEditing.value && mode.value === 'creation')
 const themeStyle = computed(()=> ({
@@ -62,17 +62,17 @@ function handleDocumentPointerDown(event: PointerEvent) {
 }
 
 const { items: powerTags, push: addPowerTag, remove: removePowerTag, move:movePowerTag } =
-  useYArray<TagShard>(props.shard, 'powerTags', ()=> emit('resized'))
+  useYArray<TagShard>(() => props.shard, 'powerTags', ()=> emit('resized'))
 
 const {
   items: weaknessTags,
   push: addWeaknessTag,
   remove: removeWeaknessTag,
   move: moveWeaknessTag
-} = useYArray<TagShard>(props.shard, 'weaknessTags', ()=> emit('resized'))
+} = useYArray<TagShard>(() => props.shard, 'weaknessTags', ()=> emit('resized'))
 
 const { child: primaryTag, clear: clearPrimaryTag, set: setPrimaryTag } = useYChildMap(
-  props.shard,
+  () => props.shard,
   'primaryTag',
   ()=> emit('resized'),
 )

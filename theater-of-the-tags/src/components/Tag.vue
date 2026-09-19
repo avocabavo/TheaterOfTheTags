@@ -23,10 +23,10 @@ const props = defineProps<{
   deletableMode?: 'any-editable' | 'narrator'
 }>()
 
-const name = useYMapField<TagData, 'name'>(props.shard, 'name', '')
-const nature = useYMapField<TagData, 'nature'>(props.shard, 'nature', 'power' as TagNature)
-const scratched = useYMapField<TagData, 'scratched'>(props.shard, 'scratched', false)
-const usage = useYMapField<TagData, 'usage'>(props.shard, 'usage', 'ready' as Usage)
+const name = useYMapField<TagData, 'name'>(() => props.shard, 'name', '')
+const nature = useYMapField<TagData, 'nature'>(() => props.shard, 'nature', 'power' as TagNature)
+const scratched = useYMapField<TagData, 'scratched'>(() => props.shard, 'scratched', false)
+const usage = useYMapField<TagData, 'usage'>(() => props.shard, 'usage', 'ready' as Usage)
 const nameEditableMode = computed(()=> props.nameEditableMode ?? 'creation')
 const deletableMode = computed(()=> props.deletableMode ?? 'any-editable')
 const canDelete = computed(()=> deletableMode.value === 'narrator'
